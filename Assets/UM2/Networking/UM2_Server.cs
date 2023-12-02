@@ -95,7 +95,7 @@ public class UM2_Server : MonoBehaviour
         string requestMethod = request.HttpMethod;
 
         // Get the request URL
-        string requestUrl = request.RawUrl;
+        string requestUrl = request.RawUrl.Substring(1);
 
         Debug.Log("Received " + requestMethod + " request for: " + requestUrl);
 
