@@ -1,31 +1,59 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Test : MonoBehaviour
 {
     public AudioSource audioSource;
     public AudioClip sourceClip;
-    public float maxDelay = .05f;
+
+    [Range(0.5f, 0.01f)]
+    public float peiceSeconds = .05f;
     int peiceLength;
     int currentIndex = 0;
     public int sampleRate = 8000;
 
-    private void Start(){
+    [Header("Debug:")]
+    public TextMeshProUGUI bitPerSecText;
+    int bits = 0;
+    public TextMeshProUGUI simulatedPingText;
+    public int simulatedPing = 60;
+    public TextMeshProUGUI serverLatencyText;
+    public TextMeshProUGUI clientLatencyText;
+    public TextMeshProUGUI sampleRateText;
+
+
+    private void Start()
+    {
         //make the original less data
         sourceClip = SetSampleRateSimple(sourceClip, sampleRate);
 
-        //math
-        peiceLength = (int)(sampleRate * maxDelay);
-        print(sampleRate);
-        print(maxDelay);
-        print(peiceLength);
-
         //start loop
         StartCoroutine(playbackAudio(null));
+        StartCoroutine(debugUpdate());
     }
 
-    private IEnumerator playbackAudio(AudioClip pastChunk){
+    private IEnumerator debugUpdate()
+    {
+        sampleRateText.text = "Sample rate: " + sampleRate + "hz";
+
+        bitPerSecText.text = "Bandwidth: " + bits + " bits/sec";
+        bits = 0;
+
+        serverLatencyText.text = "Latency (server): " + (simulatedPing + peiceSeconds * 1000) + "ms";
+        clientLatencyText.text = "Latency (client): " + (simulatedPing * 2 + peiceSeconds * 1000) + "ms";
+        simulatedPingText.text = "Simulated ping: " + simulatedPing;
+
+        yield return new WaitForSeconds(1);
+        StartCoroutine(debugUpdate());
+    }
+
+    private IEnumerator playbackAudio(AudioClip pastChunk)
+    {
+        //lil math
+        peiceLength = (int)(sampleRate * peiceSeconds);
+
         //create new clip
         AudioClip peice = AudioClip.Create("PlaybackClip", peiceLength, 1, sampleRate, false);
 
@@ -33,19 +61,22 @@ public class Test : MonoBehaviour
         float[] samples = new float[peiceLength];
         sourceClip.GetData(samples, currentIndex);
         peice.SetData(samples, 0);
-        
+        bits += peiceLength * 8; //a rough calculation for bits/sec
+
         //play created peice
         audioSource.clip = peice;
         audioSource.Play();
 
         //destroy the past peice
-        if(pastChunk != null){
+        if (pastChunk != null)
+        {
             AudioClip.Destroy(pastChunk);
         }
 
         //step samples
         currentIndex += peiceLength;
-        if(currentIndex >= sourceClip.samples){
+        if (currentIndex >= sourceClip.samples)
+        {
             currentIndex = 0;
         }
 
@@ -67,7 +98,7 @@ public class Test : MonoBehaviour
 
         for (var i = 0; i < samplesLength; i++)
         {
-            var index = (int) ((float) i * samples.Length / samplesLength);
+            var index = (int)((float)i * samples.Length / samplesLength);
 
             samplesNew[i] = samples[index];
         }
