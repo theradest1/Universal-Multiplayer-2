@@ -1,6 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using UnityEngine;
+using System.Threading.Tasks;
+using TMPro;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class UM2_Server : MonoBehaviour
 {
@@ -10,41 +15,47 @@ public class UM2_Server : MonoBehaviour
     int udpPort;
     int tcpPort;
     int httpPort;
-    public (string, string) StartServer(int _udpPort, int _tcpPort, int _httpPort)
+
+    IPEndPoint remoteEndPoint;
+    UdpClient udpClient;
+
+    List<TcpClient> tcpClients = new List<TcpClient>();
+    List<NetworkStream> tcpStreams = new List<NetworkStream>();
+
+    public void StartServer(int _udpPort, int _tcpPort, int _httpPort)
     {
         udpPort = _udpPort;
         tcpPort = _tcpPort;
         httpPort = _httpPort;
 
-        string externalIP = "20348957";
-        string internalIP = "32490509";
-        return (externalIP, internalIP);
+        initTCP();
+        initUDP();
     }
 
     void initUDP()
     {
-        remoteEndPoint = new IPEndPoint(IPAddress.Any, UDP_PORT);
+        /*remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
 
         udpClient = new UdpClient();
-        udpClient.Connect(SERVER_IP, UDP_PORT);
+        udpClient.Connect(SERVER_IP, udpPort);
 
-        udpReciever();
+        udpReciever();*/
     }
 
     void initTCP()
     {
-        tcpClient = new TcpClient();
-        tcpClient.Connect(SERVER_IP, TCP_PORT);
+        /*tcpClient = new TcpClient();
+        tcpClient.Connect(SERVER_IP, tcpPort);
         tcpStream = tcpClient.GetStream();
 
-        tcpReciever();
+        tcpReciever();*/
     }
 
     async void udpReciever()
     {
         while (true)
         {
-            byte[] receiveBytes = new byte[0];
+            /*byte[] receiveBytes = new byte[0];
             await Task.Run(() => receiveBytes = udpClient.Receive(ref remoteEndPoint));
             string message = Encoding.ASCII.GetString(receiveBytes);
             getBytesUDP += Encoding.UTF8.GetByteCount(message);
@@ -57,7 +68,7 @@ public class UM2_Server : MonoBehaviour
             {
                 udpProcessErrors++;
                 Debug.LogWarning("UDP process error: " + message);
-            }
+            }*/
         }
     }
 
@@ -65,7 +76,7 @@ public class UM2_Server : MonoBehaviour
     {
         while (true)
         {
-            byte[] tcpReceivedData = new byte[1024];
+            /*byte[] tcpReceivedData = new byte[1024];
             int bytesRead = 0; //this might cause problems, but I don't think so
 
             await Task.Run(() => bytesRead = tcpStream.Read(tcpReceivedData, 0, tcpReceivedData.Length));
@@ -91,25 +102,25 @@ public class UM2_Server : MonoBehaviour
                         Debug.LogWarning("TCP process error: " + finalMessage);
                     }
                 }
-            }
+            }*/
         }
     }
 
-    public void sendTCPMessage(string message, clientID)
+    public void sendTCPMessage(string message, int clientID)
     {
-        message += "|";
+        /*message += "|";
         sendBytesTCP += Encoding.UTF8.GetByteCount(message);
         byte[] tcpData = Encoding.ASCII.GetBytes(message);
-        tcpStream.Write(tcpData, 0, tcpData.Length);
+        tcpStream.Write(tcpData, 0, tcpData.Length);*/
     }
 
     public void sendUDPMessage(string message, int clientID)
     {
-        sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+        /*sendBytesUDP += Encoding.UTF8.GetByteCount(message);
         //load message
         byte[] udpData = Encoding.ASCII.GetBytes(message);
 
         //send message
-        udpClient.Send(udpData, udpData.Length);
+        udpClient.Send(udpData, udpData.Length);*/
     }
 }

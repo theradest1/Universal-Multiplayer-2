@@ -1,6 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using UnityEngine;
+using System.Threading.Tasks;
+using TMPro;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class UM2_Client : MonoBehaviour
 {
@@ -11,21 +16,27 @@ public class UM2_Client : MonoBehaviour
 
     IPEndPoint remoteEndPoint;
     UdpClient udpClient;
+    bool connectedToUDP = false;
 
     TcpClient tcpClient;
     NetworkStream tcpStream;
+    bool connectedToTCP = false;
 
     float httpPingStartTime;
     float udpPingStartTime;
     float tcpPingStartTime;
 
 
-    public (string, string) StartClient(string _serverIP, int _udpPort, int _tcpPort, int _httpPort)
+    public void StartClient(string _serverIP, int _udpPort, int _tcpPort, int _httpPort)
     {
         udpPort = _udpPort;
         tcpPort = _tcpPort;
         httpPort = _httpPort;
-        serverIP = _serverIP
+        serverIP = _serverIP;
+
+        initTCP();
+        initUDP();
+        initHTTP();
 
         InvokeRepeating("Ping", 0, 1f);
     }
@@ -44,10 +55,10 @@ public class UM2_Client : MonoBehaviour
 
     void initUDP()
     {
-        remoteEndPoint = new IPEndPoint(IPAddress.Any, UDP_PORT);
+        remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
 
         udpClient = new UdpClient();
-        udpClient.Connect(SERVER_IP, UDP_PORT);
+        udpClient.Connect(serverIP, udpPort);
 
         udpReciever();
     }
@@ -55,10 +66,15 @@ public class UM2_Client : MonoBehaviour
     void initTCP()
     {
         tcpClient = new TcpClient();
-        tcpClient.Connect(SERVER_IP, TCP_PORT);
+        tcpClient.Connect(serverIP, tcpPort);
         tcpStream = tcpClient.GetStream();
 
         tcpReciever();
+    }
+
+    void initHTTP()
+    {
+        //do some stuff with http
     }
 
     async void udpReciever()
@@ -68,7 +84,7 @@ public class UM2_Client : MonoBehaviour
             byte[] receiveBytes = new byte[0];
             await Task.Run(() => receiveBytes = udpClient.Receive(ref remoteEndPoint));
             string message = Encoding.ASCII.GetString(receiveBytes);
-            getBytesUDP += Encoding.UTF8.GetByteCount(message);
+            //getBytesUDP += Encoding.UTF8.GetByteCount(message);
 
             try
             {
@@ -76,7 +92,7 @@ public class UM2_Client : MonoBehaviour
             }
             catch
             {
-                udpProcessErrors++;
+                //udpProcessErrors++;
                 Debug.LogWarning("UDP process error: " + message);
             }
         }
@@ -84,7 +100,7 @@ public class UM2_Client : MonoBehaviour
 
     async void tcpReciever()
     {
-        serverOnline = true;
+        connectedToTCP = true;
         while (true)
         {
             byte[] tcpReceivedData = new byte[1024];
@@ -93,9 +109,7 @@ public class UM2_Client : MonoBehaviour
             await Task.Run(() => bytesRead = tcpStream.Read(tcpReceivedData, 0, tcpReceivedData.Length));
             string message = Encoding.UTF8.GetString(tcpReceivedData, 0, bytesRead);
 
-            getBytesTCP += Encoding.UTF8.GetByteCount(message);
-
-            //Debug.Log("Got TCP Message: " + message);
+            //getBytesTCP += Encoding.UTF8.GetByteCount(message);
 
             //loop through messages
             string[] messages = message.Split('|');
@@ -109,7 +123,7 @@ public class UM2_Client : MonoBehaviour
                     }
                     catch
                     {
-                        tcpProcessErrors++;
+                        //tcpProcessErrors++;
                         Debug.LogWarning("TCP process error: " + finalMessage);
                     }
                 }
@@ -119,10 +133,10 @@ public class UM2_Client : MonoBehaviour
 
     public void sendTCPMessage(string message)
     {
-        if (serverOnline)
+        if (connectedToTCP)
         {
             message += "|";
-            sendBytesTCP += Encoding.UTF8.GetByteCount(message);
+            //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
             byte[] tcpData = Encoding.ASCII.GetBytes(message);
             tcpStream.Write(tcpData, 0, tcpData.Length);
         }
@@ -130,11 +144,22 @@ public class UM2_Client : MonoBehaviour
 
     public void sendUDPMessage(string message)
     {
-        sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+        //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+
         //load message
         byte[] udpData = Encoding.ASCII.GetBytes(message);
 
         //send message
         udpClient.Send(udpData, udpData.Length);
+    }
+
+    public void sendHTTPMessage(string message)
+    {
+        //send an http message
+    }
+
+    void processMessage(string protocol, string message)
+    {
+        Debug.Log("Got message through " + protocol + ": " + message);
     }
 }
