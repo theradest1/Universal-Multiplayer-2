@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -5,14 +6,19 @@ using UnityEngine;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 
 public class UM2_Client : MonoBehaviour
 {
-    public int tcpPort = 5000;
-    public int udpPort = 5001;
-    public int httpPort = 5002;
+    public int clientTcpPort = 5000;
+    public int clientUdpPort = 5001;
+    public int clientHttpPort = 5002;
+
     public string serverIP = "127.0.0.1";
+    public int serverTcpPort = 5000;
+    public int serverUdpPort = 5001;
+    public int serverHttpPort = 5002;
 
     IPEndPoint remoteEndPoint;
     UdpClient udpClient;
@@ -22,18 +28,16 @@ public class UM2_Client : MonoBehaviour
     NetworkStream tcpStream;
     bool connectedToTCP = false;
 
+    bool connectedToHTTP = false;
+
+
     float httpPingStartTime;
     float udpPingStartTime;
     float tcpPingStartTime;
 
 
-    public void StartClient(string _serverIP, int _udpPort, int _tcpPort, int _httpPort)
+    public void StartClient()
     {
-        udpPort = _udpPort;
-        tcpPort = _tcpPort;
-        httpPort = _httpPort;
-        serverIP = _serverIP;
-
         initTCP();
         initUDP();
         initHTTP();
@@ -55,21 +59,21 @@ public class UM2_Client : MonoBehaviour
 
     void initUDP()
     {
-        remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
+        /*remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
 
         udpClient = new UdpClient();
         udpClient.Connect(serverIP, udpPort);
 
-        udpReciever();
+        udpReciever();*/
     }
 
     void initTCP()
     {
-        tcpClient = new TcpClient();
+        /*tcpClient = new TcpClient();
         tcpClient.Connect(serverIP, tcpPort);
         tcpStream = tcpClient.GetStream();
 
-        tcpReciever();
+        tcpReciever();*/
     }
 
     void initHTTP()
@@ -79,7 +83,7 @@ public class UM2_Client : MonoBehaviour
 
     async void udpReciever()
     {
-        while (true)
+        /*while (true)
         {
             byte[] receiveBytes = new byte[0];
             await Task.Run(() => receiveBytes = udpClient.Receive(ref remoteEndPoint));
@@ -95,12 +99,12 @@ public class UM2_Client : MonoBehaviour
                 //udpProcessErrors++;
                 Debug.LogWarning("UDP process error: " + message);
             }
-        }
+        }*/
     }
 
     async void tcpReciever()
     {
-        connectedToTCP = true;
+        /*connectedToTCP = true;
         while (true)
         {
             byte[] tcpReceivedData = new byte[1024];
@@ -128,34 +132,54 @@ public class UM2_Client : MonoBehaviour
                     }
                 }
             }
-        }
+        }*/
     }
 
     public void sendTCPMessage(string message)
     {
-        if (connectedToTCP)
+        /*if (connectedToTCP)
         {
             message += "|";
             //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
             byte[] tcpData = Encoding.ASCII.GetBytes(message);
             tcpStream.Write(tcpData, 0, tcpData.Length);
-        }
+        }*/
     }
 
     public void sendUDPMessage(string message)
     {
-        //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+        /*//sendBytesUDP += Encoding.UTF8.GetByteCount(message);
 
         //load message
         byte[] udpData = Encoding.ASCII.GetBytes(message);
 
         //send message
-        udpClient.Send(udpData, udpData.Length);
+        udpClient.Send(udpData, udpData.Length);*/
     }
 
-    public void sendHTTPMessage(string message)
+    async void sendHTTPMessage(string message)
     {
-        //send an http message
+        UnityWebRequest www = UnityWebRequest.Get("http://" + serverIP + ":" + serverHttpPort + "/" + message);
+
+        // Send the request asynchronously
+        var operation = www.SendWebRequest();
+
+        // Wait for the request to complete
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error: " + www.error);
+        }
+        else
+        {
+            // Print the response data
+            string response = www.downloadHandler.text;
+            processMessage("HTTP", response);
+        }
     }
 
     void processMessage(string protocol, string message)

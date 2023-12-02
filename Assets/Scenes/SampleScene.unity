@@ -314,7 +314,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Join Server
+  m_text: 'Start Client
 
 '
   m_isRightToLeft: 0
@@ -406,7 +406,7 @@ GameObject:
   - component: {fileID: 97530782}
   - component: {fileID: 97530781}
   m_Layer: 5
-  m_Name: Join server
+  m_Name: Start Client
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -475,7 +475,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 97530782}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1054571550}
+        m_TargetAssemblyTypeName: UM2_Client, Assembly-CSharp
+        m_MethodName: StartClient
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &97530782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1061,7 +1073,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 908521176}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1054571549}
+        m_TargetAssemblyTypeName: UM2_Server, Assembly-CSharp
+        m_MethodName: StartServer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &908521176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1228,7 +1252,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.05
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1312,6 +1336,73 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &1054571548
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1054571551}
+  - component: {fileID: 1054571550}
+  - component: {fileID: 1054571549}
+  m_Layer: 0
+  m_Name: Networking
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1054571549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054571548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c0b7dedcee9bb4499acca6aae50ed95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  udpOnline: 0
+  tcpOnline: 0
+  httpOnline: 0
+--- !u!114 &1054571550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054571548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6fecffd66900f14f8389610145ea69c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clientTcpPort: 5000
+  clientUdpPort: 5001
+  clientHttpPort: 5002
+  serverIP: localhost
+  serverTcpPort: 5000
+  serverUdpPort: 5001
+  serverHttpPort: 5002
+--- !u!4 &1054571551
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054571548}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1097567493
 GameObject:
   m_ObjectHideFlags: 0
@@ -1924,3 +2015,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 1168736112}
   - {fileID: 812254017}
+  - {fileID: 1054571551}

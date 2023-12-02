@@ -1,36 +1,125 @@
+using System.Collections.Generic;
+using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.Http;
 using System.Text;
-using UnityEngine;
 using System.Threading.Tasks;
+using System.Threading;
+using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
-using System.Collections.Generic;
 
 public class UM2_Server : MonoBehaviour
 {
-    public bool udpOnline;
-    public bool tcpOnline;
-    public bool httpOnline;
-    int udpPort;
-    int tcpPort;
-    int httpPort;
+    int udpPort = 5000;
+    int tcpPort = 5001;
+    int httpPort = 5002;
 
     IPEndPoint remoteEndPoint;
     UdpClient udpClient;
+    public bool udpOnline;
 
     List<TcpClient> tcpClients = new List<TcpClient>();
     List<NetworkStream> tcpStreams = new List<NetworkStream>();
+    public bool tcpOnline;
 
-    public void StartServer(int _udpPort, int _tcpPort, int _httpPort)
+    HttpListener httpListener;
+    public bool httpOnline;
+
+    public void StartServer()
     {
-        udpPort = _udpPort;
-        tcpPort = _tcpPort;
-        httpPort = _httpPort;
-
         initTCP();
         initUDP();
+        initHTTP();
     }
+
+    void initHTTP()
+    {
+        // Define the URL and port for the server
+        string url = "http://localhost:" + httpPort + "/";
+
+        // Create HttpListener
+        httpListener = new HttpListener();
+        httpListener.Prefixes.Add(url);
+
+        // Start listening for incoming requests
+        try
+        {
+            httpListener.Start();
+            httpOnline = true;
+
+            // Start a new thread to handle incoming requests
+            ThreadPool.QueueUserWorkItem((state) =>
+            {
+                while (httpOnline)
+                {
+                    try
+                    {
+                        // Wait for a request to come in
+                        HttpListenerContext context = httpListener.GetContext();
+
+                        // Handle the request in a separate function
+                        HandleRequest(context);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Error handling request: " + e.Message);
+                    }
+                }
+            });
+            Debug.Log("HTTP Server started.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to start HTTP Server: " + e.Message);
+            httpOnline = false;
+        }
+    }
+
+    public void stopHttp()
+    {
+        httpOnline = false;
+        httpListener.Stop();
+        httpListener.Close();
+    }
+
+    void HandleRequest(HttpListenerContext context)
+    {
+        // Handle incoming requests here
+        // For example, you can get the request and send a response
+
+        HttpListenerRequest request = context.Request;
+
+        // Get the request method (GET, POST, etc.)
+        string requestMethod = request.HttpMethod;
+
+        // Get the request URL
+        string requestUrl = request.RawUrl;
+
+        Debug.Log("Received " + requestMethod + " request for: " + requestUrl);
+
+        // Send a response
+        HttpListenerResponse response = context.Response;
+        string responseString = "pong";
+        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+
+        // Set response headers and content
+        response.ContentType = "text/html";
+        response.ContentLength64 = buffer.Length;
+
+        // Write the response
+        response.OutputStream.Write(buffer, 0, buffer.Length);
+
+        // Close the response
+        response.Close();
+    }
+
+
+
+
+
+
 
     void initUDP()
     {
