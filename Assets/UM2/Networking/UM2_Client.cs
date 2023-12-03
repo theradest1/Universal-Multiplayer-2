@@ -29,9 +29,12 @@ public class UM2_Client : MonoBehaviour
     bool connectedToHTTP = false;
 
 
-    float httpPingStartTime;
     float udpPingStartTime;
+    float udpPing;
     float tcpPingStartTime;
+    float tcpPing;
+    float httpPingStartTime;
+    float httpPing;
 
     public UM2_Server server;
     public Debugger debugger;
@@ -218,5 +221,24 @@ public class UM2_Client : MonoBehaviour
     void processMessage(string message, string protocol)
     {
         Debug.Log("Got message through " + protocol + ": " + message);
+
+        if (message == "pong")
+        {
+            if (protocol == "UDP")
+            {
+                udpPing = Time.time - udpPingStartTime;
+                debugger.setDebug("UDP ping", (int)(udpPing * 1000) + "ms");
+            }
+            else if (protocol == "TCP")
+            {
+                tcpPing = Time.time - tcpPingStartTime;
+                debugger.setDebug("TCP ping", (int)(tcpPing * 1000) + "ms");
+            }
+            else if (protocol == "HTTP")
+            {
+                httpPing = Time.time - httpPingStartTime;
+                debugger.setDebug("HTTP ping", (int)(httpPing * 1000) + "ms");
+            }
+        }
     }
 }
