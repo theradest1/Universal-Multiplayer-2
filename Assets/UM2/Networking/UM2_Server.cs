@@ -3,10 +3,12 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.SceneManagement;
 
@@ -27,8 +29,20 @@ public class UM2_Server : MonoBehaviour
     HttpListener httpListener;
     public bool httpOnline;
 
+    string localIpAddress;
+    string publicIpAddress;
+
+    private void Start()
+    {
+        localIpAddress = GetLocalIPAddress();
+        GetPublicIPAddress();
+    }
+
     public void StartServer()
     {
+        print(localIpAddress);
+        print(publicIpAddress);
+
         initTCP();
         initUDP();
         initHTTP();
@@ -36,19 +50,12 @@ public class UM2_Server : MonoBehaviour
 
     void initHTTP()
     {
-        // Define the URL and port for the server
-        string localHostURL = "http://127.0.0.1:" + httpPort + "/";
-        string localURL = "http://192.168.0.16:" + httpPort + "/";
-        string publicURL = "http://75.100.205.73:" + httpPort + "/";
-
         // Create HttpListener
         httpListener = new HttpListener();
-        httpListener.Prefixes.Add(localHostURL);
-        print(localHostURL);
-        httpListener.Prefixes.Add(localURL);
-        print(localURL);
-        /*httpListener.Prefixes.Add(publicURL);
-        print(publicURL);*/
+
+        //anything with port 5002
+        //you do still need to port forward for external
+        httpListener.Prefixes.Add("http://*:5002/");
 
         // Start listening for incoming requests
         try
@@ -202,5 +209,49 @@ public class UM2_Server : MonoBehaviour
 
         //send message
         udpClient.Send(udpData, udpData.Length);*/
+    }
+
+    public string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        throw new System.Exception("No network adapters with an IPv4 address in the system!");
+    }
+
+    public async void GetPublicIPAddress()
+    {
+        UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
+
+        // Send the request asynchronously
+        var operation = request.SendWebRequest();
+
+        // Wait for the request to complete
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error: " + request.error);
+        }
+        else
+        {
+            // Print the response data
+            string response = request.downloadHandler.text;
+
+            //cut off unneeded things
+            response = response.Substring(response.IndexOf(":") + 2);
+            response = response.Substring(0, response.IndexOf("<"));
+
+            Debug.Log("External IP: " + response);
+            publicIpAddress = response;
+        }
     }
 }
