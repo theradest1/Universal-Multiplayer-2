@@ -33,6 +33,9 @@ public class UM2_Client : MonoBehaviour
     float udpPingStartTime;
     float tcpPingStartTime;
 
+    public UM2_Server server;
+    public Debugger debugger;
+
     private void Start()
     {
         //get info from menu
@@ -43,9 +46,21 @@ public class UM2_Client : MonoBehaviour
             return;
         }
 
+        //set up debug
+        debugger.setDebug("UDP online (client)", "false");
+        debugger.setDebug("UDP ping", "n/a");
+        debugger.setDebug("TCP online (client)", "true");
+        debugger.setDebug("TCP ping", "n/a");
+        debugger.setDebug("HTTP online (client)", "false");
+        debugger.setDebug("HTTP ping", "n/a");
+
         if (!hostingServer) //client gets started by server so it doesnt try to join before server is up
         {
             StartClient();
+        }
+        else
+        {
+            server.StartServer();
         }
     }
 

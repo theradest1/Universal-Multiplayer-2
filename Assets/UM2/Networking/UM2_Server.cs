@@ -34,15 +34,12 @@ public class UM2_Server : MonoBehaviour
 
     public UM2_Client client;
 
+    public Debugger debugger;
+
     private void Start()
     {
         GetLocalIPAddress();
         GetPublicIPAddress();
-
-        if (UM2_Client.hostingServer)
-        {
-            StartServer();
-        }
     }
 
     public void StartServer()
