@@ -159,10 +159,11 @@ public class UM2_Client : MonoBehaviour
 
     async void sendHTTPMessage(string message)
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://" + serverIP + ":" + serverHttpPort + "/" + message);
+        UnityWebRequest request = UnityWebRequest.Get("http://" + serverIP + ":" + serverHttpPort + "/" + message);
 
         // Send the request asynchronously
-        var operation = www.SendWebRequest();
+        Debug.Log("Sent: " + "http://" + serverIP + ":" + serverHttpPort + "/" + message);
+        var operation = request.SendWebRequest();
 
         // Wait for the request to complete
         while (!operation.isDone)
@@ -170,14 +171,14 @@ public class UM2_Client : MonoBehaviour
             await Task.Yield();
         }
 
-        if (www.result != UnityWebRequest.Result.Success)
+        if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Error: " + www.error);
+            Debug.LogError("Error: " + request.error);
         }
         else
         {
             // Print the response data
-            string response = www.downloadHandler.text;
+            string response = request.downloadHandler.text;
             processMessage("HTTP", response);
         }
     }

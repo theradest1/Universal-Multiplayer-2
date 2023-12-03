@@ -37,11 +37,18 @@ public class UM2_Server : MonoBehaviour
     void initHTTP()
     {
         // Define the URL and port for the server
-        string url = "http://localhost:" + httpPort + "/";
+        string localHostURL = "http://127.0.0.1:" + httpPort + "/";
+        string localURL = "http://192.168.0.16:" + httpPort + "/";
+        string publicURL = "http://75.100.205.73:" + httpPort + "/";
 
         // Create HttpListener
         httpListener = new HttpListener();
-        httpListener.Prefixes.Add(url);
+        httpListener.Prefixes.Add(localHostURL);
+        print(localHostURL);
+        httpListener.Prefixes.Add(localURL);
+        print(localURL);
+        /*httpListener.Prefixes.Add(publicURL);
+        print(publicURL);*/
 
         // Start listening for incoming requests
         try
@@ -60,7 +67,7 @@ public class UM2_Server : MonoBehaviour
                         HttpListenerContext context = httpListener.GetContext();
 
                         // Handle the request in a separate function
-                        HandleRequest(context);
+                        processHTTPMessage(context);
                     }
                     catch (Exception e)
                     {
@@ -84,42 +91,26 @@ public class UM2_Server : MonoBehaviour
         httpListener.Close();
     }
 
-    void HandleRequest(HttpListenerContext context)
+    void processHTTPMessage(HttpListenerContext context)
     {
-        // Handle incoming requests here
-        // For example, you can get the request and send a response
-
         HttpListenerRequest request = context.Request;
-
-        // Get the request method (GET, POST, etc.)
-        string requestMethod = request.HttpMethod;
-
-        // Get the request URL
-        string requestUrl = request.RawUrl.Substring(1);
-
-        Debug.Log("Received " + requestMethod + " request for: " + requestUrl);
+        string message = request.RawUrl.Substring(1);
+        processMessage(message);
 
         // Send a response
         HttpListenerResponse response = context.Response;
         string responseString = "pong";
         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-
-        // Set response headers and content
         response.ContentType = "text/html";
         response.ContentLength64 = buffer.Length;
-
-        // Write the response
         response.OutputStream.Write(buffer, 0, buffer.Length);
-
-        // Close the response
         response.Close();
     }
 
-
-
-
-
-
+    void processMessage(string message)
+    {
+        Debug.Log("Got message: " + message);
+    }
 
     void initUDP()
     {
