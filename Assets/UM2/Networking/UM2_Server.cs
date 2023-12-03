@@ -18,8 +18,8 @@ public class UM2_Server : MonoBehaviour
     int tcpPort = 5001;
     int httpPort = 5002;
 
-    IPEndPoint remoteEndPoint;
-    UdpClient udpClient;
+    List<IPEndPoint> udpClients = new List<IPEndPoint>();
+    UdpClient udpServer;
     public bool udpOnline;
 
     List<TcpClient> tcpClients = new List<TcpClient>();
@@ -40,8 +40,14 @@ public class UM2_Server : MonoBehaviour
 
     public void StartServer()
     {
-        print(localIpAddress);
-        print(publicIpAddress);
+        if (localIpAddress == null || publicIpAddress == null)
+        {
+            Debug.LogWarning("Ip addresses have not been found yet - try again");
+            GetPublicIPAddress();
+            return;
+        }
+        print("local: " + localIpAddress);
+        print("public: " + publicIpAddress);
 
         initTCP();
         initUDP();
@@ -82,7 +88,7 @@ public class UM2_Server : MonoBehaviour
                     }
                 }
             });
-            Debug.Log("HTTP Server started.");
+            Debug.Log("HTTP Server started on port " + httpPort);
         }
         catch (Exception e)
         {
@@ -102,7 +108,7 @@ public class UM2_Server : MonoBehaviour
     {
         HttpListenerRequest request = context.Request;
         string message = request.RawUrl.Substring(1);
-        processMessage(message);
+        processMessage(message, "HTTP");
 
         // Send a response
         HttpListenerResponse response = context.Response;
@@ -114,19 +120,35 @@ public class UM2_Server : MonoBehaviour
         response.Close();
     }
 
-    void processMessage(string message)
+    void processMessage(string message, string protocol)
     {
-        Debug.Log("Got message: " + message);
+        //Debug.Log("Got message: " + message);
     }
 
     void initUDP()
     {
-        /*remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
+        try
+        {
+            //create server
+            udpServer = new UdpClient(udpPort);
 
-        udpClient = new UdpClient();
-        udpClient.Connect(SERVER_IP, udpPort);
+            //make it call udpReciever when message
+            udpServer.BeginReceive(udpReciever, null);
 
-        udpReciever();*/
+            Debug.Log("UDP Server started on port " + udpPort);
+            udpOnline = true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error starting UDP server: " + e.Message);
+        }
+    }
+
+    void stopUDP()
+    {
+        udpServer.Close();
+        udpOnline = false;
+        Debug.Log("UDP Server has been stopped");
     }
 
     void initTCP()
@@ -138,25 +160,15 @@ public class UM2_Server : MonoBehaviour
         tcpReciever();*/
     }
 
-    async void udpReciever()
+    private void udpReciever(IAsyncResult result)
     {
-        while (true)
-        {
-            /*byte[] receiveBytes = new byte[0];
-            await Task.Run(() => receiveBytes = udpClient.Receive(ref remoteEndPoint));
-            string message = Encoding.ASCII.GetString(receiveBytes);
-            getBytesUDP += Encoding.UTF8.GetByteCount(message);
+        IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
+        byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
+        string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-            try
-            {
-                processMessage("UDP", message);
-            }
-            catch
-            {
-                udpProcessErrors++;
-                Debug.LogWarning("UDP process error: " + message);
-            }*/
-        }
+        SendUDPMessage("pong", clientEndPoint);
+
+        udpServer.BeginReceive(udpReciever, null);
     }
 
     async void tcpReciever()
@@ -201,14 +213,24 @@ public class UM2_Server : MonoBehaviour
         tcpStream.Write(tcpData, 0, tcpData.Length);*/
     }
 
-    public void sendUDPMessage(string message, int clientID)
+    private void SendUDPMessage(string message, int clientID)
     {
-        /*sendBytesUDP += Encoding.UTF8.GetByteCount(message);
-        //load message
-        byte[] udpData = Encoding.ASCII.GetBytes(message);
+        IPEndPoint clientEndPoint = udpClients[clientID];
+        SendUDPMessage(message, clientEndPoint);
+    }
 
-        //send message
-        udpClient.Send(udpData, udpData.Length);*/
+    private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
+    {
+        try
+        {
+            //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            udpServer.Send(data, data.Length, clientEndPoint);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error sending response: " + e.Message);
+        }
     }
 
     public string GetLocalIPAddress()
@@ -226,12 +248,11 @@ public class UM2_Server : MonoBehaviour
 
     public async void GetPublicIPAddress()
     {
+        //this is kind of disgusting but there isnt a different way
         UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
 
-        // Send the request asynchronously
+        // send
         var operation = request.SendWebRequest();
-
-        // Wait for the request to complete
         while (!operation.isDone)
         {
             await Task.Yield();
@@ -243,14 +264,13 @@ public class UM2_Server : MonoBehaviour
         }
         else
         {
-            // Print the response data
+            // get data
             string response = request.downloadHandler.text;
 
-            //cut off unneeded things
+            //cut off unwanted things
             response = response.Substring(response.IndexOf(":") + 2);
             response = response.Substring(0, response.IndexOf("<"));
 
-            Debug.Log("External IP: " + response);
             publicIpAddress = response;
         }
     }

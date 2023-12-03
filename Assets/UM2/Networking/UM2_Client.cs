@@ -11,16 +11,16 @@ using System.Collections.Generic;
 
 public class UM2_Client : MonoBehaviour
 {
-    public int clientTcpPort = 5000;
-    public int clientUdpPort = 5001;
-    public int clientHttpPort = 5002;
+    public int clientTcpPort = 6000;
+    public int clientUdpPort = 6001;
+    public int clientHttpPort = 6002;
 
     public string serverIP = "127.0.0.1";
-    public int serverTcpPort = 5000;
-    public int serverUdpPort = 5001;
+    public int serverUdpPort = 5000;
+    public int serverTcpPort = 5001;
     public int serverHttpPort = 5002;
 
-    IPEndPoint remoteEndPoint;
+    IPEndPoint serverEndpoint;
     UdpClient udpClient;
     bool connectedToUDP = false;
 
@@ -59,12 +59,19 @@ public class UM2_Client : MonoBehaviour
 
     void initUDP()
     {
-        /*remoteEndPoint = new IPEndPoint(IPAddress.Any, udpPort);
+        try
+        {
+            serverEndpoint = new IPEndPoint(IPAddress.Parse(serverIP), serverUdpPort);
 
-        udpClient = new UdpClient();
-        udpClient.Connect(serverIP, udpPort);
+            udpClient = new UdpClient();
+            udpClient.Connect(serverEndpoint.Address, serverEndpoint.Port);
 
-        udpReciever();*/
+            udpReciever();
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Couldnt start udp client: " + e);
+        }
     }
 
     void initTCP()
@@ -83,23 +90,20 @@ public class UM2_Client : MonoBehaviour
 
     async void udpReciever()
     {
-        /*while (true)
+        try
         {
-            byte[] receiveBytes = new byte[0];
-            await Task.Run(() => receiveBytes = udpClient.Receive(ref remoteEndPoint));
-            string message = Encoding.ASCII.GetString(receiveBytes);
-            //getBytesUDP += Encoding.UTF8.GetByteCount(message);
+            while (true)
+            {
+                UdpReceiveResult result = await udpClient.ReceiveAsync();
+                string message = Encoding.ASCII.GetString(result.Buffer);
 
-            try
-            {
-                processMessage("UDP", message);
+                processMessage(message, "UDP");
             }
-            catch
-            {
-                //udpProcessErrors++;
-                Debug.LogWarning("UDP process error: " + message);
-            }
-        }*/
+        }
+        catch (Exception e)
+        {
+            Debug.Log("UDP client exception: " + e);
+        }
     }
 
     async void tcpReciever()
@@ -148,13 +152,13 @@ public class UM2_Client : MonoBehaviour
 
     public void sendUDPMessage(string message)
     {
-        /*//sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+        //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
 
         //load message
         byte[] udpData = Encoding.ASCII.GetBytes(message);
 
         //send message
-        udpClient.Send(udpData, udpData.Length);*/
+        udpClient.Send(udpData, udpData.Length);
     }
 
     async void sendHTTPMessage(string message)
@@ -162,7 +166,7 @@ public class UM2_Client : MonoBehaviour
         UnityWebRequest request = UnityWebRequest.Get("http://" + serverIP + ":" + serverHttpPort + "/" + message);
 
         // Send the request asynchronously
-        Debug.Log("Sent: " + "http://" + serverIP + ":" + serverHttpPort + "/" + message);
+        //Debug.Log("Sent: " + "http://" + serverIP + ":" + serverHttpPort + "/" + message);
         var operation = request.SendWebRequest();
 
         // Wait for the request to complete
@@ -179,12 +183,15 @@ public class UM2_Client : MonoBehaviour
         {
             // Print the response data
             string response = request.downloadHandler.text;
-            processMessage("HTTP", response);
+            processMessage(response, "HTTP");
         }
     }
 
-    void processMessage(string protocol, string message)
+    void processMessage(string message, string protocol)
     {
-        Debug.Log("Got message through " + protocol + ": " + message);
+        if (protocol == "UDP")
+        {
+            Debug.Log("Got message through " + protocol + ": " + message);
+        }
     }
 }
