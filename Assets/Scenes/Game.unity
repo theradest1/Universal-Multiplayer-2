@@ -1369,6 +1369,7 @@ MonoBehaviour:
   udpOnline: 0
   tcpOnline: 0
   httpOnline: 0
+  client: {fileID: 1054571550}
 --- !u!114 &1054571550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1381,13 +1382,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fecffd66900f14f8389610145ea69c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clientTcpPort: 6000
-  clientUdpPort: 6001
-  clientHttpPort: 6002
-  serverIP: 127.0.0.1
-  serverUdpPort: 5000
-  serverTcpPort: 5001
-  serverHttpPort: 5002
 --- !u!4 &1054571551
 Transform:
   m_ObjectHideFlags: 0

@@ -8,17 +8,15 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class UM2_Client : MonoBehaviour
 {
-    public int clientTcpPort = 6000;
-    public int clientUdpPort = 6001;
-    public int clientHttpPort = 6002;
-
-    public string serverIP = "127.0.0.1";
-    public int serverUdpPort = 5000;
-    public int serverTcpPort = 5001;
-    public int serverHttpPort = 5002;
+    public static string serverIP = null;
+    public static int serverUdpPort = 0;
+    public static int serverTcpPort = 0;
+    public static int serverHttpPort = 0;
+    public static bool hostingServer = false;
 
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
@@ -35,6 +33,21 @@ public class UM2_Client : MonoBehaviour
     float udpPingStartTime;
     float tcpPingStartTime;
 
+    private void Start()
+    {
+        //get info from menu
+        if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
+        {
+            Debug.LogWarning("Server info not set, pushing back to menu");
+            SceneManager.LoadScene("Menu");
+            return;
+        }
+
+        if (!hostingServer) //client gets started by server so it doesnt try to join before server is up
+        {
+            StartClient();
+        }
+    }
 
     public void StartClient()
     {
@@ -189,9 +202,6 @@ public class UM2_Client : MonoBehaviour
 
     void processMessage(string message, string protocol)
     {
-        if (protocol == "UDP")
-        {
-            Debug.Log("Got message through " + protocol + ": " + message);
-        }
+        Debug.Log("Got message through " + protocol + ": " + message);
     }
 }

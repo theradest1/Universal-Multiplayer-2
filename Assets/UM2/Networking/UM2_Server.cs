@@ -29,21 +29,30 @@ public class UM2_Server : MonoBehaviour
     HttpListener httpListener;
     public bool httpOnline;
 
-    string localIpAddress;
-    string publicIpAddress;
+    public static string localIpAddress;
+    public static string publicIpAddress;
+
+    public UM2_Client client;
 
     private void Start()
     {
-        localIpAddress = GetLocalIPAddress();
+        GetLocalIPAddress();
         GetPublicIPAddress();
+
+        if (UM2_Client.hostingServer)
+        {
+            StartServer();
+        }
     }
 
     public void StartServer()
     {
         if (localIpAddress == null || publicIpAddress == null)
         {
-            Debug.LogWarning("Ip addresses have not been found yet - try again");
+            Debug.LogWarning("Ip addresses have not been found yet - will be tried again soon");
+            GetLocalIPAddress();
             GetPublicIPAddress();
+            Invoke("StartServer", .5f);
             return;
         }
         print("local: " + localIpAddress);
@@ -52,6 +61,8 @@ public class UM2_Server : MonoBehaviour
         initTCP();
         initUDP();
         initHTTP();
+
+        client.StartClient();
     }
 
     void initHTTP()
@@ -233,20 +244,21 @@ public class UM2_Server : MonoBehaviour
         }
     }
 
-    public string GetLocalIPAddress()
+    public static void GetLocalIPAddress()
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList)
         {
             if (ip.AddressFamily == AddressFamily.InterNetwork)
             {
-                return ip.ToString();
+                UM2_Server.localIpAddress = ip.ToString();
+                return;
             }
         }
-        throw new System.Exception("No network adapters with an IPv4 address in the system!");
+        Debug.LogError("No network adapters with an IPv4 address in the system! (when finding local ip)");
     }
 
-    public async void GetPublicIPAddress()
+    public static async void GetPublicIPAddress()
     {
         //this is kind of disgusting but there isnt a different way
         UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
@@ -271,7 +283,7 @@ public class UM2_Server : MonoBehaviour
             response = response.Substring(response.IndexOf(":") + 2);
             response = response.Substring(0, response.IndexOf("<"));
 
-            publicIpAddress = response;
+            UM2_Server.publicIpAddress = response;
         }
     }
 }
