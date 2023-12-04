@@ -38,6 +38,10 @@ public class UM2_Client : MonoBehaviour
     float httpPingStartTime;
     float httpPing;
 
+    int sentBytes = 0;
+    int receivedBytes = 0;
+    int failedMessages = 0;
+
     public UM2_Server server;
     public Debugger debugger;
 
@@ -52,15 +56,26 @@ public class UM2_Client : MonoBehaviour
         }
 
         //set up debug
-        debugger.addSpace();
-        debugger.setDebug("UDP server status", "offline");
-        debugger.setDebug("UDP ping", "n/a");
-        debugger.addSpace();
-        debugger.setDebug("TCP server status", "offline");
-        debugger.setDebug("TCP ping", "n/a");
-        debugger.addSpace();
-        debugger.setDebug("HTTP server status", "offline");
-        debugger.setDebug("HTTP ping", "n/a");
+
+        debugger.addSpace("Client:");
+        debugger.setDebug("UDP Ping", "n/a");
+        debugger.setDebug("TCP Ping", "n/a");
+        debugger.setDebug("HTTP Ping", "n/a");
+        debugger.setDebug("Bytes/Sec sent", "0");
+        debugger.setDebug("Bytes/Sec recieved", "0");
+        debugger.setDebug("Failed/Sec", "0");
+
+        if (hostingServer)
+        {
+            debugger.addSpace();
+            debugger.addSpace("Server:");
+            debugger.setDebug("UDP status", "offline");
+            debugger.setDebug("TCP status", "offline");
+            debugger.setDebug("HTTP status", "offline");
+            debugger.setDebug("Bytes/Sec sent ", "0");
+            debugger.setDebug("Bytes/Sec recieved ", "0");
+            debugger.setDebug("Failed/Sec ", "0");
+        }
 
         if (!hostingServer) //client gets started by server so it doesnt try to join before server is up
         {
@@ -70,6 +85,19 @@ public class UM2_Client : MonoBehaviour
         {
             server.StartServer();
         }
+
+        InvokeRepeating("updateDebug", 1f, 1f);
+    }
+
+    void updateDebug()
+    {
+        debugger.setDebug("Bytes/Sec sent", sentBytes + "");
+        debugger.setDebug("Bytes/Sec recieved", receivedBytes + "");
+        debugger.setDebug("Failed/Sec", failedMessages + "");
+
+        sentBytes = 0;
+        receivedBytes = 0;
+        failedMessages = 0;
     }
 
     public void StartClient()
@@ -78,19 +106,19 @@ public class UM2_Client : MonoBehaviour
         initUDP();
         initHTTP();
 
-        InvokeRepeating("Ping", 0, 1f);
+        InvokeRepeating("Ping", 0, .25f);
     }
 
     void Ping()
     {
         udpPingStartTime = Time.time;
-        sendUDPMessage("ping");
+        sendMessage("ping", "UDP");
 
         tcpPingStartTime = Time.time;
-        sendTCPMessage("ping");
+        sendMessage("ping", "TCP");
 
         httpPingStartTime = Time.time;
-        sendHTTPMessage("ping");
+        sendMessage("ping", "HTTP");
     }
 
     void initUDP()
@@ -149,6 +177,7 @@ public class UM2_Client : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("UDP client exception: " + e);
+            failedMessages += 1;
         }
     }
 
@@ -169,6 +198,7 @@ public class UM2_Client : MonoBehaviour
             catch (Exception e)
             {
                 Debug.Log("Error receiving data: " + e.Message);
+                failedMessages += 1;
             }
         }
     }
@@ -179,13 +209,13 @@ public class UM2_Client : MonoBehaviour
         {
             try
             {
-                //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
                 byte[] data = Encoding.ASCII.GetBytes(message);
                 tcpStream.Write(data, 0, data.Length);
             }
             catch (Exception e)
             {
                 Debug.Log("Error sending data: " + e.Message);
+                failedMessages += 1;
             }
         }
     }
@@ -203,8 +233,6 @@ public class UM2_Client : MonoBehaviour
 
     public void sendUDPMessage(string message)
     {
-        //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
-
         //load message
         byte[] udpData = Encoding.ASCII.GetBytes(message);
 
@@ -229,6 +257,7 @@ public class UM2_Client : MonoBehaviour
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Error: " + request.error);
+            failedMessages += 1;
         }
         else
         {
@@ -238,8 +267,27 @@ public class UM2_Client : MonoBehaviour
         }
     }
 
+    public void sendMessage(string message, string protocol)
+    {
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+
+        if (protocol == "UDP")
+        {
+            sendUDPMessage(message);
+        }
+        else if (protocol == "TCP")
+        {
+            sendTCPMessage(message);
+        }
+        else if (protocol == "HTTP")
+        {
+            sendHTTPMessage(message);
+        }
+    }
+
     void processMessage(string message, string protocol)
     {
+        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         Debug.Log("Got message through " + protocol + ": " + message);
 
         if (message == "pong")
@@ -247,22 +295,23 @@ public class UM2_Client : MonoBehaviour
             if (protocol == "UDP")
             {
                 udpPing = Time.time - udpPingStartTime;
-                debugger.setDebug("UDP ping", (int)(udpPing * 1000) + "ms");
+                debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
             }
             else if (protocol == "TCP")
             {
                 tcpPing = Time.time - tcpPingStartTime;
-                debugger.setDebug("TCP ping", (int)(tcpPing * 1000) + "ms");
+                debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
             }
             else if (protocol == "HTTP")
             {
                 httpPing = Time.time - httpPingStartTime;
-                debugger.setDebug("HTTP ping", (int)(httpPing * 1000) + "ms");
+                debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
             }
         }
         else
         {
             Debug.LogWarning("Got unknown message from " + protocol + ": " + message);
+            failedMessages += 1;
         }
     }
 }

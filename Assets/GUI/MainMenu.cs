@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.PackageManager.UI;
 
 public class MainMenu : MonoBehaviour
 {
@@ -15,9 +16,21 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        string ip = PlayerPrefs.GetString("serverIP");
-        string port = PlayerPrefs.GetString("serverPort");
-        bool server = bool.Parse(PlayerPrefs.GetString("hostServer"));
+        string ip;
+        string port;
+        bool server;
+        try
+        {
+            ip = PlayerPrefs.GetString("serverIP");
+            port = PlayerPrefs.GetString("serverPort");
+            server = bool.Parse(PlayerPrefs.GetString("hostServer"));
+        }
+        catch
+        {
+            ip = "127.0.0.1";
+            port = "5000";
+            server = false;
+        }
 
         serverIpInput.text = ip;
         serverPortInput.text = port;

@@ -33,6 +33,11 @@ public class UM2_Server : MonoBehaviour
     public static string localIpAddress;
     public static string publicIpAddress;
 
+
+    int sentBytes = 0;
+    int receivedBytes = 0;
+    int failedMessages = 0;
+
     public UM2_Client client;
 
     public Debugger debugger;
@@ -41,6 +46,19 @@ public class UM2_Server : MonoBehaviour
     {
         GetLocalIPAddress();
         GetPublicIPAddress();
+
+        InvokeRepeating("updateDebug", 1f, 1f);
+    }
+
+    void updateDebug()
+    {
+        debugger.setDebug("Bytes/Sec sent ", sentBytes + "");
+        debugger.setDebug("Bytes/Sec recieved ", receivedBytes + "");
+        debugger.setDebug("Failed/Sec ", failedMessages + "");
+
+        sentBytes = 0;
+        receivedBytes = 0;
+        failedMessages = 0;
     }
 
     public void StartServer()
@@ -50,7 +68,7 @@ public class UM2_Server : MonoBehaviour
             Debug.LogWarning("Ip addresses have not been found yet - will be tried again soon");
             GetLocalIPAddress();
             GetPublicIPAddress();
-            Invoke("StartServer", .5f);
+            Invoke("StartServer", 1f);
             return;
         }
         print("local: " + localIpAddress);
@@ -76,7 +94,7 @@ public class UM2_Server : MonoBehaviour
         try
         {
             httpListener.Start();
-            debugger.setDebug("HTTP server status", "online");
+            debugger.setDebug("HTTP status", "online");
             //Debug.Log("HTTP Server started on port " + httpPort);
 
             httpOnline = true;
@@ -97,6 +115,7 @@ public class UM2_Server : MonoBehaviour
                     catch (Exception e)
                     {
                         Debug.LogError("Error handling request: " + e.Message);
+                        failedMessages += 1;
                     }
                 }
             });
@@ -105,13 +124,13 @@ public class UM2_Server : MonoBehaviour
         {
             Debug.LogError("Failed to start HTTP Server: " + e.Message);
             httpOnline = false;
-            debugger.setDebug("HTTP server status", "offline");
+            debugger.setDebug("HTTP status", "offline");
         }
     }
 
     public void stopHttp()
     {
-        debugger.setDebug("HTTP server status", "offline");
+        debugger.setDebug("HTTP status", "offline");
         httpOnline = false;
         httpListener.Stop();
         httpListener.Close();
@@ -126,6 +145,7 @@ public class UM2_Server : MonoBehaviour
         // Send a response
         HttpListenerResponse response = context.Response;
         string responseString = "pong";
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseString);
         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
         response.ContentType = "text/html";
         response.ContentLength64 = buffer.Length;
@@ -135,6 +155,7 @@ public class UM2_Server : MonoBehaviour
 
     void processMessage(string message, string protocol)
     {
+        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         //Debug.Log("Got message from " + protocol + ": " + message);
     }
 
@@ -150,7 +171,7 @@ public class UM2_Server : MonoBehaviour
 
             //Debug.Log("UDP Server started on port " + udpPort);
             udpOnline = true;
-            debugger.setDebug("UDP server status", "online");
+            debugger.setDebug("UDP status", "online");
         }
         catch (Exception e)
         {
@@ -162,7 +183,7 @@ public class UM2_Server : MonoBehaviour
     {
         udpServer.Close();
         udpOnline = false;
-        debugger.setDebug("UDP server status", "offline");
+        debugger.setDebug("UDP status", "offline");
         Debug.Log("UDP Server has been stopped");
     }
 
@@ -178,7 +199,7 @@ public class UM2_Server : MonoBehaviour
             tcpServer = new TcpListener(IPAddress.Any, tcpPort);
             tcpServer.Start();
             tcpOnline = true;
-            debugger.setDebug("TCP server status", "online");
+            debugger.setDebug("TCP status", "online");
 
             //Debug.Log("TCP Server started on port " + tcpPort);
 
@@ -216,12 +237,13 @@ public class UM2_Server : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError("Error handling client: " + e.Message);
+            failedMessages += 1;
         }
     }
 
     async void sendTCPMessage(string message, NetworkStream stream)
     {
-        //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         byte[] sendData = Encoding.ASCII.GetBytes(message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
@@ -245,6 +267,7 @@ public class UM2_Server : MonoBehaviour
 
     private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
     {
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         try
         {
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
@@ -254,6 +277,7 @@ public class UM2_Server : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError("Error sending response: " + e.Message);
+            failedMessages += 1;
         }
     }
 

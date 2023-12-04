@@ -28,13 +28,13 @@ public class Debugger : MonoBehaviour
         debugTexts[debugID].text = title + ": " + value;
     }
 
-    public void addSpace()
+    public void addSpace(string title = " ")
     {
-        if (debugTexts.Count != 0)
+        if (debugTexts.Count != 0 || title != " ")
         {
             TextMeshProUGUI newText = GameObject.Instantiate(debugTextPrefab, debugParent.transform).GetComponent<TextMeshProUGUI>();
             newText.name = "spacer";
-            newText.text = " ";
+            newText.text = title;
 
             debugTexts.Add(newText);
             titles.Add("space");
