@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using System.Threading.Tasks;
+using System.Threading;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
@@ -25,6 +26,7 @@ public class UM2_Client : MonoBehaviour
     TcpClient tcpClient;
     NetworkStream tcpStream;
     bool connectedToTCP = false;
+    Thread tcpRecieveThread;
 
     bool connectedToHTTP = false;
 
@@ -104,17 +106,27 @@ public class UM2_Client : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Couldnt start udp client: " + e);
+            Debug.Log("Couldn't start udp client: " + e);
         }
     }
 
     void initTCP()
     {
-        /*tcpClient = new TcpClient();
-        tcpClient.Connect(serverIP, tcpPort);
-        tcpStream = tcpClient.GetStream();
+        try
+        {
+            tcpClient = new TcpClient();
+            tcpClient.Connect(IPAddress.Parse(serverIP), serverTcpPort);
+            tcpStream = tcpClient.GetStream();
 
-        tcpReciever();*/
+            connectedToTCP = true;
+
+            tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
+            tcpRecieveThread.Start();
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Error connecting to server: " + e.Message);
+        }
     }
 
     void initHTTP()
@@ -140,48 +152,53 @@ public class UM2_Client : MonoBehaviour
         }
     }
 
-    async void tcpReciever()
+    private void tcpReciever()
     {
-        /*connectedToTCP = true;
-        while (true)
+        byte[] buffer = new byte[1024];
+        while (connectedToTCP)
         {
-            byte[] tcpReceivedData = new byte[1024];
-            int bytesRead = 0; //this might cause problems, but I don't think so
-
-            await Task.Run(() => bytesRead = tcpStream.Read(tcpReceivedData, 0, tcpReceivedData.Length));
-            string message = Encoding.UTF8.GetString(tcpReceivedData, 0, bytesRead);
-
-            //getBytesTCP += Encoding.UTF8.GetByteCount(message);
-
-            //loop through messages
-            string[] messages = message.Split('|');
-            foreach (string finalMessage in messages)
+            try
             {
-                if (finalMessage != "") //to get rid of final message
+                int bytesRead = tcpStream.Read(buffer, 0, buffer.Length);
+                if (bytesRead > 0)
                 {
-                    try
-                    {
-                        processMessage("TCP", finalMessage);
-                    }
-                    catch
-                    {
-                        //tcpProcessErrors++;
-                        Debug.LogWarning("TCP process error: " + finalMessage);
-                    }
+                    string receivedData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                    MainThreadDispatcher.Enqueue(() => processMessage(receivedData, "TCP"));
                 }
             }
-        }*/
+            catch (Exception e)
+            {
+                Debug.Log("Error receiving data: " + e.Message);
+            }
+        }
     }
 
     public void sendTCPMessage(string message)
     {
-        /*if (connectedToTCP)
+        if (connectedToTCP)
         {
-            message += "|";
-            //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
-            byte[] tcpData = Encoding.ASCII.GetBytes(message);
-            tcpStream.Write(tcpData, 0, tcpData.Length);
-        }*/
+            try
+            {
+                //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
+                byte[] data = Encoding.ASCII.GetBytes(message);
+                tcpStream.Write(data, 0, data.Length);
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Error sending data: " + e.Message);
+            }
+        }
+    }
+
+    public void stopTCP()
+    {
+        connectedToTCP = false;
+
+        if (tcpStream != null)
+            tcpStream.Close();
+
+        if (tcpClient != null && tcpClient.Connected)
+            tcpClient.Close();
     }
 
     public void sendUDPMessage(string message)
@@ -242,6 +259,10 @@ public class UM2_Client : MonoBehaviour
                 httpPing = Time.time - httpPingStartTime;
                 debugger.setDebug("HTTP ping", (int)(httpPing * 1000) + "ms");
             }
+        }
+        else
+        {
+            Debug.LogWarning("Got unknown message from " + protocol + ": " + message);
         }
     }
 }

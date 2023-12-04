@@ -32,7 +32,6 @@ public class MainMenu : MonoBehaviour
 
     public void saveSettings()
     {
-        Debug.Log("Saved");
         PlayerPrefs.SetString("serverIP", serverIpInput.text);
         PlayerPrefs.SetString("serverPort", serverPortInput.text);
         PlayerPrefs.SetString("hostServer", hostServerToggle.isOn + "");

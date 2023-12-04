@@ -24,6 +24,7 @@ public class UM2_Server : MonoBehaviour
 
     List<TcpClient> tcpClients = new List<TcpClient>();
     List<NetworkStream> tcpStreams = new List<NetworkStream>();
+    TcpListener tcpServer;
     public bool tcpOnline;
 
     HttpListener httpListener;
@@ -76,6 +77,8 @@ public class UM2_Server : MonoBehaviour
         {
             httpListener.Start();
             debugger.setDebug("HTTP server status", "online");
+            //Debug.Log("HTTP Server started on port " + httpPort);
+
             httpOnline = true;
 
             // Start a new thread to handle incoming requests
@@ -97,7 +100,6 @@ public class UM2_Server : MonoBehaviour
                     }
                 }
             });
-            //Debug.Log("HTTP Server started on port " + httpPort);
         }
         catch (Exception e)
         {
@@ -133,7 +135,7 @@ public class UM2_Server : MonoBehaviour
 
     void processMessage(string message, string protocol)
     {
-        //Debug.Log("Got message: " + message);
+        //Debug.Log("Got message from " + protocol + ": " + message);
     }
 
     void initUDP()
@@ -146,7 +148,7 @@ public class UM2_Server : MonoBehaviour
             //make it call udpReciever when message
             udpServer.BeginReceive(udpReciever, null);
 
-            Debug.Log("UDP Server started on port " + udpPort);
+            //Debug.Log("UDP Server started on port " + udpPort);
             udpOnline = true;
             debugger.setDebug("UDP server status", "online");
         }
@@ -166,11 +168,62 @@ public class UM2_Server : MonoBehaviour
 
     void initTCP()
     {
-        /*tcpClient = new TcpClient();
-        tcpClient.Connect(SERVER_IP, tcpPort);
-        tcpStream = tcpClient.GetStream();
+        tcpReciever();
+    }
 
-        tcpReciever();*/
+    async void tcpReciever()
+    {
+        try
+        {
+            tcpServer = new TcpListener(IPAddress.Any, tcpPort);
+            tcpServer.Start();
+            tcpOnline = true;
+            debugger.setDebug("TCP server status", "online");
+
+            //Debug.Log("TCP Server started on port " + tcpPort);
+
+            while (tcpOnline)
+            {
+                TcpClient client = await tcpServer.AcceptTcpClientAsync();
+                handleTcpClient(client);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error starting TCP server: " + e.Message);
+        }
+    }
+
+    private async void handleTcpClient(TcpClient client)
+    {
+        try
+        {
+            NetworkStream stream = client.GetStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+            {
+                string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                processMessage(receivedMessage, "TCP");
+
+                sendTCPMessage("pong", stream);
+            }
+
+            // Close the client connection
+            client.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error handling client: " + e.Message);
+        }
+    }
+
+    async void sendTCPMessage(string message, NetworkStream stream)
+    {
+        //sendBytesTCP += Encoding.UTF8.GetByteCount(message);
+        byte[] sendData = Encoding.ASCII.GetBytes(message);
+        await stream.WriteAsync(sendData, 0, sendData.Length);
     }
 
     private void udpReciever(IAsyncResult result)
@@ -182,48 +235,6 @@ public class UM2_Server : MonoBehaviour
         SendUDPMessage("pong", clientEndPoint);
 
         udpServer.BeginReceive(udpReciever, null);
-    }
-
-    async void tcpReciever()
-    {
-        while (true)
-        {
-            /*byte[] tcpReceivedData = new byte[1024];
-            int bytesRead = 0; //this might cause problems, but I don't think so
-
-            await Task.Run(() => bytesRead = tcpStream.Read(tcpReceivedData, 0, tcpReceivedData.Length));
-            string message = Encoding.UTF8.GetString(tcpReceivedData, 0, bytesRead);
-
-            getBytesTCP += Encoding.UTF8.GetByteCount(message);
-
-            //Debug.Log("Got TCP Message: " + message);
-
-            //loop through messages
-            string[] messages = message.Split('|');
-            foreach (string finalMessage in messages)
-            {
-                if (finalMessage != "") //to get rid of final message
-                {
-                    try
-                    {
-                        processMessage("TCP", finalMessage);
-                    }
-                    catch
-                    {
-                        tcpProcessErrors++;
-                        Debug.LogWarning("TCP process error: " + finalMessage);
-                    }
-                }
-            }*/
-        }
-    }
-
-    public void sendTCPMessage(string message, int clientID)
-    {
-        /*message += "|";
-        sendBytesTCP += Encoding.UTF8.GetByteCount(message);
-        byte[] tcpData = Encoding.ASCII.GetBytes(message);
-        tcpStream.Write(tcpData, 0, tcpData.Length);*/
     }
 
     private void SendUDPMessage(string message, int clientID)
