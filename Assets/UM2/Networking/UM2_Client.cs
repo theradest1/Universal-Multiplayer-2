@@ -58,8 +58,6 @@ public class UM2_Client : MonoBehaviour
             return;
         }
 
-        //set up debug
-
         debugger.addSpace("Client:");
         debugger.setDebug("UDP Ping", "n/a");
         debugger.setDebug("TCP Ping", "n/a");

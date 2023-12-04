@@ -41,15 +41,6 @@ public class UM2_Server : MonoBehaviour
     public UM2_Client client;
 
     public Debugger debugger;
-
-    private void Start()
-    {
-        GetLocalIPAddress();
-        GetPublicIPAddress();
-
-        InvokeRepeating("updateDebug", 1f, 1f);
-    }
-
     void updateDebug()
     {
         debugger.setDebug("Bytes/Sec sent ", sentBytes + "");
@@ -63,6 +54,8 @@ public class UM2_Server : MonoBehaviour
 
     public void StartServer()
     {
+        InvokeRepeating("updateDebug", 1f, 1f);
+
         if (localIpAddress == null || publicIpAddress == null)
         {
             Debug.LogWarning("Ip addresses have not been found yet (restart if continued)");
