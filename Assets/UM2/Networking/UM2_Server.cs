@@ -65,9 +65,7 @@ public class UM2_Server : MonoBehaviour
     {
         if (localIpAddress == null || publicIpAddress == null)
         {
-            Debug.LogWarning("Ip addresses have not been found yet - will be tried again soon");
-            GetLocalIPAddress();
-            GetPublicIPAddress();
+            Debug.LogWarning("Ip addresses have not been found yet (restart if continued)");
             Invoke("StartServer", 1f);
             return;
         }
@@ -128,7 +126,6 @@ public class UM2_Server : MonoBehaviour
 
                     // Send a response
                     HttpListenerResponse response = context.Response;
-                    sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
                     byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
                     response.ContentType = "text/html";
                     response.ContentLength64 = buffer.Length;
@@ -259,7 +256,6 @@ public class UM2_Server : MonoBehaviour
 
     private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
     {
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         try
         {
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);

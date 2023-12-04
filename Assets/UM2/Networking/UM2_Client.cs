@@ -47,6 +47,9 @@ public class UM2_Client : MonoBehaviour
 
     private void Start()
     {
+        UM2_Server.GetLocalIPAddress();
+        UM2_Server.GetPublicIPAddress();
+
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
