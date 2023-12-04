@@ -16,8 +16,6 @@ public class Debugger : MonoBehaviour
 
         if (debugID == -1)
         {
-            Debug.Log(debugParent);
-
             TextMeshProUGUI newText = GameObject.Instantiate(debugTextPrefab, debugParent.transform).GetComponent<TextMeshProUGUI>();
             newText.name = title + " debug";
 
@@ -28,5 +26,14 @@ public class Debugger : MonoBehaviour
         }
 
         debugTexts[debugID].text = title + ": " + value;
+    }
+
+    public void addSpace()
+    {
+        TextMeshProUGUI newText = GameObject.Instantiate(debugTextPrefab, debugParent.transform).GetComponent<TextMeshProUGUI>();
+        newText.name = "spacer";
+
+        debugTexts.Add(newText);
+        titles.Add("space");
     }
 }

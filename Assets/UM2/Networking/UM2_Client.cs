@@ -52,10 +52,13 @@ public class UM2_Client : MonoBehaviour
         //set up debug
         debugger.setDebug("UDP online (client)", "false");
         debugger.setDebug("UDP ping", "n/a");
+        debugger.addSpace();
         debugger.setDebug("TCP online (client)", "true");
         debugger.setDebug("TCP ping", "n/a");
+        debugger.addSpace();
         debugger.setDebug("HTTP online (client)", "false");
         debugger.setDebug("HTTP ping", "n/a");
+        debugger.addSpace();
 
         if (!hostingServer) //client gets started by server so it doesnt try to join before server is up
         {
