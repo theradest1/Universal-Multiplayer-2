@@ -30,10 +30,14 @@ public class Debugger : MonoBehaviour
 
     public void addSpace()
     {
-        TextMeshProUGUI newText = GameObject.Instantiate(debugTextPrefab, debugParent.transform).GetComponent<TextMeshProUGUI>();
-        newText.name = "spacer";
+        if (debugTexts.Count != 0)
+        {
+            TextMeshProUGUI newText = GameObject.Instantiate(debugTextPrefab, debugParent.transform).GetComponent<TextMeshProUGUI>();
+            newText.name = "spacer";
+            newText.text = " ";
 
-        debugTexts.Add(newText);
-        titles.Add("space");
+            debugTexts.Add(newText);
+            titles.Add("space");
+        }
     }
 }

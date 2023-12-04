@@ -69,12 +69,13 @@ public class UM2_Server : MonoBehaviour
 
         //anything with port 5002
         //you do still need to port forward for external
-        httpListener.Prefixes.Add("http://*:5002/");
+        httpListener.Prefixes.Add("http://*:" + httpPort + "/");
 
         // Start listening for incoming requests
         try
         {
             httpListener.Start();
+            debugger.setDebug("HTTP server status", "online");
             httpOnline = true;
 
             // Start a new thread to handle incoming requests
@@ -96,17 +97,19 @@ public class UM2_Server : MonoBehaviour
                     }
                 }
             });
-            Debug.Log("HTTP Server started on port " + httpPort);
+            //Debug.Log("HTTP Server started on port " + httpPort);
         }
         catch (Exception e)
         {
             Debug.LogError("Failed to start HTTP Server: " + e.Message);
             httpOnline = false;
+            debugger.setDebug("HTTP server status", "offline");
         }
     }
 
     public void stopHttp()
     {
+        debugger.setDebug("HTTP server status", "offline");
         httpOnline = false;
         httpListener.Stop();
         httpListener.Close();
@@ -145,6 +148,7 @@ public class UM2_Server : MonoBehaviour
 
             Debug.Log("UDP Server started on port " + udpPort);
             udpOnline = true;
+            debugger.setDebug("UDP server status", "online");
         }
         catch (Exception e)
         {
@@ -156,6 +160,7 @@ public class UM2_Server : MonoBehaviour
     {
         udpServer.Close();
         udpOnline = false;
+        debugger.setDebug("UDP server status", "offline");
         Debug.Log("UDP Server has been stopped");
     }
 
