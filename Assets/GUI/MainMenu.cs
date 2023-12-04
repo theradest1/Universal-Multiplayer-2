@@ -16,6 +16,10 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        //doing this ahead of time so there is less waiting
+        //UM2_Server.GetLocalIPAddress();
+        //UM2_Server.GetPublicIPAddress();
+
         string ip;
         string port;
         bool server;

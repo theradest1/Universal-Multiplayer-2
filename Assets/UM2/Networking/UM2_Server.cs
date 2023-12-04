@@ -99,26 +99,7 @@ public class UM2_Server : MonoBehaviour
 
             httpOnline = true;
 
-            // Start a new thread to handle incoming requests
-            ThreadPool.QueueUserWorkItem((state) =>
-            {
-                while (httpOnline)
-                {
-                    try
-                    {
-                        // Wait for a request to come in
-                        HttpListenerContext context = httpListener.GetContext();
-
-                        // Handle the request in a separate function
-                        processHTTPMessage(context);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("Error handling request: " + e.Message);
-                        failedMessages += 1;
-                    }
-                }
-            });
+            httpReciever();
         }
         catch (Exception e)
         {
@@ -128,35 +109,49 @@ public class UM2_Server : MonoBehaviour
         }
     }
 
-    public void stopHttp()
+    void httpReciever()
     {
-        debugger.setDebug("HTTP status", "offline");
-        httpOnline = false;
-        httpListener.Stop();
-        httpListener.Close();
+        // Start a new thread to handle incoming requests
+        ThreadPool.QueueUserWorkItem((state) =>
+        {
+            while (httpOnline)
+            {
+                try
+                {
+                    // wait for message
+                    HttpListenerContext context = httpListener.GetContext();
+
+                    // process the message
+                    HttpListenerRequest request = context.Request;
+                    string message = request.RawUrl.Substring(1);
+                    string responseMessage = processMessage(message, "HTTP");
+
+                    // Send a response
+                    HttpListenerResponse response = context.Response;
+                    sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
+                    response.ContentType = "text/html";
+                    response.ContentLength64 = buffer.Length;
+                    response.OutputStream.Write(buffer, 0, buffer.Length);
+                    response.Close();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Error handling request: " + e.Message);
+                    failedMessages += 1;
+                }
+            }
+        });
     }
 
-    void processHTTPMessage(HttpListenerContext context)
-    {
-        HttpListenerRequest request = context.Request;
-        string message = request.RawUrl.Substring(1);
-        processMessage(message, "HTTP");
-
-        // Send a response
-        HttpListenerResponse response = context.Response;
-        string responseString = "pong";
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseString);
-        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-        response.ContentType = "text/html";
-        response.ContentLength64 = buffer.Length;
-        response.OutputStream.Write(buffer, 0, buffer.Length);
-        response.Close();
-    }
-
-    void processMessage(string message, string protocol)
+    string processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        //Debug.Log("Got message from " + protocol + ": " + message);
+
+        //send back message (set to null to not send anything back)
+        string responseMessage = "pong";
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
+        return responseMessage;
     }
 
     void initUDP()
@@ -179,20 +174,12 @@ public class UM2_Server : MonoBehaviour
         }
     }
 
-    void stopUDP()
-    {
-        udpServer.Close();
-        udpOnline = false;
-        debugger.setDebug("UDP status", "offline");
-        Debug.Log("UDP Server has been stopped");
-    }
-
     void initTCP()
     {
         tcpReciever();
     }
 
-    async void tcpReciever()
+    async void tcpReciever() //this doesnt actually recieve any messages, but sets up connections with other clients
     {
         try
         {
@@ -226,9 +213,11 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                processMessage(receivedMessage, "TCP");
-
-                sendTCPMessage("pong", stream);
+                string responseMessage = processMessage(receivedMessage, "TCP");
+                if (responseMessage != null)
+                {
+                    sendTCPMessage(responseMessage, stream);
+                }
             }
 
             // Close the client connection
@@ -243,7 +232,6 @@ public class UM2_Server : MonoBehaviour
 
     async void sendTCPMessage(string message, NetworkStream stream)
     {
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         byte[] sendData = Encoding.ASCII.GetBytes(message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
@@ -254,7 +242,11 @@ public class UM2_Server : MonoBehaviour
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-        SendUDPMessage("pong", clientEndPoint);
+        string responseMessage = processMessage("pong", "UDP");
+        if (responseMessage != null)
+        {
+            SendUDPMessage(responseMessage, clientEndPoint);
+        }
 
         udpServer.BeginReceive(udpReciever, null);
     }
@@ -321,6 +313,27 @@ public class UM2_Server : MonoBehaviour
             response = response.Substring(0, response.IndexOf("<"));
 
             UM2_Server.publicIpAddress = response;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        //stop udp
+        if (udpServer != null)
+        {
+            udpServer.Close();
+        }
+        udpOnline = false;
+        debugger.setDebug("UDP status", "offline");
+        Debug.Log("UDP Server has been stopped");
+
+        //stop http
+        debugger.setDebug("HTTP status", "offline");
+        httpOnline = false;
+        if (httpListener != null)
+        {
+            httpListener.Stop();
+            httpListener.Close();
         }
     }
 }
