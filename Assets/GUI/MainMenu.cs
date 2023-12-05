@@ -16,10 +16,26 @@ public class MainMenu : MonoBehaviour
     public GameObject generateKeysButton;
     public TextMeshProUGUI keyDisplays;
 
+    string localKey;
+    string publicKey;
+
     public static bool hosting = false;
 
     //the characters allowed to be used in the join keys
     public string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    public void copyKey(bool copyLocalKey){
+        if(copyLocalKey){
+            GUIUtility.systemCopyBuffer = localKey;
+        }
+        else{
+            GUIUtility.systemCopyBuffer = publicKey;
+        }
+    }
+
+    public void pasteKey(){
+        joinKeyInput.text = GUIUtility.systemCopyBuffer;
+    }
 
     private void Start()
     {
@@ -106,8 +122,8 @@ public class MainMenu : MonoBehaviour
             return;
         }
 
-        string localKey = encodeJoinKey(UM2_Server.localIpAddress);
-        string publicKey = encodeJoinKey(UM2_Server.publicIpAddress);
+        localKey = encodeJoinKey(UM2_Server.localIpAddress);
+        publicKey = encodeJoinKey(UM2_Server.publicIpAddress);
 
         keyDisplays.text = "LAN: " + localKey + "\nWAN: " + publicKey;
     }
