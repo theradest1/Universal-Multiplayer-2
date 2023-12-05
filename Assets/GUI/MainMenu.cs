@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditor.PackageManager.UI;
+using Unity.VisualScripting;
 
 public class MainMenu : MonoBehaviour
 {
@@ -16,9 +16,10 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        //doing this ahead of time so there is less waiting
-        //UM2_Server.GetLocalIPAddress();
-        //UM2_Server.GetPublicIPAddress();
+        //does a few things like disabling the server, udp, and tcp
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            UM2_Client.webGLBuild = true;
+        #endif
 
         string ip;
         string port;
@@ -39,6 +40,11 @@ public class MainMenu : MonoBehaviour
         serverIpInput.text = ip;
         serverPortInput.text = port;
         hostServerToggle.isOn = server;
+
+        if(UM2_Client.webGLBuild){
+            hostServerToggle.isOn = false;
+            hostServerToggle.gameObject.SetActive(false);
+        }
     }
 
     public void Join()

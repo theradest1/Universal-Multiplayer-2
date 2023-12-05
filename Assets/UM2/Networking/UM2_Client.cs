@@ -18,6 +18,7 @@ public class UM2_Client : MonoBehaviour
     public static int serverTcpPort = 0;
     public static int serverHttpPort = 0;
     public static bool hostingServer = false;
+    public static bool webGLBuild;
 
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
@@ -47,15 +48,26 @@ public class UM2_Client : MonoBehaviour
 
     private void Start()
     {
-        UM2_Server.GetLocalIPAddress();
-        UM2_Server.GetPublicIPAddress();
-
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
             Debug.LogWarning("Server info not set, pushing back to menu");
             SceneManager.LoadScene("Menu");
             return;
+        }
+
+        if (webGLBuild && hostingServer)
+        {
+            Debug.LogWarning("You cannot host a server on a webgl build");
+            SceneManager.LoadScene("Menu");
+            return;
+        }
+
+
+        if (!webGLBuild)
+        {
+            UM2_Server.GetLocalIPAddress();
+            UM2_Server.GetPublicIPAddress();
         }
 
         debugger.addSpace("Client:");
@@ -103,8 +115,11 @@ public class UM2_Client : MonoBehaviour
 
     public void StartClient()
     {
-        initTCP();
-        initUDP();
+        if (!webGLBuild)
+        {
+            initTCP();
+            initUDP();
+        }
         initHTTP();
 
         InvokeRepeating("Ping", 0, .25f);
@@ -112,11 +127,14 @@ public class UM2_Client : MonoBehaviour
 
     void Ping()
     {
-        udpPingStartTime = Time.time;
-        sendMessage("ping", "UDP");
+        if (!webGLBuild)
+        {
+            udpPingStartTime = Time.time;
+            sendMessage("ping", "UDP");
 
-        tcpPingStartTime = Time.time;
-        sendMessage("ping", "TCP");
+            tcpPingStartTime = Time.time;
+            sendMessage("ping", "TCP");
+        }
 
         httpPingStartTime = Time.time;
         sendMessage("ping", "HTTP");
@@ -244,6 +262,7 @@ public class UM2_Client : MonoBehaviour
     async void sendHTTPMessage(string message)
     {
         UnityWebRequest request = UnityWebRequest.Get("http://" + serverIP + ":" + serverHttpPort + "/" + message);
+        request.SetRequestHeader("Accept", "application/json");
 
         // Send the request asynchronously
         //Debug.Log("Sent: " + "http://" + serverIP + ":" + serverHttpPort + "/" + message);
@@ -270,7 +289,13 @@ public class UM2_Client : MonoBehaviour
 
     public void sendMessage(string message, string protocol)
     {
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+
+        if ((protocol == "UDP" || protocol == "TCP") && webGLBuild)
+        {
+            Debug.LogError(protocol + " cannot be used in a webGL build. Message trying to send was " + message);
+            failedMessages += 1;
+            return;
+        }
 
         if (protocol == "UDP")
         {
@@ -284,12 +309,14 @@ public class UM2_Client : MonoBehaviour
         {
             sendHTTPMessage(message);
         }
+
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
     }
 
     void processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        Debug.Log("Got message through " + protocol + ": " + message);
+        //Debug.Log("Got message through " + protocol + ": " + message);
 
         if (message == "pong")
         {

@@ -65,8 +65,11 @@ public class UM2_Server : MonoBehaviour
         print("local: " + localIpAddress);
         print("public: " + publicIpAddress);
 
-        initTCP();
-        initUDP();
+        if (!UM2_Client.webGLBuild)
+        {
+            initTCP();
+            initUDP();
+        }
         initHTTP();
 
         client.StartClient();
@@ -109,21 +112,35 @@ public class UM2_Server : MonoBehaviour
             {
                 try
                 {
-                    // wait for message
+                    // wait for message and get data
                     HttpListenerContext context = httpListener.GetContext();
-
-                    // process the message
-                    HttpListenerRequest request = context.Request;
-                    string message = request.RawUrl.Substring(1);
-                    string responseMessage = processMessage(message, "HTTP");
-
-                    // Send a response
                     HttpListenerResponse response = context.Response;
-                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
-                    response.ContentType = "text/html";
-                    response.ContentLength64 = buffer.Length;
-                    response.OutputStream.Write(buffer, 0, buffer.Length);
-                    response.Close();
+                    HttpListenerRequest request = context.Request;
+
+                    //set headers (so webgl builds dont complain)
+                    response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    if (request.HttpMethod == "OPTIONS")
+                    {
+                        response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                        response.Headers.Add("Access-Control-Allow-Headers", "Accept, Content-Type");
+                        response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                        response.StatusCode = (int)HttpStatusCode.OK;
+                        response.Close();
+                    }
+                    else if (request.HttpMethod == "GET")
+                    {
+                        // process the message
+                        string message = request.RawUrl.Substring(1);
+                        string responseMessage = processMessage(message, "HTTP");
+
+                        //send response
+                        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
+                        response.ContentType = "text/html";
+                        response.ContentLength64 = buffer.Length;
+
+                        response.OutputStream.Write(buffer, 0, buffer.Length);
+                        response.OutputStream.Close();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -137,9 +154,11 @@ public class UM2_Server : MonoBehaviour
     string processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+        Debug.Log("Got request: " + message + ". " + System.Text.Encoding.UTF8.GetByteCount(message) + " bytes");
 
         //send back message (set to null to not send anything back)
         string responseMessage = "pong";
+        Debug.Log("Sent a response: " + responseMessage + ". " + System.Text.Encoding.UTF8.GetByteCount(responseMessage) + " bytes");
         sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
         return responseMessage;
     }
@@ -278,6 +297,7 @@ public class UM2_Server : MonoBehaviour
 
     public static async void GetPublicIPAddress()
     {
+        Debug.Log("FINDING EXTERNAL IP");
         //this is kind of disgusting but there isnt a different way
         UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
 

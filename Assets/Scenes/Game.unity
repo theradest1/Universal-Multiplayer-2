@@ -707,6 +707,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fecffd66900f14f8389610145ea69c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isWebGLBuild: 0
   server: {fileID: 1054571549}
   debugger: {fileID: 1542006208}
 --- !u!4 &1054571551
