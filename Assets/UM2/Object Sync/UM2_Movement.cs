@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UM2_Movement : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    UM2_Object parentScript;
+
+    public void initialize(UM2_Object _parentScript){
+        parentScript = _parentScript;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void checkSync(){
+        //parentScript.send
     }
-}
+}   
