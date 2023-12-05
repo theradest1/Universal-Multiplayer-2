@@ -14,9 +14,9 @@ using Unity.VisualScripting;
 public class UM2_Client : MonoBehaviour
 {
     public static string serverIP = null;
-    public static int serverUdpPort = 0;
-    public static int serverTcpPort = 0;
-    public static int serverHttpPort = 0;
+    public static int serverUdpPort = 5000;
+    public static int serverTcpPort = 5001;
+    public static int serverHttpPort = 5002;
     public static bool hostingServer = false;
     public static bool webGLBuild;
 
@@ -61,13 +61,6 @@ public class UM2_Client : MonoBehaviour
             Debug.LogWarning("You cannot host a server on a webgl build");
             SceneManager.LoadScene("Menu");
             return;
-        }
-
-
-        if (!webGLBuild)
-        {
-            UM2_Server.GetLocalIPAddress();
-            UM2_Server.GetPublicIPAddress();
         }
 
         debugger.addSpace("Client:");

@@ -62,8 +62,6 @@ public class UM2_Server : MonoBehaviour
             Invoke("StartServer", 1f);
             return;
         }
-        print("local: " + localIpAddress);
-        print("public: " + publicIpAddress);
 
         if (!UM2_Client.webGLBuild)
         {
@@ -154,11 +152,11 @@ public class UM2_Server : MonoBehaviour
     string processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        Debug.Log("Got request: " + message + ". " + System.Text.Encoding.UTF8.GetByteCount(message) + " bytes");
+        //Debug.Log("Got request: " + message + ". " + System.Text.Encoding.UTF8.GetByteCount(message) + " bytes");
 
         //send back message (set to null to not send anything back)
         string responseMessage = "pong";
-        Debug.Log("Sent a response: " + responseMessage + ". " + System.Text.Encoding.UTF8.GetByteCount(responseMessage) + " bytes");
+        //Debug.Log("Sent a response: " + responseMessage + ". " + System.Text.Encoding.UTF8.GetByteCount(responseMessage) + " bytes");
         sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
         return responseMessage;
     }
@@ -297,7 +295,6 @@ public class UM2_Server : MonoBehaviour
 
     public static async void GetPublicIPAddress()
     {
-        Debug.Log("FINDING EXTERNAL IP");
         //this is kind of disgusting but there isnt a different way
         UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
 
