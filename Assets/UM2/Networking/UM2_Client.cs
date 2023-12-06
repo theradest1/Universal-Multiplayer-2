@@ -48,6 +48,9 @@ public class UM2_Client : MonoBehaviour
     public UM2_Server server;
     public Debugger debugger;
 
+    List<Type> UM2Scripts = new List<Type>();
+
+
     private void Start()
     {
         //get info from menu
@@ -58,11 +61,14 @@ public class UM2_Client : MonoBehaviour
             return;
         }
 
-        if (webGLBuild && hostingServer)
-        {
-            Debug.LogWarning("You cannot host a server on a webgl build");
-            SceneManager.LoadScene("Menu");
-            return;
+        //load all scripts attached to this object for calling functions
+        foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()){
+            try{
+                UM2Scripts.Add(script.GetType());
+            }
+            catch{
+                //I dont think this can happen, but I did a catch just in case
+            }
         }
 
         debugger.addSpace("Client:");
@@ -187,7 +193,7 @@ public class UM2_Client : MonoBehaviour
 
     void initHTTP()
     {
-        //do some stuff with http
+        //nothing needs to be done to start http, but I'm leaving this here for some consistancy
     }
 
     async void udpReciever()
@@ -349,44 +355,48 @@ public class UM2_Client : MonoBehaviour
             messageParts = message.Split("~");
         }
 
-
-
-        // Example function to be called dynamically
-        // Modify this function based on the function you want to call
-        MethodInfo methodInfo = this.GetType().GetMethod(methodToCall);
-
-        if (methodInfo != null)
-        {
-            ParameterInfo[] parameters = methodInfo.GetParameters();
-
-            // Check if the number of parameters matches the number of tokens
-            if (parameters.Length == messageParts.Length + 1)
+        //get function
+        foreach(Type script in UM2Scripts){
+            MethodInfo methodInfo = null;
+            try{
+                methodInfo = script.GetMethod(methodToCall);
+            }
+            catch{
+                //thing isnt found
+            }
+            if (methodInfo != null)
             {
-                object[] parsedParameters = new object[messageParts.Length + 1];
+                ParameterInfo[] parameters = methodInfo.GetParameters();
 
-                for (int i = 0; i < messageParts.Length; i++)
+                // Check if the number of parameters matches the number of tokens
+                if (parameters.Length == messageParts.Length + 1 || parameters.Length == messageParts.Length)
                 {
-                    Type parameterType = parameters[i].ParameterType;
-                    object parsedValue = ParseValue(messageParts[i], parameterType);
-                    parsedParameters[i] = parsedValue;
-                }
-                parsedParameters[parsedParameters.Length - 1] = protocol;
+                    //create parsed parameters list
+                    object[] parsedParameters = new object[parameters.Length - 1];
 
-                // Call the function dynamically with parsed parameters
-                methodInfo.Invoke(this, parsedParameters);
-            }
-            else
-            {
-                Debug.LogError("Number of parameters does not match: " + methodToCall + "(" + parameters.Length + "), " + message);
+                    for (int i = 0; i < messageParts.Length; i++)
+                    {
+                        Type parameterType = parameters[i].ParameterType;
+                        object parsedValue = ParseValue(messageParts[i], parameterType);
+                        parsedParameters[i] = parsedValue;
+                    }
+
+                    //if method accepts one more perameter than given, give the protocol
+                    if(parameters.Length == messageParts.Length + 1){
+                        parsedParameters[parsedParameters.Length - 1] = protocol;
+                    }
+
+                    // Call the function dynamically with parsed parameters
+                    methodInfo.Invoke(this, parsedParameters);
+                    return;
+                }
             }
         }
-        else
-        {
-            Debug.LogError("Function not found: \n" + methodToCall + "\"");
-        }
+        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
+        return;
     }
 
-    public void pong(string protocol){
+    public void pongz(string protocol){
         if (protocol == "UDP")
         {
             udpPing = Time.time - udpPingStartTime;
@@ -403,7 +413,6 @@ public class UM2_Client : MonoBehaviour
             debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
         }
     }
-
     
     //a bunch of helper methods (make them static and put in a seperate script later-----------------
     public void callFunctionByName(string functionName, params object[] parameters)

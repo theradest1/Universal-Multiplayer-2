@@ -15,7 +15,7 @@ public class UM2_Sync : MonoBehaviour
         return currentObjectID;
     }
 
-    public void createSyncedObject(int objectID, int prefabID){
+    public void newSynced(int objectID, int prefabID){
         currentObjectID = objectID;
 
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).GetComponent<UM2_Prefab>();

@@ -330,11 +330,10 @@ public class UM2_Server : MonoBehaviour
             udpServer.Close();
         }
         udpOnline = false;
-        debugger.setDebug("UDP status", "offline");
-        Debug.Log("UDP Server has been stopped");
+        //Debug.Log("UDP Server has been stopped");
 
         //stop http
-        debugger.setDebug("HTTP status", "offline");
+        //Debug.Log("HTTP has been stopped");
         httpOnline = false;
         if (httpListener != null)
         {
