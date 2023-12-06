@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using System.Reflection;
 
 public class UM2_Client : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class UM2_Client : MonoBehaviour
     public static int serverHttpPort = 5002;
     public static bool hostingServer = false;
     public static bool webGLBuild;
+    public static int clientID;
 
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
@@ -94,6 +96,20 @@ public class UM2_Client : MonoBehaviour
 
         InvokeRepeating("updateDebug", 1f, 1f);
     }
+
+    public void join(){
+        sendMessage("join", true);
+    }
+
+    public void sendMessage(string message, bool reliableProtocol){
+        if(connectedToTCP){
+            sendMessage(message, "TCP");
+        }
+        else{
+            sendMessage(message, "HTTP");
+        }
+    }
+
 
     void updateDebug()
     {
@@ -308,31 +324,128 @@ public class UM2_Client : MonoBehaviour
 
     void processMessage(string message, string protocol)
     {
-        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        //Debug.Log("Got message through " + protocol + ": " + message);
+        if(message == ""){
+            return;
+        }
 
-        if (message == "pong")
+        //if there are combined messages (seperated by '|')
+        if(message.IndexOf("|") != -1){
+            string[] messages = message.Split("|");
+            foreach(string singleMessage in messages){
+                processMessage(singleMessage, protocol);
+            }
+            return;
+        }
+
+        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+        string methodToCall = message.Split('~')[0];
+        message = message.Substring(methodToCall.Length);
+
+        string[] messageParts;
+        if(message == ""){
+            messageParts = new string[] {};
+        }
+        else{
+            messageParts = message.Split("~");
+        }
+
+
+
+        // Example function to be called dynamically
+        // Modify this function based on the function you want to call
+        MethodInfo methodInfo = this.GetType().GetMethod(methodToCall);
+
+        if (methodInfo != null)
         {
-            if (protocol == "UDP")
+            ParameterInfo[] parameters = methodInfo.GetParameters();
+
+            // Check if the number of parameters matches the number of tokens
+            if (parameters.Length == messageParts.Length + 1)
             {
-                udpPing = Time.time - udpPingStartTime;
-                debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
+                object[] parsedParameters = new object[messageParts.Length + 1];
+
+                for (int i = 0; i < messageParts.Length; i++)
+                {
+                    Type parameterType = parameters[i].ParameterType;
+                    object parsedValue = ParseValue(messageParts[i], parameterType);
+                    parsedParameters[i] = parsedValue;
+                }
+                parsedParameters[parsedParameters.Length - 1] = protocol;
+
+                // Call the function dynamically with parsed parameters
+                methodInfo.Invoke(this, parsedParameters);
             }
-            else if (protocol == "TCP")
+            else
             {
-                tcpPing = Time.time - tcpPingStartTime;
-                debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
-            }
-            else if (protocol == "HTTP")
-            {
-                httpPing = Time.time - httpPingStartTime;
-                debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
+                Debug.LogError("Number of parameters does not match: " + methodToCall + "(" + parameters.Length + "), " + message);
             }
         }
         else
         {
-            Debug.LogWarning("Got unknown message from " + protocol + ": " + message);
-            failedMessages += 1;
+            Debug.LogError("Function not found: \n" + methodToCall + "\"");
+        }
+    }
+
+    public void pong(string protocol){
+        if (protocol == "UDP")
+        {
+            udpPing = Time.time - udpPingStartTime;
+            debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
+        }
+        else if (protocol == "TCP")
+        {
+            tcpPing = Time.time - tcpPingStartTime;
+            debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
+        }
+        else if (protocol == "HTTP")
+        {
+            httpPing = Time.time - httpPingStartTime;
+            debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
+        }
+    }
+
+    
+    //a bunch of helper methods (make them static and put in a seperate script later-----------------
+    public void callFunctionByName(string functionName, params object[] parameters)
+    {
+        // Get the Type of the current class
+        Type type = this.GetType();
+
+        // Get the MethodInfo of the function by name
+        MethodInfo methodInfo = type.GetMethod(functionName);
+
+        if (methodInfo != null)
+        {
+            // Invoke the method with the specified parameters
+            methodInfo.Invoke(this, parameters);
+        }
+        else
+        {
+            Debug.LogError("Function " + functionName + " not found!");
+        }
+    }
+
+    private object ParseValue(string token, Type type)
+    {
+        if (type == typeof(int))
+        {
+            return int.Parse(token);
+        }
+        else if (type == typeof(float))
+        {
+            return float.Parse(token);
+        }
+        else if (type == typeof(bool))
+        {
+            return bool.Parse(token);
+        }
+        else if (type == typeof(string))
+        {
+            return token;
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported parameter type: " + type);
         }
     }
 }
