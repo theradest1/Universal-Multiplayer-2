@@ -392,7 +392,7 @@ public class UM2_Client : MonoBehaviour
                 }
             }
         }
-        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
+        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
         return;
     }
 
