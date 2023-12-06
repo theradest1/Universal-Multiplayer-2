@@ -372,7 +372,7 @@ public class UM2_Client : MonoBehaviour
                 if (parameters.Length == messageParts.Length + 1 || parameters.Length == messageParts.Length)
                 {
                     //create parsed parameters list
-                    object[] parsedParameters = new object[parameters.Length - 1];
+                    object[] parsedParameters = new object[parameters.Length];
 
                     for (int i = 0; i < messageParts.Length; i++)
                     {
@@ -396,7 +396,7 @@ public class UM2_Client : MonoBehaviour
         return;
     }
 
-    public void pongz(string protocol){
+    public void pong(string protocol){
         if (protocol == "UDP")
         {
             udpPing = Time.time - udpPingStartTime;
