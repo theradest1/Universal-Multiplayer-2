@@ -4,15 +4,5 @@ using UnityEngine;
 
 public class UM2_Object : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public UM2_Prefab prefab;
 }
