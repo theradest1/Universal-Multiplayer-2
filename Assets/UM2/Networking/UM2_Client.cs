@@ -50,6 +50,12 @@ public class UM2_Client : MonoBehaviour
 
     List<Type> UM2Scripts = new List<Type>();
 
+    bool connectedToServer = true;
+
+    private void OnDestroy()
+    {
+        connectedToServer = false;
+    }
 
     private void Start()
     {
@@ -107,38 +113,42 @@ public class UM2_Client : MonoBehaviour
         sendMessage("server~join", "HTTP", true);
     }
 
-    public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true){
+    public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "direct~" + recievingClientID + "~" + message;
-        sendMessage(message, reliableProtocol);
+        sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
-    public void messageServer(string message, bool reliableProtocol = true){
+    public void messageServer(string message, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "server~" + message;
-        sendMessage(message, reliableProtocol);
+        sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
-    public void messageOtherClients(string message, bool reliableProtocol = true){
+    public void messageOtherClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "others~" + message;
-        sendMessage(message, reliableProtocol);
+        sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
-    public void messageAllClients(string message, bool reliableProtocol = true){ //this also messages this client
+    public void messageAllClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this also messages this client
         message = "all~" + message;
-        sendMessage(message, reliableProtocol);
+        sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
-    public void sendMessage(string message, bool reliableProtocol = true){ //this just finds what protocol you want to use
-        if(reliableProtocol && connectedToTCP){
-            sendMessage(message, "TCP");
+    public async void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use
+        if(!reliableProtocol && connectedToUDP){
+            sendMessage(message, "UDP", sendWithoutID);
         }
-        else if(!reliableProtocol && connectedToUDP){
-            sendMessage(message, "UDP");
+        else if(connectedToTCP){
+            sendMessage(message, "TCP", sendWithoutID);
         }
         else if(connectedToHTTP){
-            sendMessage(message, "HTTP");
+            sendMessage(message, "HTTP", sendWithoutID);
         }
         else{
-            Debug.LogError("No connected protocols.");
+            if(connectedToServer){
+                Debug.LogError("No connected protocols, trying again\n" + message + "\nUDP: " + connectedToUDP + "\nTCP: " + connectedToTCP + "\nHTTP: " + connectedToHTTP);
+                await Task.Delay(500);
+                sendMessage(message, reliableProtocol, sendWithoutID);
+            }
         }
     }
 
@@ -366,6 +376,8 @@ public class UM2_Client : MonoBehaviour
             sendHTTPMessage(message);
         }
 
+        //Debug.Log("Sent message: " + message);
+
         sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
     }
 
@@ -411,29 +423,41 @@ public class UM2_Client : MonoBehaviour
             }
             if (methodInfo != null)
             {
-                ParameterInfo[] parameters = methodInfo.GetParameters();
+                try{
+                    ParameterInfo[] parameters = methodInfo.GetParameters();
 
-                // Check if the number of parameters matches the number of tokens
-                if (parameters.Length == messageParts.Length + 1 || parameters.Length == messageParts.Length)
-                {
-                    //create parsed parameters list
-                    object[] parsedParameters = new object[parameters.Length];
-
-                    for (int i = 0; i < messageParts.Length; i++)
+                    // Check if the number of parameters matches the number of tokens
+                    if (parameters.Length == messageParts.Length + 1 || parameters.Length == messageParts.Length)
                     {
-                        Type parameterType = parameters[i].ParameterType;
-                        object parsedValue = ParseValue(messageParts[i], parameterType);
-                        parsedParameters[i] = parsedValue;
-                    }
+                        //create parsed parameters list
+                        object[] parsedParameters = new object[parameters.Length];
 
-                    //if method accepts one more perameter than given, give the protocol
-                    if(parameters.Length == messageParts.Length + 1){
-                        parsedParameters[parsedParameters.Length - 1] = protocol;
-                    }
+                        for (int i = 0; i < messageParts.Length; i++)
+                        {
+                            Type parameterType = parameters[i].ParameterType;
+                            object parsedValue = ParseValue(messageParts[i], parameterType);
+                            Debug.Log(parameterType + " == " + parsedValue.GetType() + ": " + (parsedValue.GetType() == parameterType));
+                            parsedParameters[i] = parsedValue;
+                        }
 
-                    // Call the function dynamically with parsed parameters
-                    methodInfo.Invoke(this, parsedParameters);
-                    return;
+                        //if method accepts one more perameter than given, give the protocol
+                        if(parameters.Length == messageParts.Length + 1){
+                            parsedParameters[parsedParameters.Length - 1] = protocol;
+                        }
+                        if(message.Length > 0){
+                            Debug.Log(message + ":");
+                            PrintArray(parsedParameters);
+                            PrintArray(parameters);
+                            PrintArrayTypes(parsedParameters);
+                        }
+
+                        // Call the function dynamically with parsed parameters
+                        methodInfo.Invoke(this, parsedParameters);
+                        return;
+                    }
+                }
+                catch(Exception e){
+                    Debug.LogError(e.Message);
                 }
             }
         }
@@ -529,5 +553,34 @@ public class UM2_Client : MonoBehaviour
         {
             throw new ArgumentException("Unsupported parameter type: " + type + ". Add to ParseValue method in UM2_Client");
         }
+    }
+
+    public static void PrintList<T>(List<T> list)
+    {
+        string finalString = "{";
+        foreach (T element in list)
+        {
+            finalString += element + ", ";
+        }
+        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
+    }
+    public static void PrintArrayTypes<T>(T[] array)
+    {
+        string finalString = "{";
+        foreach (T element in array)
+        {
+            finalString += element.GetType() + ", ";
+        }
+        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
+    }
+
+    public static void PrintArray<T>(T[] array)
+    {
+        string finalString = "{";
+        foreach (T element in array)
+        {
+            finalString += element + ", ";
+        }
+        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
     }
 }

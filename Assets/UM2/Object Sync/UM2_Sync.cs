@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using Unity.VisualScripting;
+using System;
 
 public class UM2_Sync : MonoBehaviour
 {
@@ -10,7 +12,7 @@ public class UM2_Sync : MonoBehaviour
     List<GameObject> prefabs = new List<GameObject>();
     public string prefabFolderPath;
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
-    UM2_Client client;
+    public UM2_Client client;
 
     private void Start()
     {
@@ -25,23 +27,24 @@ public class UM2_Sync : MonoBehaviour
                 prefabs.Add(prefab); //add to list
             }
         }
-
-        client = GetComponent<UM2_Client>();
     }
 
     public void createSyncedObject(UM2_Object startedObject){
         int prefabID = prefabs.IndexOf(startedObject.prefab);
         currentObjectID++;
+        Debug.Log("Creating new synced object " + currentObjectID);
         startedObject.objectID = currentObjectID;
         
         client.messageAllClients("newSyncedObject~" + currentObjectID);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
+        Debug.Log("Updating object " + objectID);
         client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation);
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
+        Debug.Log("Syncing object with ID " + objectID);
         foreach(UM2_Prefab prefab in syncedObjects){
             if(prefab.objectID == objectID){
                 prefab.transform.position = position;

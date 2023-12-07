@@ -1015,6 +1015,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabFolderPath: Assets/UM2/Object Sync/Prefabs
+  client: {fileID: 1054571550}
 --- !u!1 &1168736109
 GameObject:
   m_ObjectHideFlags: 0

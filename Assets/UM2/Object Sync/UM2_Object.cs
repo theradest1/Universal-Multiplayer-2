@@ -12,6 +12,8 @@ public class UM2_Object : MonoBehaviour
     private void Start()
     {
         InvokeRepeating("updateTransform", 1, 1/ticksPerSecond);
+
+        sync.createSyncedObject(this);
     }
 
     void updateTransform(){

@@ -176,8 +176,7 @@ public class UM2_Server : MonoBehaviour
 
         string clientIDString = message.Split("~")[0];
         string messageType = message.Split("~")[1];
-        string messageCommand = message.Split("~")[2];
-        string messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
+        string messageContents = message.Substring(clientIDString.Length + messageType.Length + 2);
         string[] messageParameters = message.Split("~");
         
         int clientID = int.Parse(clientIDString);
@@ -186,6 +185,8 @@ public class UM2_Server : MonoBehaviour
         switch (messageType)
         {
             case "server":  //server messages (client -> server)
+                string messageCommand = message.Split("~")[2];
+                messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
                 switch (messageCommand)
                 {
                     case "ping":
@@ -194,8 +195,6 @@ public class UM2_Server : MonoBehaviour
                     case "join":
                         Client newClient = new Client(currentPlayerID);
                         clients.Add(newClient);
-
-                        isNewClient = currentPlayerID;
 
                         responseMessage = "setID~" + currentPlayerID + "";
                         currentPlayerID++;
@@ -210,6 +209,7 @@ public class UM2_Server : MonoBehaviour
                 Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "all":     //send message to all clients
+                Debug.Log("Sending: " + messageContents + "\n from: " + message);
                 foreach(Client client in clients){
                     if(protocol == "UDP" && client.udpEndpoint != null){
                         SendUDPMessage(messageContents, client.udpEndpoint);
@@ -231,7 +231,9 @@ public class UM2_Server : MonoBehaviour
                 break;
         }
 
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
+        if(responseMessage != null){
+            sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
+        }
         return (responseMessage + "|", isNewClient);
     }
 
@@ -295,10 +297,9 @@ public class UM2_Server : MonoBehaviour
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                 (string responseMessage, int addToClients) = processMessage(receivedMessage, "TCP");
-                Debug.Log(receivedMessage);
 
-                if(addToClients != -1){
-                    Client clientData = getClientFromID(addToClients);
+                if(receivedMessage.Split("~")[0] != "-1"){
+                    Client clientData = getClientFromID(int.Parse(receivedMessage.Split("~")[0]));
                     clientData.networkStream = stream;
                     clientData.tcpClient = client;
                 }
@@ -332,8 +333,10 @@ public class UM2_Server : MonoBehaviour
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
         (string responseMessage, int addToClients) = processMessage(receivedData, "UDP");
-        if(addToClients != -1){
-            getClientFromID(addToClients).udpEndpoint = clientEndPoint;
+        
+        if(receivedData.Split("~")[0] != "-1"){
+            Client clientData = getClientFromID(int.Parse(receivedData.Split("~")[0]));
+            clientData.udpEndpoint = clientEndPoint;
         }
         if (responseMessage != null)
         {
