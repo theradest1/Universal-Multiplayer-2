@@ -20,7 +20,7 @@ public class UM2_Client : MonoBehaviour
     public static int serverHttpPort = 5002;
     public static bool hostingServer = false;
     public static bool webGLBuild;
-    public static int clientID;
+    public static int clientID = -1;
 
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
@@ -104,15 +104,41 @@ public class UM2_Client : MonoBehaviour
     }
 
     public void join(){
-        sendMessage("join", true);
+        sendMessage("server~join", "HTTP", true);
     }
 
-    public void sendMessage(string message, bool reliableProtocol){
-        if(connectedToTCP){
+    public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true){
+        message = "direct~" + recievingClientID + "~" + message;
+        sendMessage(message, reliableProtocol);
+    }
+
+    public void messageServer(string message, bool reliableProtocol = true){
+        message = "server~" + message;
+        sendMessage(message, reliableProtocol);
+    }
+
+    public void messageOtherClients(string message, bool reliableProtocol = true){
+        message = "others~" + message;
+        sendMessage(message, reliableProtocol);
+    }
+
+    public void messageAllClients(string message, bool reliableProtocol = true){ //this also messages this client
+        message = "all~" + message;
+        sendMessage(message, reliableProtocol);
+    }
+
+    public void sendMessage(string message, bool reliableProtocol = true){ //this just finds what protocol you want to use
+        if(reliableProtocol && connectedToTCP){
             sendMessage(message, "TCP");
         }
-        else{
+        else if(!reliableProtocol && connectedToUDP){
+            sendMessage(message, "UDP");
+        }
+        else if(connectedToHTTP){
             sendMessage(message, "HTTP");
+        }
+        else{
+            Debug.LogError("No connected protocols.");
         }
     }
 
@@ -138,6 +164,7 @@ public class UM2_Client : MonoBehaviour
         initHTTP();
 
         InvokeRepeating("Ping", 0, .25f);
+        join(); //get client ID from the server
     }
 
     void Ping()
@@ -145,14 +172,14 @@ public class UM2_Client : MonoBehaviour
         if (!webGLBuild)
         {
             udpPingStartTime = Time.time;
-            sendMessage("ping", "UDP");
+            sendMessage("server~ping", "UDP", true);
 
             tcpPingStartTime = Time.time;
-            sendMessage("ping", "TCP");
+            sendMessage("server~ping", "TCP", true);
         }
 
         httpPingStartTime = Time.time;
-        sendMessage("ping", "HTTP");
+        sendMessage("server~ping", "HTTP", true);
     }
 
     void initUDP()
@@ -231,7 +258,7 @@ public class UM2_Client : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.Log("Error receiving data: " + e.Message);
+                Debug.Log("Error receiving tcp data: " + e.Message);
                 failedMessages += 1;
             }
         }
@@ -248,7 +275,7 @@ public class UM2_Client : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.Log("Error sending data: " + e.Message);
+                Debug.Log("Error sending tcp data: " + e.Message);
                 failedMessages += 1;
             }
         }
@@ -291,7 +318,7 @@ public class UM2_Client : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Error: " + request.error);
+            Debug.LogError("HTTP error: " + request.error);
             failedMessages += 1;
         }
         else
@@ -302,14 +329,28 @@ public class UM2_Client : MonoBehaviour
         }
     }
 
-    public void sendMessage(string message, string protocol)
+    public async void sendMessage(string message, string protocol, bool sendWithoutID = false)
     {
-
+        //check if wrong protocol is used
         if ((protocol == "UDP" || protocol == "TCP") && webGLBuild)
         {
             Debug.LogError(protocol + " cannot be used in a webGL build. Message trying to send was " + message);
             failedMessages += 1;
             return;
+        }
+
+        //sign message if ID is available
+        if(!sendWithoutID){
+            if(clientID == -1){
+                while(clientID == -1){
+                    await Task.Delay(500);
+                    Debug.Log("Wating for connection to send message: " + message + ". Current ID: " + clientID);
+                }
+            }
+            message = clientID + "~" + message;
+        }
+        else{
+            message = "-1~" + message;
         }
 
         if (protocol == "UDP")
@@ -345,7 +386,11 @@ public class UM2_Client : MonoBehaviour
 
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         string methodToCall = message.Split('~')[0];
+        //Debug.Log("recieved message: " + message);
         message = message.Substring(methodToCall.Length);
+        if(message.Length > 0 && message[0] == '~'){
+            message = message.Substring(1);
+        }
 
         string[] messageParts;
         if(message == ""){
@@ -392,7 +437,7 @@ public class UM2_Client : MonoBehaviour
                 }
             }
         }
-        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
+        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\nGotten message: " + message + "\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. the method must be void public \n4. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
         return;
     }
 
@@ -412,6 +457,11 @@ public class UM2_Client : MonoBehaviour
             httpPing = Time.time - httpPingStartTime;
             debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
         }
+    }
+
+    public void setID(int id){
+        clientID = id;
+        Debug.Log("Set id to " + clientID);
     }
     
     //a bunch of helper methods (make them static and put in a seperate script later-----------------
@@ -435,8 +485,31 @@ public class UM2_Client : MonoBehaviour
     }
 
     private object ParseValue(string token, Type type)
-    {
-        if (type == typeof(int))
+    {   
+        if(type == typeof(Vector3)){
+            // Remove parentheses and split string into components
+            string[] components = token.Replace("(", "").Replace(")", "").Split(',');
+
+            // Parse components to floats
+            float x = float.Parse(components[0]);
+            float y = float.Parse(components[1]);
+            float z = float.Parse(components[2]);
+
+            return new Vector3(x, y, z);
+        }
+        else if(type == typeof(Quaternion)){
+            // Remove parentheses and split string into components
+            string[] components = token.Replace("(", "").Replace(")", "").Split(',');
+
+            // Parse components to floats
+            float w = float.Parse(components[0]);
+            float x = float.Parse(components[1]);
+            float y = float.Parse(components[2]);
+            float z = float.Parse(components[3]);
+
+            return new Quaternion(w, x, y, z);
+        }
+        else if (type == typeof(int))
         {
             return int.Parse(token);
         }
@@ -454,7 +527,7 @@ public class UM2_Client : MonoBehaviour
         }
         else
         {
-            throw new ArgumentException("Unsupported parameter type: " + type);
+            throw new ArgumentException("Unsupported parameter type: " + type + ". Add to ParseValue method in UM2_Client");
         }
     }
 }

@@ -10,6 +10,7 @@ public class UM2_Sync : MonoBehaviour
     List<GameObject> prefabs = new List<GameObject>();
     public string prefabFolderPath;
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
+    UM2_Client client;
 
     private void Start()
     {
@@ -24,21 +25,33 @@ public class UM2_Sync : MonoBehaviour
                 prefabs.Add(prefab); //add to list
             }
         }
-        PrintListContents(prefabs);
+
+        client = GetComponent<UM2_Client>();
     }
 
-    void PrintListContents<T>(List<T> list)
-    {
-        foreach (T element in list)
-        {
-            Debug.Log(element);
-        }
-    }
-
-    public int createSyncedObject(UM2_Object startedObject){
+    public void createSyncedObject(UM2_Object startedObject){
         int prefabID = prefabs.IndexOf(startedObject.prefab);
         currentObjectID++;
-        return currentObjectID;
+        startedObject.objectID = currentObjectID;
+        
+        client.messageAllClients("newSyncedObject~" + currentObjectID);
+    }
+
+    public void updateObject(int objectID, Vector3 position, Quaternion rotation){
+        client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation);
+    }
+
+    public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
+        foreach(UM2_Prefab prefab in syncedObjects){
+            if(prefab.objectID == objectID){
+                prefab.transform.position = position;
+                prefab.transform.rotation = rotation;
+
+                return;
+            }
+        }
+
+        Debug.LogError("Could not find synced object with ID " + objectID);
     }
 
     public void newSyncedObject(int objectID, int prefabID){
@@ -47,6 +60,6 @@ public class UM2_Sync : MonoBehaviour
 
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
-        newPrefab.objectID = prefabID;
+        newPrefab.objectID = objectID;
     }
 }

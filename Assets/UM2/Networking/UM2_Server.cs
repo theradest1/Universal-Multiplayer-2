@@ -11,6 +11,22 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEditor.Compilation;
+
+public class Client{
+    public IPEndPoint udpEndpoint;
+
+    public TcpClient tcpClient;
+    public NetworkStream networkStream;
+
+    public int clientID;
+
+    public List<string> messageQueue = new List<string>();
+
+    public Client(int id){
+        clientID = id;
+    }
+}
 
 public class UM2_Server : MonoBehaviour
 {
@@ -18,12 +34,9 @@ public class UM2_Server : MonoBehaviour
     int tcpPort = 5001;
     int httpPort = 5002;
 
-    List<IPEndPoint> udpClients = new List<IPEndPoint>();
     UdpClient udpServer;
     public bool udpOnline;
 
-    List<TcpClient> tcpClients = new List<TcpClient>();
-    List<NetworkStream> tcpStreams = new List<NetworkStream>();
     TcpListener tcpServer;
     public bool tcpOnline;
 
@@ -33,14 +46,21 @@ public class UM2_Server : MonoBehaviour
     public static string localIpAddress;
     public static string publicIpAddress;
 
-
     int sentBytes = 0;
     int receivedBytes = 0;
     int failedMessages = 0;
 
+
     public UM2_Client client;
 
     public Debugger debugger;
+
+    int currentPlayerID = 0;
+
+
+    List<Client> clients = new List<Client>();
+
+
     void updateDebug()
     {
         debugger.setDebug("Bytes/Sec sent ", sentBytes + "");
@@ -79,7 +99,7 @@ public class UM2_Server : MonoBehaviour
         httpListener = new HttpListener();
 
         //anything with port 5002
-        //you do still need to port forward for external
+        //you do still need to port forward for external connections
         httpListener.Prefixes.Add("http://*:" + httpPort + "/");
 
         // Start listening for incoming requests
@@ -129,7 +149,7 @@ public class UM2_Server : MonoBehaviour
                     {
                         // process the message
                         string message = request.RawUrl.Substring(1);
-                        string responseMessage = processMessage(message, "HTTP");
+                        (string responseMessage, _) = processMessage(message, "HTTP");
 
                         //send response
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
@@ -149,16 +169,70 @@ public class UM2_Server : MonoBehaviour
         });
     }
 
-    string processMessage(string message, string protocol)
+    (string, int) processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        //Debug.Log("Got request: " + message + ". " + System.Text.Encoding.UTF8.GetByteCount(message) + " bytes");
+        int isNewClient = -1;
 
-        //send back message (set to null to not send anything back)
-        string responseMessage = "pong";
-        //Debug.Log("Sent a response: " + responseMessage + ". " + System.Text.Encoding.UTF8.GetByteCount(responseMessage) + " bytes");
+        string clientIDString = message.Split("~")[0];
+        string messageType = message.Split("~")[1];
+        string messageCommand = message.Split("~")[2];
+        string messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
+        string[] messageParameters = message.Split("~");
+        
+        int clientID = int.Parse(clientIDString);
+
+        string responseMessage = null;
+        switch (messageType)
+        {
+            case "server":  //server messages (client -> server)
+                switch (messageCommand)
+                {
+                    case "ping":
+                        responseMessage = "pong";
+                        break;
+                    case "join":
+                        Client newClient = new Client(currentPlayerID);
+                        clients.Add(newClient);
+
+                        isNewClient = currentPlayerID;
+
+                        responseMessage = "setID~" + currentPlayerID + "";
+                        currentPlayerID++;
+
+                        break;
+                    default:
+                        Debug.LogError("Unknown message: " + message);
+                        break;
+                }
+                break;
+            case "others":  //send message to all other clients
+                Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
+                break;
+            case "all":     //send message to all clients
+                foreach(Client client in clients){
+                    if(protocol == "UDP" && client.udpEndpoint != null){
+                        SendUDPMessage(messageContents, client.udpEndpoint);
+                    }
+                    else if(client.tcpClient != null){
+                        sendTCPMessage(messageContents, client.networkStream);
+                    }
+                    else{
+                        client.messageQueue.Add(messageContents);
+                    }
+                }
+                //Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
+                break;
+            case "direct":  //send message to specified other client
+                Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
+                break;
+            default:
+                Debug.LogError("Unknown message type: " + messageType + " (from " + message + ")");
+                break;
+        }
+
         sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
-        return responseMessage;
+        return (responseMessage + "|", isNewClient);
     }
 
     void initUDP()
@@ -220,7 +294,15 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                string responseMessage = processMessage(receivedMessage, "TCP");
+                (string responseMessage, int addToClients) = processMessage(receivedMessage, "TCP");
+                Debug.Log(receivedMessage);
+
+                if(addToClients != -1){
+                    Client clientData = getClientFromID(addToClients);
+                    clientData.networkStream = stream;
+                    clientData.tcpClient = client;
+                }
+
                 if (responseMessage != null)
                 {
                     sendTCPMessage(responseMessage, stream);
@@ -249,7 +331,10 @@ public class UM2_Server : MonoBehaviour
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-        string responseMessage = processMessage("pong", "UDP");
+        (string responseMessage, int addToClients) = processMessage(receivedData, "UDP");
+        if(addToClients != -1){
+            getClientFromID(addToClients).udpEndpoint = clientEndPoint;
+        }
         if (responseMessage != null)
         {
             SendUDPMessage(responseMessage, clientEndPoint);
@@ -260,7 +345,15 @@ public class UM2_Server : MonoBehaviour
 
     private void SendUDPMessage(string message, int clientID)
     {
-        IPEndPoint clientEndPoint = udpClients[clientID];
+        IPEndPoint clientEndPoint = null;
+        foreach(Client client in clients){
+            if(client.clientID == clientID){
+                clientEndPoint = client.udpEndpoint;
+            }
+        }
+        if(clientEndPoint == null){
+            Debug.LogError("Couldnt find client with ID " + clientID);
+        }
         SendUDPMessage(message, clientEndPoint);
     }
 
@@ -320,6 +413,17 @@ public class UM2_Server : MonoBehaviour
 
             UM2_Server.publicIpAddress = response;
         }
+    }
+
+    public Client getClientFromID(int clientID){
+        foreach(Client client in clients){
+            if(client.clientID == clientID){
+                return client;
+            }
+        }
+
+        Debug.LogError("Couldnt find client with ID " + clientID);
+        return null;
     }
 
     private void OnDestroy()
