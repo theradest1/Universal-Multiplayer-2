@@ -4,5 +4,11 @@ using UnityEngine;
 
 public class UM2_Object : MonoBehaviour
 {
-    public UM2_Prefab prefab;
+    public GameObject prefab;
+    public int objectID;
+
+    private void Start()
+    {
+        
+    }
 }
