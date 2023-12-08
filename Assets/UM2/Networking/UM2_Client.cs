@@ -50,15 +50,23 @@ public class UM2_Client : MonoBehaviour
 
     List<MonoBehaviour> UM2Scripts = new List<MonoBehaviour>();
 
-    bool connectedToServer = true;
+    public static bool connectedToServer = true;
+
+    public static UM2_Client client;
 
     private void OnDestroy()
     {
         connectedToServer = false;
     }
 
+    private void Awake()
+    {
+        client = this;
+    }
+
     private void Start()
     {
+        connectedToServer = true;
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
@@ -354,14 +362,11 @@ public class UM2_Client : MonoBehaviour
             if(clientID == -1){
                 while(clientID == -1){
                     await Task.Delay(500);
-                    Debug.Log("Wating for connection to send message: " + message + ". Current ID: " + clientID);
+                    //Debug.Log("Wating for connection to send message: " + message + ". Current ID: " + clientID);
                 }
             }
-            message = clientID + "~" + message;
         }
-        else{
-            message = "-1~" + message;
-        }
+        message = clientID + "~" + message;
 
         if (protocol == "UDP")
         {
@@ -391,7 +396,10 @@ public class UM2_Client : MonoBehaviour
         if(message.IndexOf("|") != -1){
             string[] messages = message.Split("|");
             foreach(string singleMessage in messages){
-                processMessage(singleMessage, protocol);
+                if(singleMessage != ""){
+                    processMessage(singleMessage, protocol);
+                    Debug.Log(singleMessage);
+                }
             }
             return;
         }

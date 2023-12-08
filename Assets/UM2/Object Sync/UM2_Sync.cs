@@ -12,10 +12,13 @@ public class UM2_Sync : MonoBehaviour
     List<GameObject> prefabs = new List<GameObject>();
     public string prefabFolderPath;
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
-    public UM2_Client client;
+    UM2_Client client;
+    public static UM2_Sync sync;
 
-    private void Start()
+    private void Awake()
     {
+        sync = this;
+
         //loads all prefabs into a list
         string[] prefabFiles = Directory.GetFiles(prefabFolderPath, "*.prefab"); //get all prefabs in directory
         foreach (string prefabFile in prefabFiles)
@@ -24,15 +27,21 @@ public class UM2_Sync : MonoBehaviour
 
             if (prefab != null)
             {
-                prefabs.Add(prefab); //add to list
+                prefabs.Add(prefab);
             }
         }
+    }
+
+    private void Start()
+    {
+        client = gameObject.GetComponent<UM2_Client>();
     }
 
     public void createSyncedObject(UM2_Object startedObject){
         int prefabID = prefabs.IndexOf(startedObject.prefab);
         if(prefabID == -1){
             Debug.LogError("Prefab with name " + startedObject.prefab.name + " not found. Make sure to put in the folder referenced by the UM2_Sync script");
+            return;
         }
         currentObjectID++;
         Debug.Log("Creating new synced object " + currentObjectID);
@@ -43,7 +52,7 @@ public class UM2_Sync : MonoBehaviour
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
         Debug.Log("Updating object " + objectID);
-        client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation);
+        client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
@@ -57,7 +66,7 @@ public class UM2_Sync : MonoBehaviour
             }
         }
 
-        Debug.LogError("Could not find synced object with ID " + objectID);
+        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message. (only worry if it continues)");
     }
 
     public void newSyncedObject(int objectID, int prefabID){
