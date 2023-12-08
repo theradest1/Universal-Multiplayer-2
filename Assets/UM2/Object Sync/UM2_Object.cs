@@ -31,9 +31,11 @@ public class UM2_Object : MonoBehaviour
     }
 
     async void updateTransform(){
-        sync.updateObject(objectID, transform.position, transform.rotation);
+        if(this != null){
+            sync.updateObject(objectID, transform.position, transform.rotation);
 
-        await Task.Delay((int)(1/ticksPerSecond*1000));
-        updateTransform();
+            await Task.Delay((int)(1/ticksPerSecond*1000));
+            updateTransform();
+        }
     }
 }

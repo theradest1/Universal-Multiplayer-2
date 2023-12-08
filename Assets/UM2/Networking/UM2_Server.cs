@@ -169,6 +169,7 @@ public class UM2_Server : MonoBehaviour
                             Debug.Log("sent HTTP: " + responseMessage);
                         }
 
+                        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
                         response.OutputStream.Write(buffer, 0, buffer.Length);
                         response.OutputStream.Close();
                     }
@@ -266,10 +267,6 @@ public class UM2_Server : MonoBehaviour
             }
             //clear out queue
             currentClient.messageQueue = new List<string>();
-        }
-
-        if(responseMessage != null){
-            sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
         }
 
         return responseMessage;
@@ -370,6 +367,7 @@ public class UM2_Server : MonoBehaviour
         if(debugMessages){
             Debug.Log("Sent TCP: " + message);
         }
+        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
 
@@ -415,6 +413,7 @@ public class UM2_Server : MonoBehaviour
             if(debugMessages){
                 Debug.Log("Sent UDP: " + message);
             }
+            sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
             udpServer.Send(data, data.Length, clientEndPoint);
         }
         catch (Exception e)
