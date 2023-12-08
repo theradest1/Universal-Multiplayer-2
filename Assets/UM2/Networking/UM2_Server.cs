@@ -121,6 +121,10 @@ public class UM2_Server : MonoBehaviour
         }
     }
 
+    void sendHTTPMessage(string message, int clientID){
+        getClientFromID(clientID).messageQueue.Add(message + "|");
+    }
+
     void httpReciever()
     {
         // Start a new thread to handle incoming requests
@@ -149,12 +153,15 @@ public class UM2_Server : MonoBehaviour
                     {
                         // process the message
                         string message = request.RawUrl.Substring(1);
-                        (string responseMessage, _) = processMessage(message, "HTTP");
+                        string responseMessage = processMessage(message, "HTTP");
+                        responseMessage += "|";
 
                         //send response
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
                         response.ContentType = "text/html";
                         response.ContentLength64 = buffer.Length;
+
+                        Debug.Log("HTTP: " + responseMessage);
 
                         response.OutputStream.Write(buffer, 0, buffer.Length);
                         response.OutputStream.Close();
@@ -169,10 +176,9 @@ public class UM2_Server : MonoBehaviour
         });
     }
 
-    (string, int) processMessage(string message, string protocol)
+    string processMessage(string message, string protocol)
     {
         receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
-        int isNewClient = -1;
 
         string clientIDString = message.Split("~")[0];
         string messageType = message.Split("~")[1];
@@ -209,7 +215,7 @@ public class UM2_Server : MonoBehaviour
                 Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "all":     //send message to all clients
-                Debug.Log("Sending: " + messageContents + "\n from: " + message);
+                //Debug.Log("Sending: " + messageContents + "\n from: " + message);
                 foreach(Client client in clients){
                     if(protocol == "UDP" && client.udpEndpoint != null){
                         SendUDPMessage(messageContents, client.udpEndpoint);
@@ -218,7 +224,7 @@ public class UM2_Server : MonoBehaviour
                         sendTCPMessage(messageContents, client.networkStream);
                     }
                     else{
-                        client.messageQueue.Add(messageContents);
+                        sendHTTPMessage(messageContents, clientID);
                     }
                 }
                 //Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
@@ -231,10 +237,18 @@ public class UM2_Server : MonoBehaviour
                 break;
         }
 
+        //check if queued messages for http
+        if(protocol == "HTTP" && clientID != -1){
+            foreach(string queuedMessage in getClientFromID(clientID).messageQueue){
+                responseMessage += "|" + queuedMessage;
+            }
+        }
+
         if(responseMessage != null){
             sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
         }
-        return (responseMessage + "|", isNewClient);
+
+        return responseMessage;
     }
 
     void initUDP()
@@ -296,8 +310,9 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                (string responseMessage, int addToClients) = processMessage(receivedMessage, "TCP");
+                string responseMessage = processMessage(receivedMessage, "TCP");
 
+                //need to change how this works (right now it checks if a client exists every message)
                 if(receivedMessage.Split("~")[0] != "-1"){
                     Client clientData = getClientFromID(int.Parse(receivedMessage.Split("~")[0]));
                     clientData.networkStream = stream;
@@ -321,8 +336,11 @@ public class UM2_Server : MonoBehaviour
     }
 
     async void sendTCPMessage(string message, NetworkStream stream)
-    {
+    {   
+        message += "|";
         byte[] sendData = Encoding.ASCII.GetBytes(message);
+
+        Debug.Log("TCP: " + message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
 
@@ -332,12 +350,14 @@ public class UM2_Server : MonoBehaviour
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-        (string responseMessage, int addToClients) = processMessage(receivedData, "UDP");
+        string responseMessage = processMessage(receivedData, "UDP");
         
+        //need to change how this works (right now it checks if a client exists every message)
         if(receivedData.Split("~")[0] != "-1"){
             Client clientData = getClientFromID(int.Parse(receivedData.Split("~")[0]));
             clientData.udpEndpoint = clientEndPoint;
         }
+
         if (responseMessage != null)
         {
             SendUDPMessage(responseMessage, clientEndPoint);
@@ -348,24 +368,19 @@ public class UM2_Server : MonoBehaviour
 
     private void SendUDPMessage(string message, int clientID)
     {
-        IPEndPoint clientEndPoint = null;
-        foreach(Client client in clients){
-            if(client.clientID == clientID){
-                clientEndPoint = client.udpEndpoint;
-            }
-        }
-        if(clientEndPoint == null){
-            Debug.LogError("Couldnt find client with ID " + clientID);
-        }
-        SendUDPMessage(message, clientEndPoint);
+        IPEndPoint udpEndpoint = getClientFromID(clientID).udpEndpoint;
+        SendUDPMessage(message, udpEndpoint);
     }
 
     private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
     {
+        message += "|";
         try
         {
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
             byte[] data = Encoding.UTF8.GetBytes(message);
+
+            Debug.Log("UDP: " + message);
             udpServer.Send(data, data.Length, clientEndPoint);
         }
         catch (Exception e)

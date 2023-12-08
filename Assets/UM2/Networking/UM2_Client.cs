@@ -48,7 +48,7 @@ public class UM2_Client : MonoBehaviour
     public UM2_Server server;
     public Debugger debugger;
 
-    List<Type> UM2Scripts = new List<Type>();
+    List<MonoBehaviour> UM2Scripts = new List<MonoBehaviour>();
 
     bool connectedToServer = true;
 
@@ -70,7 +70,7 @@ public class UM2_Client : MonoBehaviour
         //load all scripts attached to this object for calling functions
         foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()){
             try{
-                UM2Scripts.Add(script.GetType());
+                UM2Scripts.Add(script);
             }
             catch{
                 //I dont think this can happen, but I did a catch just in case
@@ -173,7 +173,7 @@ public class UM2_Client : MonoBehaviour
         }
         initHTTP();
 
-        InvokeRepeating("Ping", 0, .25f);
+        InvokeRepeating("Ping", 0, 1f);
         join(); //get client ID from the server
     }
 
@@ -413,10 +413,10 @@ public class UM2_Client : MonoBehaviour
         }
 
         //get function
-        foreach(Type script in UM2Scripts){
+        foreach(MonoBehaviour script in UM2Scripts){
             MethodInfo methodInfo = null;
             try{
-                methodInfo = script.GetMethod(methodToCall);
+                methodInfo = script.GetType().GetMethod(methodToCall);
             }
             catch{
                 //thing isnt found
@@ -436,7 +436,6 @@ public class UM2_Client : MonoBehaviour
                         {
                             Type parameterType = parameters[i].ParameterType;
                             object parsedValue = ParseValue(messageParts[i], parameterType);
-                            Debug.Log(parameterType + " == " + parsedValue.GetType() + ": " + (parsedValue.GetType() == parameterType));
                             parsedParameters[i] = parsedValue;
                         }
 
@@ -444,15 +443,9 @@ public class UM2_Client : MonoBehaviour
                         if(parameters.Length == messageParts.Length + 1){
                             parsedParameters[parsedParameters.Length - 1] = protocol;
                         }
-                        if(message.Length > 0){
-                            Debug.Log(message + ":");
-                            PrintArray(parsedParameters);
-                            PrintArray(parameters);
-                            PrintArrayTypes(parsedParameters);
-                        }
 
                         // Call the function dynamically with parsed parameters
-                        methodInfo.Invoke(this, parsedParameters);
+                        methodInfo.Invoke(script, parsedParameters);
                         return;
                     }
                 }

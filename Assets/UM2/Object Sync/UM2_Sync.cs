@@ -31,11 +31,14 @@ public class UM2_Sync : MonoBehaviour
 
     public void createSyncedObject(UM2_Object startedObject){
         int prefabID = prefabs.IndexOf(startedObject.prefab);
+        if(prefabID == -1){
+            Debug.LogError("Prefab with name " + startedObject.prefab.name + " not found. Make sure to put in the folder referenced by the UM2_Sync script");
+        }
         currentObjectID++;
         Debug.Log("Creating new synced object " + currentObjectID);
         startedObject.objectID = currentObjectID;
         
-        client.messageAllClients("newSyncedObject~" + currentObjectID);
+        client.messageAllClients("newSyncedObject~" + currentObjectID + "~" + prefabID);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
