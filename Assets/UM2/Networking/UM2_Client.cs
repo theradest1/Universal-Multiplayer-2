@@ -245,6 +245,7 @@ public class UM2_Client : MonoBehaviour
     {
         try
         {
+            connectedToUDP = true;
             while (true)
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
