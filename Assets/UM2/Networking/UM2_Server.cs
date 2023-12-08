@@ -55,6 +55,7 @@ public class UM2_Server : MonoBehaviour
     public Debugger debugger;
 
     int currentPlayerID = 0;
+    int currentObjectID = 0;
 
 
     List<Client> clients = new List<Client>();
@@ -157,7 +158,7 @@ public class UM2_Server : MonoBehaviour
                         if(debugMessages){
                             Debug.Log("got HTTP: " + message);
                         }
-                        string responseMessage = processMessage(message, "HTTP");
+                        string responseMessage = processSplitMessages(message, "HTTP");
                         responseMessage += "|";
 
                         //send response
@@ -179,6 +180,18 @@ public class UM2_Server : MonoBehaviour
                 }
             }
         });
+    }
+
+    string processSplitMessages(string messages, string protocol){
+        string[] splitMessages = messages.Split("|");
+        string endString = "";
+        foreach(string message in splitMessages){
+            if(message != ""){
+                endString += "|" + processMessage(message, protocol);
+            }
+        }
+
+        return endString;
     }
 
     string processMessage(string message, string protocol)
@@ -211,8 +224,12 @@ public class UM2_Server : MonoBehaviour
                         currentPlayerID++;
 
                         break;
+                    case "reserveObjectID":
+                        responseMessage = "reservedObjectID~" + currentObjectID;
+                        currentObjectID++;
+                        break;
                     default:
-                        Debug.LogError("Unknown message: " + message);
+                        Debug.LogError("Unknown message from " + protocol + ": " + message);
                         break;
                 }
                 break;
@@ -248,7 +265,7 @@ public class UM2_Server : MonoBehaviour
                 responseMessage += "|" + queuedMessage;
             }
             //clear out queue
-            currentClient.messageQueue = new List<string>(); 
+            currentClient.messageQueue = new List<string>();
         }
 
         if(responseMessage != null){
@@ -321,7 +338,7 @@ public class UM2_Server : MonoBehaviour
                     Debug.Log("got TCP: " + receivedMessage);
                 }
                 
-                string responseMessage = processMessage(receivedMessage, "TCP");
+                string responseMessage = processSplitMessages(receivedMessage, "TCP");
 
                 //need to change how this works (right now it checks if a client exists every message)
                 if(receivedMessage.Split("~")[0] != "-1"){
@@ -366,7 +383,7 @@ public class UM2_Server : MonoBehaviour
             Debug.Log("Got UDP: " + receivedData);
         }
 
-        string responseMessage = processMessage(receivedData, "UDP");
+        string responseMessage = processSplitMessages(receivedData, "UDP");
         
         //need to change how this works (right now it checks if a client exists every message)
         if(receivedData.Split("~")[0] != "-1"){

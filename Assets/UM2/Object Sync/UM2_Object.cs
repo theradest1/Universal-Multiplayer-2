@@ -20,7 +20,7 @@ public class UM2_Object : MonoBehaviour
 
     async void initialize(){
         while (UM2_Client.clientID == -1){
-            await Task.Delay(200);
+            await Task.Delay(50);
 
             if(!UM2_Client.connectedToServer){
                 return;

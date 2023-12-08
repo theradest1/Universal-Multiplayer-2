@@ -369,6 +369,10 @@ public class UM2_Client : MonoBehaviour
         }
         message = clientID + "~" + message;
 
+        if(protocol != "HTTP"){ //http cant do the symbol "|", but it doesnt need it since there is no chance of smashing messages
+            message += "|";
+        }
+
         if (protocol == "UDP")
         {
             sendUDPMessage(message);
