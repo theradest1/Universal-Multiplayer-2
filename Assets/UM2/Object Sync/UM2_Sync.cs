@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using Unity.VisualScripting;
 using System;
 
 public class UM2_Sync : MonoBehaviour
@@ -20,14 +19,11 @@ public class UM2_Sync : MonoBehaviour
         sync = this;
 
         //loads all prefabs into a list
-        string[] prefabFiles = Directory.GetFiles(prefabFolderPath, "*.prefab"); //get all prefabs in directory
-        foreach (string prefabFile in prefabFiles)
+        UnityEngine.Object[] prefabFiles = Resources.LoadAll("", typeof(GameObject));
+        foreach (UnityEngine.Object prefabFile in prefabFiles)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabFile); //load prefab
-
-            if (prefab != null)
-            {
-                prefabs.Add(prefab);
+            if(prefabFile.GetType() == typeof(GameObject)){
+                prefabs.Add((GameObject)prefabFile);
             }
         }
     }
@@ -44,14 +40,14 @@ public class UM2_Sync : MonoBehaviour
             return;
         }
         currentObjectID++;
-        Debug.Log("Creating new synced object " + currentObjectID);
+        //Debug.Log("Creating new synced object " + currentObjectID);
         startedObject.objectID = currentObjectID;
         
         client.messageAllClients("newSyncedObject~" + currentObjectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
-        Debug.Log("Updating object " + objectID);
+        //Debug.Log("Updating object " + objectID);
         client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
     }
 
@@ -64,11 +60,11 @@ public class UM2_Sync : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message. (only worry if it continues)");
+        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
     }
 
     public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond){
-        Debug.Log("Made a new synced object: " + objectID);
+        //Debug.Log("Made a new synced object: " + objectID);
         currentObjectID = objectID;
 
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).AddComponent<UM2_Prefab>(); 

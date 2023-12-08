@@ -182,7 +182,7 @@ public class MainMenu : MonoBehaviour
                 finalString = "." + finalString;
             }
         }
-        Debug.Log("Server IP: " + finalString);
+        //Debug.Log("Server IP: " + finalString);
         return finalString;
     }
 }

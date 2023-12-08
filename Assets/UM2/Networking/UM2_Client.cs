@@ -70,7 +70,7 @@ public class UM2_Client : MonoBehaviour
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
-            Debug.LogWarning("Server info not set, pushing back to menu");
+            //Debug.LogWarning("Server info not set, pushing back to menu");
             SceneManager.LoadScene("Menu");
             return;
         }
@@ -399,7 +399,6 @@ public class UM2_Client : MonoBehaviour
             foreach(string singleMessage in messages){
                 if(singleMessage != ""){
                     processMessage(singleMessage, protocol);
-                    Debug.Log(singleMessage);
                 }
             }
             return;
@@ -487,7 +486,6 @@ public class UM2_Client : MonoBehaviour
 
     public void setID(int id){
         clientID = id;
-        Debug.Log("Set id to " + clientID);
     }
     
     //a bunch of helper methods (make them static and put in a seperate script later-----------------

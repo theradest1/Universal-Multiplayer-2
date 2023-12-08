@@ -1013,7 +1013,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc7e5ba156414bb4393dfb79ff2c7431, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabFolderPath: Assets/UM2/Object Sync/Prefabs
+  prefabFolderPath: Assets/UM2/Object Sync/Resources
 --- !u!1 &1168736109
 GameObject:
   m_ObjectHideFlags: 0

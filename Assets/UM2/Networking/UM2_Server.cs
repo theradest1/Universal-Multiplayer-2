@@ -11,7 +11,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.SceneManagement;
-using UnityEditor.Compilation;
 
 public class Client{
     public IPEndPoint udpEndpoint;
@@ -59,6 +58,8 @@ public class UM2_Server : MonoBehaviour
 
 
     List<Client> clients = new List<Client>();
+
+    public bool debugMessages = false;
 
 
     void updateDebug()
@@ -153,7 +154,9 @@ public class UM2_Server : MonoBehaviour
                     {
                         // process the message
                         string message = request.RawUrl.Substring(1);
-                        Debug.Log("got HTTP: " + message);
+                        if(debugMessages){
+                            Debug.Log("got HTTP: " + message);
+                        }
                         string responseMessage = processMessage(message, "HTTP");
                         responseMessage += "|";
 
@@ -161,8 +164,9 @@ public class UM2_Server : MonoBehaviour
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
                         response.ContentType = "text/html";
                         response.ContentLength64 = buffer.Length;
-
-                        Debug.Log("sent HTTP: " + responseMessage);
+                        if(debugMessages){
+                            Debug.Log("sent HTTP: " + responseMessage);
+                        }
 
                         response.OutputStream.Write(buffer, 0, buffer.Length);
                         response.OutputStream.Close();
@@ -216,7 +220,6 @@ public class UM2_Server : MonoBehaviour
                 Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "all":     //send message to all clients
-                Debug.Log("Sending to all: " + messageContents + "\n from: " + message);
                 foreach(Client client in clients){
                     if(protocol == "UDP" && client.udpEndpoint != null){
                         SendUDPMessage(messageContents, client.udpEndpoint);
@@ -225,7 +228,6 @@ public class UM2_Server : MonoBehaviour
                         sendTCPMessage(messageContents, client.networkStream);
                     }
                     else{
-                        Debug.Log("HTTP");
                         sendHTTPMessage(messageContents, clientID);
                     }
                 }
@@ -315,7 +317,10 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                Debug.Log("got TCP: " + receivedMessage);
+                if(debugMessages){
+                    Debug.Log("got TCP: " + receivedMessage);
+                }
+                
                 string responseMessage = processMessage(receivedMessage, "TCP");
 
                 //need to change how this works (right now it checks if a client exists every message)
@@ -345,8 +350,9 @@ public class UM2_Server : MonoBehaviour
     {   
         message += "|";
         byte[] sendData = Encoding.ASCII.GetBytes(message);
-
-        Debug.Log("Sent TCP: " + message);
+        if(debugMessages){
+            Debug.Log("Sent TCP: " + message);
+        }
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
 
@@ -356,7 +362,9 @@ public class UM2_Server : MonoBehaviour
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-        Debug.Log("Got UDP: " + receivedData);
+        if(debugMessages){
+            Debug.Log("Got UDP: " + receivedData);
+        }
 
         string responseMessage = processMessage(receivedData, "UDP");
         
@@ -387,8 +395,9 @@ public class UM2_Server : MonoBehaviour
         {
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
             byte[] data = Encoding.UTF8.GetBytes(message);
-
-            Debug.Log("Sent UDP: " + message);
+            if(debugMessages){
+                Debug.Log("Sent UDP: " + message);
+            }
             udpServer.Send(data, data.Length, clientEndPoint);
         }
         catch (Exception e)
