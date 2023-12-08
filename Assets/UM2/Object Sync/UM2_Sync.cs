@@ -108,6 +108,7 @@ public class UM2_Sync : MonoBehaviour
     }
 
     public void giveAllSyncedObjects(int requestingClientID){
+        Debug.LogError("YESSSS: " + requestingClientID);
         client.messageToOtherClient("debugMessage~test", requestingClientID);
     }
 

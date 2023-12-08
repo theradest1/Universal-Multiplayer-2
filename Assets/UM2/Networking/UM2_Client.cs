@@ -52,9 +52,10 @@ public class UM2_Client : MonoBehaviour
     List<MonoBehaviour> UM2Scripts = new List<MonoBehaviour>();
 
     public static bool connectedToServer = true;
-    bool testValue = false;
+    string messageQueue = "";
 
     public static UM2_Client client;
+
 
     private void OnDestroy()
     {
@@ -127,10 +128,6 @@ public class UM2_Client : MonoBehaviour
         InvokeRepeating("updateDebug", 1f, 1f);
     }
 
-    void Update(){
-        Debug.Log(connectedToHTTP);
-    }
-
     public void join(){
         sendMessage("server~join", "HTTP", true);
     }
@@ -162,33 +159,24 @@ public class UM2_Client : MonoBehaviour
         }
     }
 
-    public async void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use
-        Debug.LogWarning("Test Value: " + testValue);
-        
-        if(!connectedToTCP && !connectedToUDP && !connectedToHTTP){
-            while((connectedToTCP || connectedToHTTP) == false){
-                if(!connectedToServer){
-                    return;
-                }
-
-                Debug.Log("NOT CONNNECTED");
-                Debug.Log("TCP: " + connectedToTCP);
-                Debug.Log("HTTP: " + connectedToHTTP);
-                await Task.Yield();
-            }
-        }
+    public void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use and has some protections
         
         if(!reliableProtocol && connectedToUDP){
             sendMessage(message, "UDP", sendWithoutID);
+            return;
         }
         else if(connectedToTCP){
             sendMessage(message, "TCP", sendWithoutID);
+            return;
         }
         else if(connectedToHTTP){
             sendMessage(message, "HTTP", sendWithoutID);
+            return;
         }
-        else{
-            Debug.LogError("THIS SHOULDN'T HAPPEN D:");
+        
+        if(reliableProtocol){
+            Debug.Log("Added message to queue: " + message);
+            messageQueue += "|" + message;
         }
     }
 
@@ -273,7 +261,6 @@ public class UM2_Client : MonoBehaviour
     {
         //nothing needs to be done to start http, but I'm leaving this here for some consistancy
         Debug.Log("Connected to HTTP");
-        testValue = true;
         connectedToHTTP = true;
     }
 
@@ -395,6 +382,11 @@ public class UM2_Client : MonoBehaviour
             }
         }
         message = clientID + "~" + message;
+
+        if(protocol != "UDP"){
+            message += messageQueue;
+            messageQueue = "";
+        }
 
         if(protocol != "HTTP"){ //http cant do the symbol "|", but it doesnt need it since there is no chance of smashing messages
             message += "|";
