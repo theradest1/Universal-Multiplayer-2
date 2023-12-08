@@ -7,6 +7,8 @@ public class UM2_Object : MonoBehaviour
 {
     public GameObject prefab;
     [HideInInspector] public int objectID = -1;
+
+    [Range(1,64)]
     public float ticksPerSecond;
     UM2_Sync sync;
 
@@ -25,10 +27,13 @@ public class UM2_Object : MonoBehaviour
             }
         }
         sync.createSyncedObject(this);
-        InvokeRepeating("updateTransform", 0, 1/ticksPerSecond);
+        updateTransform();
     }
 
-    void updateTransform(){
+    async void updateTransform(){
         sync.updateObject(objectID, transform.position, transform.rotation);
+
+        await Task.Delay((int)(1/ticksPerSecond*1000));
+        updateTransform();
     }
 }

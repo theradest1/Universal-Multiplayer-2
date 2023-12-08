@@ -293,7 +293,6 @@ MonoBehaviour:
   prefab: {fileID: 6784705878260703352, guid: 75ba9de79c18c45418ef1113b563faa7, type: 3}
   objectID: 0
   ticksPerSecond: 10
-  sync: {fileID: 1054571552}
 --- !u!1 &334502187
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,7 +1014,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabFolderPath: Assets/UM2/Object Sync/Prefabs
-  client: {fileID: 1054571550}
 --- !u!1 &1168736109
 GameObject:
   m_ObjectHideFlags: 0

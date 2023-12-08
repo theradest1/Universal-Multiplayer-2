@@ -47,7 +47,7 @@ public class UM2_Sync : MonoBehaviour
         Debug.Log("Creating new synced object " + currentObjectID);
         startedObject.objectID = currentObjectID;
         
-        client.messageAllClients("newSyncedObject~" + currentObjectID + "~" + prefabID);
+        client.messageAllClients("newSyncedObject~" + currentObjectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
@@ -56,11 +56,9 @@ public class UM2_Sync : MonoBehaviour
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
-        Debug.Log("Syncing object with ID " + objectID);
         foreach(UM2_Prefab prefab in syncedObjects){
             if(prefab.objectID == objectID){
-                prefab.transform.position = position;
-                prefab.transform.rotation = rotation;
+                prefab.newTransform(position, rotation);
 
                 return;
             }
@@ -69,12 +67,13 @@ public class UM2_Sync : MonoBehaviour
         Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message. (only worry if it continues)");
     }
 
-    public void newSyncedObject(int objectID, int prefabID){
+    public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond){
         Debug.Log("Made a new synced object: " + objectID);
         currentObjectID = objectID;
 
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
         newPrefab.objectID = objectID;
+        //newPrefab.ticksPerSecond = ticksPerSecond;
     }
 }
