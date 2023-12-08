@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using System.Reflection;
+using UnityEngine.Video;
 
 public class UM2_Client : MonoBehaviour
 {
@@ -51,12 +52,21 @@ public class UM2_Client : MonoBehaviour
     List<MonoBehaviour> UM2Scripts = new List<MonoBehaviour>();
 
     public static bool connectedToServer = true;
+    bool testValue = false;
 
     public static UM2_Client client;
 
     private void OnDestroy()
     {
         connectedToServer = false;
+
+        //close tcp
+        connectedToTCP = false;
+        if (tcpStream != null)
+            tcpStream.Close();
+
+        if (tcpClient != null && tcpClient.Connected)
+            tcpClient.Close();
     }
 
     private void Awake()
@@ -117,6 +127,10 @@ public class UM2_Client : MonoBehaviour
         InvokeRepeating("updateDebug", 1f, 1f);
     }
 
+    void Update(){
+        Debug.Log(connectedToHTTP);
+    }
+
     public void join(){
         sendMessage("server~join", "HTTP", true);
     }
@@ -141,7 +155,29 @@ public class UM2_Client : MonoBehaviour
         sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
+    public async void test(){
+        while(true){
+            Debug.Log(connectedToHTTP);
+            await Task.Delay(100);
+        }
+    }
+
     public async void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use
+        Debug.LogWarning("Test Value: " + testValue);
+        
+        if(!connectedToTCP && !connectedToUDP && !connectedToHTTP){
+            while((connectedToTCP || connectedToHTTP) == false){
+                if(!connectedToServer){
+                    return;
+                }
+
+                Debug.Log("NOT CONNNECTED");
+                Debug.Log("TCP: " + connectedToTCP);
+                Debug.Log("HTTP: " + connectedToHTTP);
+                await Task.Yield();
+            }
+        }
+        
         if(!reliableProtocol && connectedToUDP){
             sendMessage(message, "UDP", sendWithoutID);
         }
@@ -152,11 +188,7 @@ public class UM2_Client : MonoBehaviour
             sendMessage(message, "HTTP", sendWithoutID);
         }
         else{
-            if(connectedToServer){
-                Debug.LogError("No connected protocols, trying again\n" + message + "\nUDP: " + connectedToUDP + "\nTCP: " + connectedToTCP + "\nHTTP: " + connectedToHTTP);
-                await Task.Delay(500);
-                sendMessage(message, reliableProtocol, sendWithoutID);
-            }
+            Debug.LogError("THIS SHOULDN'T HAPPEN D:");
         }
     }
 
@@ -225,10 +257,11 @@ public class UM2_Client : MonoBehaviour
             tcpClient.Connect(IPAddress.Parse(serverIP), serverTcpPort);
             tcpStream = tcpClient.GetStream();
 
-            connectedToTCP = true;
-
             tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
             tcpRecieveThread.Start();
+
+            Debug.Log("Connected to TCP");
+            connectedToTCP = true;
         }
         catch (Exception e)
         {
@@ -239,6 +272,9 @@ public class UM2_Client : MonoBehaviour
     void initHTTP()
     {
         //nothing needs to be done to start http, but I'm leaving this here for some consistancy
+        Debug.Log("Connected to HTTP");
+        testValue = true;
+        connectedToHTTP = true;
     }
 
     async void udpReciever()
@@ -246,6 +282,7 @@ public class UM2_Client : MonoBehaviour
         try
         {
             connectedToUDP = true;
+            Debug.Log("Connected to UDP");
             while (true)
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
@@ -300,17 +337,6 @@ public class UM2_Client : MonoBehaviour
         }
     }
 
-    public void stopTCP()
-    {
-        connectedToTCP = false;
-
-        if (tcpStream != null)
-            tcpStream.Close();
-
-        if (tcpClient != null && tcpClient.Connected)
-            tcpClient.Close();
-    }
-
     public void sendUDPMessage(string message)
     {
         //load message
@@ -344,6 +370,7 @@ public class UM2_Client : MonoBehaviour
         {
             // Print the response data
             string response = request.downloadHandler.text;
+            connectedToHTTP = true;
             processMessage(response, "HTTP");
         }
     }

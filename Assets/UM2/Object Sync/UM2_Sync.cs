@@ -32,19 +32,17 @@ public class UM2_Sync : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if(reservedIDs.Count < targetPreppedObjects){
-            getReserveNewObjectID();
-        }
-    }
-
     async void reserveIDLoop(){
+        await Task.Delay(100);
+
+        if(!UM2_Client.connectedToServer){
+            return;
+        }
+
         if(reservedIDs.Count < targetPreppedObjects){
             getReserveNewObjectID();
         }
 
-        await Task.Delay(100);
         reserveIDLoop();
     }
 
@@ -53,6 +51,8 @@ public class UM2_Sync : MonoBehaviour
         client = gameObject.GetComponent<UM2_Client>();
 
         checkIfAllObjectsExist();
+
+        reserveIDLoop();
     }
 
     public async void createSyncedObject(UM2_Object startedObject){
