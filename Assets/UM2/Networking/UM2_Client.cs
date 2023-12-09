@@ -181,7 +181,7 @@ public class UM2_Client : MonoBehaviour
         }
         initHTTP();
 
-        InvokeRepeating("Ping", 0, 1f);
+        InvokeRepeating("Ping", 0, 3f);
         join(); //get client ID from the server
     }
 
@@ -393,6 +393,7 @@ public class UM2_Client : MonoBehaviour
 
     void processMessage(string message, string protocol)
     {
+        string initialMessage = message;
         if(message == ""){
             return;
         }
@@ -466,7 +467,7 @@ public class UM2_Client : MonoBehaviour
                 }
             }
         }
-        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\nGotten message: " + message + "\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. the method must be void public \n4. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
+        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\nGotten message: " + initialMessage + "\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. the method must be void public \n4. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
         return;
     }
 

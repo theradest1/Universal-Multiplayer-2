@@ -252,7 +252,7 @@ public class UM2_Server : MonoBehaviour
                 //Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "direct":  //send message to specified other client
-                Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
+                Debug.Log("Direct message: " + messageContents);
                 break;
             default:
                 Debug.LogError("Unknown message type: " + messageType + " (from " + message + ")");

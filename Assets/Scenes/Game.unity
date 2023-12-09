@@ -292,7 +292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 6784705878260703352, guid: 75ba9de79c18c45418ef1113b563faa7, type: 3}
   objectID: 0
-  ticksPerSecond: 10
+  ticksPerSecond: 3
 --- !u!1 &334502187
 GameObject:
   m_ObjectHideFlags: 0
@@ -972,7 +972,7 @@ MonoBehaviour:
   httpOnline: 0
   client: {fileID: 1054571550}
   debugger: {fileID: 1542006208}
-  debugMessages: 0
+  debugMessages: 1
 --- !u!114 &1054571550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1015,6 +1015,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabFolderPath: Assets/UM2/Object Sync/Resources
+  targetPreppedObjects: 3
 --- !u!1 &1168736109
 GameObject:
   m_ObjectHideFlags: 0
@@ -1385,7 +1386,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 1814554127673409255, guid: 1e06c4fdc415f6045b93fe5c9c548136, type: 3}
   objectID: -1
-  ticksPerSecond: 8
+  ticksPerSecond: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -5,6 +5,7 @@ using UnityEditor;
 using System.IO;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 public class UM2_Sync : MonoBehaviour
 {
@@ -50,6 +51,8 @@ public class UM2_Sync : MonoBehaviour
     private void Start()
     {
         client = gameObject.GetComponent<UM2_Client>();
+
+        checkIfAllObjectsExist();
     }
 
     public async void createSyncedObject(UM2_Object startedObject){
@@ -65,8 +68,8 @@ public class UM2_Sync : MonoBehaviour
         }
 
         startedObject.objectID = reservedIDs[0];
-        reservedIDs.Remove(0);
-        Debug.Log("used reserved ID " + startedObject.objectID);
+        //Debug.Log("used reserved ID " + startedObject.objectID);
+        reservedIDs.RemoveAt(0);
         
         client.messageAllClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
     }
@@ -101,6 +104,22 @@ public class UM2_Sync : MonoBehaviour
 
     public void reservedObjectID(int newReservedID){
         reservedIDs.Add(newReservedID);
-        Debug.Log("reserved ID " + newReservedID);
+        //Debug.Log("reserved ID " + newReservedID);
+    }
+
+    public void giveAllSyncedObjects(int requestingClientID){
+        client.messageToOtherClient("debugMessage~test", requestingClientID);
+    }
+
+    public void debugMessage(string message){   
+        Debug.Log(message);
+    }
+
+    public async void checkIfAllObjectsExist(){
+        while(UM2_Client.clientID == -1){
+            await Task.Delay(50);
+        }
+
+        client.messageAllClients("giveAllSyncedObjects~" + UM2_Client.clientID);
     }
 }
