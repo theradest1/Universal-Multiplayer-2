@@ -252,7 +252,25 @@ public class UM2_Server : MonoBehaviour
                 //Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "direct":  //send message to specified other client
-                Debug.Log("Direct message: " + messageContents);
+                int targetClientID = int.Parse(messageContents.Split("~")[0]);
+                messageContents = messageContents.Substring(messageContents.Split("~")[0].Length + 1);
+                foreach(Client client in clients){
+                    if(client.clientID == targetClientID){
+                        if(protocol == "UDP" && client.udpEndpoint != null){
+                            SendUDPMessage(messageContents, client.udpEndpoint);
+                        }
+                        else if(client.tcpClient != null && client.networkStream != null){
+                            sendTCPMessage(messageContents, client.networkStream);
+                        }
+                        else{
+                            sendHTTPMessage(messageContents, clientID);
+                        }
+                        Debug.Log("Direct message to " + targetClientID + ": " + messageContents);
+                        Debug.Log("YUHHHH");
+                        break;
+                    }
+                }
+                Debug.LogError("Couldnt find client with ID " + targetClientID);
                 break;
             default:
                 Debug.LogError("Unknown message type: " + messageType + " (from " + message + ")");

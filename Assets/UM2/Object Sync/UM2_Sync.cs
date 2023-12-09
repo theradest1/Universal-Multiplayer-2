@@ -10,6 +10,7 @@ using Unity.VisualScripting;
 public class UM2_Sync : MonoBehaviour
 {
     List<GameObject> prefabs = new List<GameObject>();
+    List<UM2_Object> clientSideObjects = new List<UM2_Object>();
     public string prefabFolderPath;
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
     UM2_Client client;
@@ -56,6 +57,8 @@ public class UM2_Sync : MonoBehaviour
     }
 
     public async void createSyncedObject(UM2_Object startedObject){
+        clientSideObjects.Add(startedObject);
+
         int prefabID = prefabs.IndexOf(startedObject.prefab);
         if(prefabID == -1){
             Debug.LogError("Prefab with name " + startedObject.prefab.name + " not found. Make sure to put in the folder referenced by the UM2_Sync script");
@@ -108,8 +111,10 @@ public class UM2_Sync : MonoBehaviour
     }
 
     public void giveAllSyncedObjects(int requestingClientID){
-        Debug.LogError("YESSSS: " + requestingClientID);
-        client.messageToOtherClient("debugMessage~test", requestingClientID);
+        foreach(UM2_Object clientSideObject in clientSideObjects){
+            int prefabID = prefabs.IndexOf(clientSideObject.prefab);
+            client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond, requestingClientID);
+        }
     }
 
     public void debugMessage(string message){   

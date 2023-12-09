@@ -352,6 +352,7 @@ public class UM2_Client : MonoBehaviour
         {
             Debug.LogError("HTTP error: " + request.error);
             failedMessages += 1;
+            return;
         }
         else
         {
