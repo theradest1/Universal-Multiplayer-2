@@ -51,7 +51,7 @@ public class UM2_Sync : MonoBehaviour
     {
         client = gameObject.GetComponent<UM2_Client>();
 
-        checkIfAllObjectsExist();
+        StartCoroutine(checkIfAllObjectsExist());
 
         reserveIDLoop();
     }
@@ -113,19 +113,16 @@ public class UM2_Sync : MonoBehaviour
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
+            Debug.Log("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond);
             client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond, requestingClientID);
         }
     }
 
-    public void debugMessage(string message){   
-        Debug.Log(message);
-    }
+    IEnumerator checkIfAllObjectsExist(){
+        yield return new WaitUntil(() => UM2_Client.clientID != -1);
 
-    public async void checkIfAllObjectsExist(){
-        while(UM2_Client.clientID == -1){
-            await Task.Delay(50);
-        }
+        client.messageOtherClients("giveAllSyncedObjects~" + UM2_Client.clientID);
 
-        client.messageAllClients("giveAllSyncedObjects~" + UM2_Client.clientID);
+        yield return null;
     }
 }

@@ -56,7 +56,6 @@ public class UM2_Client : MonoBehaviour
 
     public static UM2_Client client;
 
-
     private void OnDestroy()
     {
         connectedToServer = false;
@@ -73,6 +72,8 @@ public class UM2_Client : MonoBehaviour
     private void Awake()
     {
         client = this;
+
+        messageQueue = "";
     }
 
     private void Start()
@@ -150,13 +151,6 @@ public class UM2_Client : MonoBehaviour
     public void messageAllClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this also messages this client
         message = "all~" + message;
         sendMessage(message, reliableProtocol, sendWithoutID);
-    }
-
-    public async void test(){
-        while(true){
-            Debug.Log(connectedToHTTP);
-            await Task.Delay(100);
-        }
     }
 
     public void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use and has some protections

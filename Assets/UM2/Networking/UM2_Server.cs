@@ -235,7 +235,19 @@ public class UM2_Server : MonoBehaviour
                 }
                 break;
             case "others":  //send message to all other clients
-                Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
+                foreach(Client client in clients){
+                    if(client.clientID != clientID){
+                        if(protocol == "UDP" && client.udpEndpoint != null){
+                            SendUDPMessage(messageContents, client.udpEndpoint);
+                        }
+                        else if(client.tcpClient != null && client.networkStream != null){
+                            sendTCPMessage(messageContents, client.networkStream);
+                        }
+                        else{
+                            sendHTTPMessage(messageContents, clientID);
+                        }
+                    }
+                }
                 break;
             case "all":     //send message to all clients
                 foreach(Client client in clients){
