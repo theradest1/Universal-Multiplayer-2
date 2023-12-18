@@ -12,6 +12,10 @@ public class UM2_Object : MonoBehaviour
     public float ticksPerSecond;
     UM2_Sync sync;
 
+    public bool syncTransform = true;
+    bool pastSyncTransform = false;
+    bool initialized = false;
+
     private void Start()
     {
         sync = UM2_Sync.sync;
@@ -27,11 +31,25 @@ public class UM2_Object : MonoBehaviour
             }
         }
         sync.createSyncedObject(this);
-        updateTransform();
+        initialized = true;
     }
 
+    private void Update()
+    {
+        if(initialized){ // if object is being synced
+            if(pastSyncTransform != syncTransform){ //if it has been changed
+                pastSyncTransform = syncTransform;
+                if(syncTransform){
+                    updateTransform();
+                }
+            }
+        }
+    }
+
+
+
     async void updateTransform(){
-        if(this != null){
+        if(this != null && syncTransform){
             sync.updateObject(objectID, transform.position, transform.rotation);
 
             await Task.Delay((int)(1/ticksPerSecond*1000));
