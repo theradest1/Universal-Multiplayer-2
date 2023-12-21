@@ -62,6 +62,32 @@ public class UM2_Server : MonoBehaviour
 
     public bool debugMessages = false;
 
+    private void OnDestroy()
+    {
+        //stop udp
+        if (udpServer != null)
+        {
+            udpServer.Close();
+        }
+        udpOnline = false;
+        //Debug.Log("UDP Server has been stopped");
+
+        //stop http
+        //Debug.Log("HTTP has been stopped");
+        httpOnline = false;
+        if (httpListener != null)
+        {
+            httpListener.Stop();
+            httpListener.Close();
+        }
+
+        //close tcp
+        if(tcpServer != null){
+            tcpServer.Stop();
+        }
+        tcpOnline = false;
+    }
+
 
     void updateDebug()
     {
@@ -505,25 +531,5 @@ public class UM2_Server : MonoBehaviour
 
         Debug.LogError("Couldnt find client with ID " + clientID);
         return null;
-    }
-
-    private void OnDestroy()
-    {
-        //stop udp
-        if (udpServer != null)
-        {
-            udpServer.Close();
-        }
-        udpOnline = false;
-        //Debug.Log("UDP Server has been stopped");
-
-        //stop http
-        //Debug.Log("HTTP has been stopped");
-        httpOnline = false;
-        if (httpListener != null)
-        {
-            httpListener.Stop();
-            httpListener.Close();
-        }
     }
 }
