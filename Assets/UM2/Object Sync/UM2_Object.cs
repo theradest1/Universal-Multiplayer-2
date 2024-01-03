@@ -12,6 +12,7 @@ public class UM2_Object : MonoBehaviour
     [Range(1,64)]
     public float ticksPerSecond;
     UM2_Sync sync;
+	UM2_Variables variables;
 
     public bool syncTransform = true;
     bool pastSyncTransform = false;
@@ -20,6 +21,7 @@ public class UM2_Object : MonoBehaviour
     private void Start()
     {
         sync = UM2_Sync.sync;
+		variables = UM2_Variables.instance;
         initialize();
     }
 
@@ -33,6 +35,9 @@ public class UM2_Object : MonoBehaviour
         }
         sync.createSyncedObject(this);
         initialized = true;
+
+		variables.createServerVariable("testvar1", "yuh");
+		print(variables.getServerVariableValue("testvar1"));
     }
 
     private void Update()
@@ -46,8 +51,6 @@ public class UM2_Object : MonoBehaviour
             }
         }
     }
-
-
 
     async void updateTransform(){
         if(this != null && syncTransform){

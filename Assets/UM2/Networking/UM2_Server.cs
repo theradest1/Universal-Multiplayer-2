@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class Client{
     public IPEndPoint udpEndpoint;
@@ -25,6 +26,22 @@ public class Client{
     public Client(int id){
         clientID = id;
     }
+}
+
+public class ServerVariable
+{
+	public int ID;
+	public string name;
+	public string value;
+	public Type type;
+
+	public ServerVariable(int setID, string setName, string setValue, Type setType)
+	{
+		ID = setID;
+		name = setName;
+		value = setValue;
+		type = setType;
+	}
 }
 
 public class UM2_Server : MonoBehaviour
@@ -62,7 +79,10 @@ public class UM2_Server : MonoBehaviour
 
     public bool debugMessages = false;
 
-    private void OnDestroy()
+	//server-variables
+	List<ServerVariable> serverVariables = new List<ServerVariable>();
+
+	private void OnDestroy()
     {
         //stop udp
         if (udpServer != null)

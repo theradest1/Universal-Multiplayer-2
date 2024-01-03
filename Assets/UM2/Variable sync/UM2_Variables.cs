@@ -1,16 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class ServerVariable{
+public class LocalServerVariable{
     string value;
     Type type;
     public string name;
 
-    public ServerVariable(string name, object initialValue, Type setType){
+    public LocalServerVariable(string setName, object initialValue, Type setType){
         value = initialValue + "";
         type = setType;
+        name = setName;
+
         try
         {
             this.getValue();
@@ -22,7 +25,7 @@ public class ServerVariable{
         }
     }
 
-    public object parser(object value){
+    public object getValue(){
         if (type == typeof(int))
         {
             return int.Parse(value);
@@ -35,34 +38,45 @@ public class ServerVariable{
         {
             return value;
         }
-
         Debug.LogError("Unknown server variable type: " + type);
         return null;
     }
 
-    public void setValue(object value){
+    public void setValue(object newValue){
+        value = newValue + "";
+        syncVariable();
+    }
 
+    public void syncVariable(){
+        Debug.LogWarning("Not implemented");
     }
 }
 
 public class UM2_Variables : MonoBehaviour
 {
-    List<ServerVariable> serverVariables = new List<ServerVariable>();
+    List<LocalServerVariable> serverVariables = new List<LocalServerVariable>();
     public UM2_Client client;
+	public static UM2_Variables instance;
 
-    //I could make it so you can pass any type, but you cant actually do that (it will only be able to sync basic variables)
-    public ServerVariable createServerVariable(string name, string initialValue){
-        return new ServerVariable(name, initialValue, initialValue.GetType());
-    }
-    public ServerVariable createServerVariable(string name, int initialValue){
-        return new ServerVariable(name, initialValue, initialValue.GetType());
-    }
-    public ServerVariable createServerVariable(string name, float initialValue){
-        return new ServerVariable(name, initialValue, initialValue.GetType());
+	//I could make it so you can pass any type, but you cant actually do that (it will only be able to sync basic variables)
+	public LocalServerVariable createServerVariable(string name, string initialValue){
+		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
+		serverVariables.Add(newVariable);
+		return newVariable;
+	}
+    public LocalServerVariable createServerVariable(string name, int initialValue){
+		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
+		serverVariables.Add(newVariable);
+		return newVariable;
+	}
+    public LocalServerVariable createServerVariable(string name, float initialValue){
+        LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
+		serverVariables.Add(newVariable);
+        return newVariable;
     }
 
-    public ServerVariable getServerVariable(string name){
-        foreach (ServerVariable variable in serverVariables)
+    public LocalServerVariable getServerVariable(string name){ //I need to make this a dictionary in the future
+		foreach (LocalServerVariable variable in serverVariables)
         {
             if(variable.name == name){
                 return variable;
@@ -76,4 +90,9 @@ public class UM2_Variables : MonoBehaviour
     public object getServerVariableValue(string name){
         return getServerVariable(name).getValue();
     }
+
+	private void Awake()
+	{
+		instance = this;
+	}
 }
