@@ -35,9 +35,6 @@ public class UM2_Object : MonoBehaviour
         }
         sync.createSyncedObject(this);
         initialized = true;
-
-		variables.createServerVariable("testvar1", "yuh");
-		print(variables.getServerVariableValue("testvar1"));
     }
 
     private void Update()

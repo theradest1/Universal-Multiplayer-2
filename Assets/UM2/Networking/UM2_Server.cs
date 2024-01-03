@@ -127,7 +127,7 @@ public class UM2_Server : MonoBehaviour
 
         if (localIpAddress == null || publicIpAddress == null)
         {
-            Debug.LogWarning("Ip addresses have not been found yet (restart if continued)");
+            Debug.LogWarning("(Server) Ip addresses have not been found yet (restart if continued)");
             Invoke("StartServer", 1f);
             return;
         }
@@ -156,7 +156,9 @@ public class UM2_Server : MonoBehaviour
         {
             httpListener.Start();
             debugger.setDebug("HTTP status", "online");
-            //Debug.Log("HTTP Server started on port " + httpPort);
+            if(debugMessages){
+                Debug.Log("(Server) HTTP Server started on port " + httpPort);
+            }
 
             httpOnline = true;
 
@@ -164,7 +166,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Failed to start HTTP Server: " + e.Message);
+            Debug.LogError("(Server) Failed to start HTTP: " + e.Message);
             httpOnline = false;
             debugger.setDebug("HTTP status", "offline");
         }
@@ -203,17 +205,17 @@ public class UM2_Server : MonoBehaviour
                         // process the message
                         string message = request.RawUrl.Substring(1);
                         if(debugMessages){
-                            Debug.Log("got HTTP: " + message);
+                            Debug.Log("(Server) Got HTTP: " + message);
                         }
                         string responseMessage = processSplitMessages(message, "HTTP");
                         responseMessage += "|";
 
-                        //send response
+                        //send response - even if empty (because http needs a reponse)
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
                         response.ContentType = "text/html";
                         response.ContentLength64 = buffer.Length;
                         if(debugMessages){
-                            Debug.Log("sent HTTP: " + responseMessage);
+                            Debug.Log("(Server) Sent HTTP: " + responseMessage);
                         }
 
                         sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
@@ -223,7 +225,7 @@ public class UM2_Server : MonoBehaviour
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Error handling request: " + e.Message);
+                    Debug.LogError("(Server) Error handling request: " + e.Message);
                     failedMessages += 1;
                 }
             }
@@ -280,11 +282,10 @@ public class UM2_Server : MonoBehaviour
                         currentVariableID++;
                         break;
                     case "getQueue": //this is called by http clients to collect the queue
-                        //Debug.Log("Collected queue");
                         responseMessage = "";
                         break;
                     default:
-                        Debug.LogError("Unknown message from " + protocol + ": " + message);
+                        Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
                         break;
                 }
                 break;
@@ -315,7 +316,6 @@ public class UM2_Server : MonoBehaviour
                         sendHTTPMessage(messageContents, clientID);
                     }
                 }
-                //Debug.LogError("Not implimented: " + messageType + " (from " + message + ")");
                 break;
             case "direct":  //send message to specified other client
                 int targetClientID = int.Parse(messageContents.Split("~")[0]);
@@ -331,14 +331,13 @@ public class UM2_Server : MonoBehaviour
                         else{
                             sendHTTPMessage(messageContents, clientID);
                         }
-                        Debug.Log("Direct message to " + targetClientID + ": " + messageContents);
                         break;
                     }
                 }
-                Debug.LogError("Couldnt find client with ID " + targetClientID);
+                Debug.LogError("(Server) Couldnt find client with ID " + targetClientID);
                 break;
             default:
-                Debug.LogError("Unknown message type: " + messageType + " (from " + message + ")");
+                Debug.LogError("(Server) Unknown message type: " + messageType + " (from " + message + ")");
                 break;
         }
 
@@ -363,14 +362,15 @@ public class UM2_Server : MonoBehaviour
 
             //make it call udpReciever when message
             udpServer.BeginReceive(udpReciever, null);
-
-            //Debug.Log("UDP Server started on port " + udpPort);
+            if(debugMessages){
+                Debug.Log("(Server) UDP Server started on port " + udpPort);
+            }
             udpOnline = true;
             debugger.setDebug("UDP status", "online");
         }
         catch (Exception e)
         {
-            Debug.LogError("Error starting UDP server: " + e.Message);
+            Debug.LogError("(Server) Error starting UDP server: " + e.Message);
         }
     }
 
@@ -387,8 +387,9 @@ public class UM2_Server : MonoBehaviour
             tcpServer.Start();
             tcpOnline = true;
             debugger.setDebug("TCP status", "online");
-
-            //Debug.Log("TCP Server started on port " + tcpPort);
+            if(debugMessages){
+                Debug.Log("(Server) TCP Server started on port " + tcpPort);
+            }
 
             while (tcpOnline)
             {
@@ -398,7 +399,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Error starting TCP server: " + e.Message);
+            Debug.LogError("Server) Error starting TCP server: " + e.Message);
         }
     }
 
@@ -414,7 +415,7 @@ public class UM2_Server : MonoBehaviour
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                 if(debugMessages){
-                    Debug.Log("got TCP: " + receivedMessage);
+                    Debug.Log("(Server) Got TCP: " + receivedMessage);
                 }
                 
                 string responseMessage = processSplitMessages(receivedMessage, "TCP");
@@ -426,7 +427,7 @@ public class UM2_Server : MonoBehaviour
                     clientData.tcpClient = client;
                 }
 
-                if (responseMessage != null)
+                if (responseMessage != null && responseMessage != "||" && responseMessage != "|")
                 {
                     sendTCPMessage(responseMessage, stream);
                 }
@@ -437,7 +438,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Error handling client: " + e.Message);
+            Debug.LogError("(Server) Error handling client: " + e.Message);
             failedMessages += 1;
         }
     }
@@ -447,7 +448,7 @@ public class UM2_Server : MonoBehaviour
         message += "|";
         byte[] sendData = Encoding.ASCII.GetBytes(message);
         if(debugMessages){
-            Debug.Log("Sent TCP: " + message);
+            Debug.Log("(Server) Sent TCP: " + message);
         }
         sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
@@ -462,7 +463,7 @@ public class UM2_Server : MonoBehaviour
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
         if(debugMessages){
-            Debug.Log("Got UDP: " + receivedData);
+            Debug.Log("(Server) Got UDP: " + receivedData);
         }
 
         string responseMessage = processSplitMessages(receivedData, "UDP");
@@ -475,7 +476,6 @@ public class UM2_Server : MonoBehaviour
 
         if (responseMessage != null && responseMessage != "|")
         {
-            Debug.Log(responseMessage);
             SendUDPMessage(responseMessage, clientEndPoint);
         }
 
@@ -495,14 +495,14 @@ public class UM2_Server : MonoBehaviour
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
             byte[] data = Encoding.UTF8.GetBytes(message);
             if(debugMessages){
-                Debug.Log("Sent UDP: " + message);
+                Debug.Log("(Server) Sent UDP: " + message);
             }
             sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
             udpServer.Send(data, data.Length, clientEndPoint);
         }
         catch (Exception e)
         {
-            Debug.LogError("Error sending response: " + e.Message);
+            Debug.LogError("(Server) Error sending response: " + e.Message);
             failedMessages += 1;
         }
     }
@@ -518,7 +518,7 @@ public class UM2_Server : MonoBehaviour
                 return;
             }
         }
-        Debug.LogError("No network adapters with an IPv4 address in the system! (when finding local ip)");
+        Debug.LogError("(Server) No network adapters with an IPv4 address in the system! (when finding local ip)");
     }
 
     public static async void GetPublicIPAddress()
@@ -535,7 +535,7 @@ public class UM2_Server : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("Error: " + request.error);
+            Debug.LogError("(Server) Error getting public IP: " + request.error);
         }
         else
         {
@@ -557,7 +557,7 @@ public class UM2_Server : MonoBehaviour
             }
         }
 
-        Debug.LogError("Couldnt find client with ID " + clientID);
+        Debug.LogError("(Server) Couldnt find client with ID " + clientID);
         return null;
     }
 }
