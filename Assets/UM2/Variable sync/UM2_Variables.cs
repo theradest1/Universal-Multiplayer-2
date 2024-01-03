@@ -8,6 +8,7 @@ public class LocalServerVariable{
     string value;
     Type type;
     public string name;
+    List<int> reservedIDs = new List<int>();
 
     public LocalServerVariable(string setName, object initialValue, Type setType){
         value = initialValue + "";

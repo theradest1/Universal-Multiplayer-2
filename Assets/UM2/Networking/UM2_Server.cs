@@ -73,6 +73,7 @@ public class UM2_Server : MonoBehaviour
 
     int currentPlayerID = 0;
     int currentObjectID = 0;
+    int currentVariableID = 0;
 
 
     List<Client> clients = new List<Client>();
@@ -269,11 +270,18 @@ public class UM2_Server : MonoBehaviour
 
                         responseMessage = "setID~" + currentPlayerID + "";
                         currentPlayerID++;
-
                         break;
                     case "reserveObjectID":
                         responseMessage = "reservedObjectID~" + currentObjectID;
                         currentObjectID++;
+                        break;
+                    case "reserveVariableID":
+                        responseMessage = "reservedVariableID~" + currentVariableID;
+                        currentVariableID++;
+                        break;
+                    case "getQueue": //this is called by http clients to collect the queue
+                        //Debug.Log("Collected queue");
+                        responseMessage = "";
                         break;
                     default:
                         Debug.LogError("Unknown message from " + protocol + ": " + message);
@@ -324,7 +332,6 @@ public class UM2_Server : MonoBehaviour
                             sendHTTPMessage(messageContents, clientID);
                         }
                         Debug.Log("Direct message to " + targetClientID + ": " + messageContents);
-                        Debug.Log("YUHHHH");
                         break;
                     }
                 }
@@ -344,7 +351,6 @@ public class UM2_Server : MonoBehaviour
             //clear out queue
             currentClient.messageQueue = new List<string>();
         }
-
         return responseMessage;
     }
 
@@ -449,6 +455,8 @@ public class UM2_Server : MonoBehaviour
 
     private void udpReciever(IAsyncResult result)
     {
+        udpServer.BeginReceive(udpReciever, null);
+        
         IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
@@ -465,12 +473,12 @@ public class UM2_Server : MonoBehaviour
             clientData.udpEndpoint = clientEndPoint;
         }
 
-        if (responseMessage != null)
+        if (responseMessage != null && responseMessage != "|")
         {
+            Debug.Log(responseMessage);
             SendUDPMessage(responseMessage, clientEndPoint);
         }
 
-        udpServer.BeginReceive(udpReciever, null);
     }
 
     private void SendUDPMessage(string message, int clientID)

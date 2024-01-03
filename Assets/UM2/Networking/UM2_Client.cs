@@ -56,6 +56,8 @@ public class UM2_Client : MonoBehaviour
 
     public static UM2_Client client;
 
+    public float httpUpdateRate = .1f;
+
     private void OnDestroy()
     {
         connectedToServer = false;
@@ -127,6 +129,11 @@ public class UM2_Client : MonoBehaviour
         }
 
         InvokeRepeating("updateDebug", 1f, 1f);
+        InvokeRepeating("clearHTTPQueue", 1f, httpUpdateRate);
+    }
+
+    public void clearHTTPQueue(){
+        sendMessage("server~getQueue", "HTTP");
     }
 
     public void join(){
