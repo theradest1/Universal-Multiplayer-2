@@ -3,17 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Threading.Tasks;
 
 public class LocalServerVariable{
     string value;
     Type type;
     public string name;
-    List<int> reservedIDs = new List<int>();
+    public int ID;
 
-    public LocalServerVariable(string setName, object initialValue, Type setType){
+    public LocalServerVariable(string setName, object initialValue, Type setType, int setID){
         value = initialValue + "";
         type = setType;
         name = setName;
+        ID = setID; 
 
         try
         {
@@ -56,25 +58,61 @@ public class LocalServerVariable{
 public class UM2_Variables : MonoBehaviour
 {
     List<LocalServerVariable> serverVariables = new List<LocalServerVariable>();
-    public UM2_Client client;
+    UM2_Client client;
 	public static UM2_Variables instance;
+    
+    List<int> reservedIDs = new List<int>();
+    public int targetReservedIDs = 3;
+    
+    List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
 
-	//I could make it so you can pass any type, but you cant actually do that (it will only be able to sync basic variables)
-	public LocalServerVariable createServerVariable(string name, string initialValue){
-		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
-		serverVariables.Add(newVariable);
-		return newVariable;
-	}
-    public LocalServerVariable createServerVariable(string name, int initialValue){
-		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
-		serverVariables.Add(newVariable);
-		return newVariable;
-	}
-    public LocalServerVariable createServerVariable(string name, float initialValue){
-        LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, initialValue.GetType());
-		serverVariables.Add(newVariable);
-        return newVariable;
+    async void reserveIDLoop(){
+        await Task.Delay(100);
+
+        if(!UM2_Client.connectedToServer){
+            return;
+        }
+
+        if(reservedIDs.Count < targetReservedIDs){
+            getReserveNewObjectID();
+        }
+
+        reserveIDLoop();
     }
+
+    void getReserveNewObjectID(){
+        client.messageServer("reserveVariableID");
+    }
+
+    public void reservedVariableID(int newReservedID){
+        reservedIDs.Add(newReservedID);
+    }
+
+	async public void createServerVariable<T>(string name, T initialValue){
+        if(!allowedVariableTypes.Contains(typeof(T))){
+            Debug.LogError("Type \"" + typeof(T) + "\" is not allowed to be a server variable.\nIt must be a string, int, or float (lists will be possible in the future)");
+            return;
+        }
+
+        /*
+        TODO:
+        - send stuff to server
+        */
+
+        while(reservedIDs.Count == 0){
+            getReserveNewObjectID();
+            await Task.Delay(50);
+        }
+
+        int usedVariableID = reservedIDs[0];
+        reservedIDs.RemoveAt(0);
+
+		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T), usedVariableID);
+		serverVariables.Add(newVariable);
+
+        Debug.Log("Created new server variable");
+		return;
+	}
 
     public LocalServerVariable getServerVariable(string name){ //I need to make this a dictionary in the future
 		foreach (LocalServerVariable variable in serverVariables)
@@ -96,4 +134,10 @@ public class UM2_Variables : MonoBehaviour
 	{
 		instance = this;
 	}
+
+    void Start()
+    {
+        client = gameObject.GetComponent<UM2_Client>();
+        reserveIDLoop();
+    }
 }
