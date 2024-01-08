@@ -250,6 +250,7 @@ public class UM2_Server : MonoBehaviour
         string clientIDString = message.Split("~")[0];
         string messageType = message.Split("~")[1];
         string messageContents = message.Substring(clientIDString.Length + messageType.Length + 2);
+        string messageCommand;
         string[] messageParameters = message.Split("~");
         
         int clientID = int.Parse(clientIDString);
@@ -258,7 +259,7 @@ public class UM2_Server : MonoBehaviour
         switch (messageType)
         {
             case "server":  //server messages (client -> server)
-                string messageCommand = message.Split("~")[2];
+                messageCommand = message.Split("~")[2];
                 messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
                 switch (messageCommand)
                 {
@@ -276,11 +277,7 @@ public class UM2_Server : MonoBehaviour
                         responseMessage = "reservedObjectID~" + currentObjectID;
                         currentObjectID++;
                         break;
-                    case "reserveVariableID":
-                        responseMessage = "reservedVariableID~" + currentVariableID;
-                        currentVariableID++;
-                        break;
-                    case "getQueue": //this is called by http clients to collect the queue
+                    case "getQueue": //this is called by http clients to collect queued messages
                         responseMessage = "";
                         break;
                     default:
@@ -288,6 +285,26 @@ public class UM2_Server : MonoBehaviour
                         break;
                 }
                 break;
+            case "var":
+                messageCommand = message.Split("~")[2];
+                messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
+                switch (messageCommand)
+                {
+                    case "new":
+                        Debug.Log("(Server) New variable: " + messageContents);
+                        break;
+                    case "set":
+                        Debug.Log("(Server) Setting variable: " + messageContents);
+                        break;
+                    case "add":
+                        Debug.Log("(Server) Adding to variable: " + messageContents);
+                        break;
+                    default:
+                        Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
+                        break;
+                }
+                break;
+
             case "others":  //send message to all other clients
                 foreach(Client client in clients){
                     if(client.clientID != clientID){

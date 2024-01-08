@@ -9,13 +9,11 @@ public class LocalServerVariable{
     string value;
     Type type;
     public string name;
-    public int ID;
 
-    public LocalServerVariable(string setName, object initialValue, Type setType, int setID){
+    public LocalServerVariable(string setName, object initialValue, Type setType){
         value = initialValue + "";
         type = setType;
         name = setName;
-        ID = setID; 
 
         try
         {
@@ -61,34 +59,10 @@ public class UM2_Variables : MonoBehaviour
     UM2_Client client;
 	public static UM2_Variables instance;
     
-    List<int> reservedIDs = new List<int>();
-    public int targetReservedIDs = 3;
-    
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
 
-    async void reserveIDLoop(){
-        await Task.Delay(100);
 
-        if(!UM2_Client.connectedToServer){
-            return;
-        }
-
-        if(reservedIDs.Count < targetReservedIDs){
-            getReserveNewObjectID();
-        }
-
-        reserveIDLoop();
-    }
-
-    void getReserveNewObjectID(){
-        client.messageServer("reserveVariableID");
-    }
-
-    public void reservedVariableID(int newReservedID){
-        reservedIDs.Add(newReservedID);
-    }
-
-	async public void createServerVariable<T>(string name, T initialValue){
+	public void createServerVariable<T>(string name, T initialValue){
         if(!allowedVariableTypes.Contains(typeof(T))){
             Debug.LogError("Type \"" + typeof(T) + "\" is not allowed to be a server variable.\nIt must be a string, int, or float (lists will be possible in the future)");
             return;
@@ -99,18 +73,10 @@ public class UM2_Variables : MonoBehaviour
         - send stuff to server
         */
 
-        while(reservedIDs.Count == 0){
-            getReserveNewObjectID();
-            await Task.Delay(50);
-        }
-
-        int usedVariableID = reservedIDs[0];
-        reservedIDs.RemoveAt(0);
-
-		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T), usedVariableID);
+		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T));
 		serverVariables.Add(newVariable);
 
-        Debug.Log("Created new server variable");
+        Debug.Log("Created new server variable " + name);
 		return;
 	}
 
@@ -138,6 +104,5 @@ public class UM2_Variables : MonoBehaviour
     void Start()
     {
         client = gameObject.GetComponent<UM2_Client>();
-        reserveIDLoop();
     }
 }
