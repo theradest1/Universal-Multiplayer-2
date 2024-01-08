@@ -11,6 +11,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Runtime.InteropServices;
+using Unity.VisualScripting;
+using System.Xml.Schema;
 
 public class Client{
     public IPEndPoint udpEndpoint;
@@ -29,18 +32,37 @@ public class Client{
 
 public class ServerVariable
 {
-	public int ID;
 	public string name;
 	public string value;
 	public Type type;
+    UM2_Server server;
 
-	public ServerVariable(int setID, string setName, string setValue, Type setType)
+	public ServerVariable(string setName, string setValue, string setType, UM2_Server setServer)
 	{
-		ID = setID;
 		name = setName;
 		value = setValue;
-		type = setType;
+
+		type = Type.GetType(setType);
+        server = setServer;
 	}
+
+    public void add(string addValue){
+        if(type == typeof(int)){
+            set(int.Parse(value) + int.Parse(addValue) + "");
+        }
+        else if(type == typeof(float)){
+            set(float.Parse(value) + float.Parse(addValue) + "");
+        }
+        else if(type == typeof(string)){
+            set(value + addValue);
+        }
+    }
+
+    public void set(string newValue){
+        value = newValue;
+        Debug.Log("(Server) Set " + name + " to " + value);
+        server.sendMessageToAll("syncVar~" + name + "~" + value, "TCP");
+    }
 }
 
 public class UM2_Server : MonoBehaviour
@@ -280,24 +302,25 @@ public class UM2_Server : MonoBehaviour
                     case "getQueue": //this is called by http clients to collect queued messages
                         responseMessage = "";
                         break;
-                    default:
-                        Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
+                    case "newVar":
+                        string varName = messageContents.Split("~")[1];
+                        string varValue = messageContents.Split("~")[2];
+                        string varType = messageContents.Split("~")[3];
+                        serverVariables.Add(new ServerVariable(varName, varValue, varType, this));
+                        sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP");
+                        Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
-                }
-                break;
-            case "var":
-                messageCommand = message.Split("~")[2];
-                messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
-                switch (messageCommand)
-                {
-                    case "new":
-                        Debug.Log("(Server) New variable: " + messageContents);
+                    case "setVar":
+                        varName = messageContents.Split("~")[1];
+                        varValue = messageContents.Split("~")[2];
+                        Debug.Log("(Server) Setting var " + varName);
+                        getServerVariable(varName).set(varValue);
                         break;
-                    case "set":
-                        Debug.Log("(Server) Setting variable: " + messageContents);
-                        break;
-                    case "add":
-                        Debug.Log("(Server) Adding to variable: " + messageContents);
+                    case "addToVar":
+                        varName = messageContents.Split("~")[1];
+                        varValue = messageContents.Split("~")[2];
+                        Debug.Log("(Server) Adding to var " + varName);
+                        getServerVariable(varName).add(varValue);
                         break;
                     default:
                         Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
@@ -306,32 +329,10 @@ public class UM2_Server : MonoBehaviour
                 break;
 
             case "others":  //send message to all other clients
-                foreach(Client client in clients){
-                    if(client.clientID != clientID){
-                        if(protocol == "UDP" && client.udpEndpoint != null){
-                            SendUDPMessage(messageContents, client.udpEndpoint);
-                        }
-                        else if(client.tcpClient != null && client.networkStream != null){
-                            sendTCPMessage(messageContents, client.networkStream);
-                        }
-                        else{
-                            sendHTTPMessage(messageContents, clientID);
-                        }
-                    }
-                }
+                sendMessageToAll(messageContents, protocol, clientID);
                 break;
             case "all":     //send message to all clients
-                foreach(Client client in clients){
-                    if(protocol == "UDP" && client.udpEndpoint != null){
-                        SendUDPMessage(messageContents, client.udpEndpoint);
-                    }
-                    else if(client.tcpClient != null && client.networkStream != null){
-                        sendTCPMessage(messageContents, client.networkStream);
-                    }
-                    else{
-                        sendHTTPMessage(messageContents, clientID);
-                    }
-                }
+                sendMessageToAll(messageContents, protocol);
                 break;
             case "direct":  //send message to specified other client
                 int targetClientID = int.Parse(messageContents.Split("~")[0]);
@@ -367,6 +368,32 @@ public class UM2_Server : MonoBehaviour
             currentClient.messageQueue = new List<string>();
         }
         return responseMessage;
+    }
+
+    public ServerVariable getServerVariable(string name){
+        foreach(ServerVariable serverVariable in serverVariables){
+            if(serverVariable.name == name){
+                return serverVariable;
+            }
+        }
+        Debug.LogError("(Server) Could not find server variable: " + name);
+        return null;
+    }
+
+    public void sendMessageToAll(string message, string protocol, int excludedID = -1){
+        foreach(Client client in clients){
+            if(client.clientID != excludedID){
+                if(protocol == "UDP" && client.udpEndpoint != null){
+                    SendUDPMessage(message, client.udpEndpoint);
+                }
+                else if(client.tcpClient != null && client.networkStream != null){
+                    sendTCPMessage(message, client.networkStream);
+                }
+                else{
+                    sendHTTPMessage(message, client.clientID);
+                }
+            }
+        }
     }
 
     void initUDP()

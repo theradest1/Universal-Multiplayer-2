@@ -4,16 +4,19 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 public class LocalServerVariable{
     string value;
     Type type;
     public string name;
+    UM2_Client client;
 
-    public LocalServerVariable(string setName, object initialValue, Type setType){
+    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient){
         value = initialValue + "";
         type = setType;
         name = setName;
+        client = setClient;
 
         try
         {
@@ -24,6 +27,7 @@ public class LocalServerVariable{
             Debug.LogError("Could not parse initial value: " + initialValue + "\nType: " + setType);
             return;
         }
+        client.messageServer("newVar~" + name + "~" + value + "~" + type);
     }
 
     public object getValue(){
@@ -42,15 +46,6 @@ public class LocalServerVariable{
         Debug.LogError("Unknown server variable type: " + type);
         return null;
     }
-
-    public void setValue(object newValue){
-        value = newValue + "";
-        syncVariable();
-    }
-
-    public void syncVariable(){
-        Debug.LogWarning("Not implemented");
-    }
 }
 
 public class UM2_Variables : MonoBehaviour
@@ -61,22 +56,41 @@ public class UM2_Variables : MonoBehaviour
     
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
 
+    public void syncVar(string name, string value){
+        Debug.Log(name + " = " + value);
+    }
+
+    public void syncNewVar(string name, string value, string type){
+        Type varType = Type.GetType(type);
+
+        if(varType == typeof(int)){
+            createServerVariable<int>(name, int.Parse(value));
+        }
+        else if(varType == typeof(float)){
+            createServerVariable<float>(name, float.Parse(value));
+        }
+        else if(varType == typeof(string)){
+            createServerVariable<string>(name, value);
+        }
+    }
 
 	public void createServerVariable<T>(string name, T initialValue){
+        foreach(LocalServerVariable serverVariable in serverVariables){
+            if(serverVariable.name == name){
+                Debug.LogError("A server variable with name " + name + " already exists");
+                return;
+            }
+        }
+
         if(!allowedVariableTypes.Contains(typeof(T))){
             Debug.LogError("Type \"" + typeof(T) + "\" is not allowed to be a server variable.\nIt must be a string, int, or float (lists will be possible in the future)");
             return;
         }
 
-        /*
-        TODO:
-        - send stuff to server
-        */
-
-		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T));
+		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T), client);
 		serverVariables.Add(newVariable);
 
-        Debug.Log("Created new server variable " + name);
+        //Debug.Log("Created new server variable " + name);
 		return;
 	}
 
@@ -104,5 +118,37 @@ public class UM2_Variables : MonoBehaviour
     void Start()
     {
         client = gameObject.GetComponent<UM2_Client>();
+        initialize();
+    }
+
+    public void addToVar(string name, object value){
+        client.messageServer("addToVar~" + name + "~" + value);
+        Debug.Log("Added");
+    }
+
+    public void setVar(string name, object value){
+        client.messageServer("setVar~" + name + "~" + value);
+        Debug.Log("Set");
+    }
+
+    async void initialize(){
+        while (UM2_Client.clientID == -1){
+            await Task.Delay(50);
+
+            if(!UM2_Client.connectedToServer){
+                return;
+            }
+        }
+        
+        createServerVariable<int>("testVar", 1);
+        Invoke("testSet", 2);
+        Invoke("testAdd", 3);
+    }
+
+    void testAdd(){
+        addToVar("testVar", 1);
+    }
+    void testSet(){
+        setVar("testVar", 3);
     }
 }
