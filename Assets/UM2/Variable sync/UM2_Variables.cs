@@ -12,11 +12,11 @@ public class LocalServerVariable{
     public string name;
     UM2_Client client;
 
-    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient){
-        value = initialValue + "";
+    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
         type = setType;
         name = setName;
         client = setClient;
+        value = initialValue + "";
 
         try
         {
@@ -24,7 +24,7 @@ public class LocalServerVariable{
         }
         catch (System.Exception)
         {
-            Debug.LogError("Could not parse initial value: " + initialValue + "\nType: " + setType);
+            Debug.LogError("Could not parse initial value: " + initialValue + " into " + setType);
             return;
         }
         client.messageServer("newVar~" + name + "~" + value + "~" + type);
@@ -46,6 +46,11 @@ public class LocalServerVariable{
         Debug.LogError("Unknown server variable type: " + type);
         return null;
     }
+
+    public void setValue(string newValue){
+        value = newValue;
+        //Debug.Log(name + " = " + value);
+    }
 }
 
 public class UM2_Variables : MonoBehaviour
@@ -57,7 +62,7 @@ public class UM2_Variables : MonoBehaviour
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
 
     public void syncVar(string name, string value){
-        Debug.Log(name + " = " + value);
+        getServerVariable(name).setValue(value);
     }
 
     public void syncNewVar(string name, string value, string type){
@@ -123,12 +128,10 @@ public class UM2_Variables : MonoBehaviour
 
     public void addToVar(string name, object value){
         client.messageServer("addToVar~" + name + "~" + value);
-        Debug.Log("Added");
     }
 
     public void setVar(string name, object value){
         client.messageServer("setVar~" + name + "~" + value);
-        Debug.Log("Set");
     }
 
     async void initialize(){
@@ -149,6 +152,6 @@ public class UM2_Variables : MonoBehaviour
         addToVar("testVar", 1);
     }
     void testSet(){
-        setVar("testVar", 3);
+        setVar("testVar", 2);
     }
 }

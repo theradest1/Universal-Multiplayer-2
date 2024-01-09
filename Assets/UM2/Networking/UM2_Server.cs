@@ -60,7 +60,7 @@ public class ServerVariable
 
     public void set(string newValue){
         value = newValue;
-        Debug.Log("(Server) Set " + name + " to " + value);
+        //Debug.Log("(Server) Set " + name + " to " + value);
         server.sendMessageToAll("syncVar~" + name + "~" + value, "TCP");
     }
 }
@@ -94,7 +94,6 @@ public class UM2_Server : MonoBehaviour
 
     int currentPlayerID = 0;
     int currentObjectID = 0;
-    int currentVariableID = 0;
 
 
     List<Client> clients = new List<Client>();
@@ -308,18 +307,18 @@ public class UM2_Server : MonoBehaviour
                         string varType = messageContents.Split("~")[3];
                         serverVariables.Add(new ServerVariable(varName, varValue, varType, this));
                         sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP");
-                        Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
+                        //Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
                     case "setVar":
                         varName = messageContents.Split("~")[1];
                         varValue = messageContents.Split("~")[2];
-                        Debug.Log("(Server) Setting var " + varName);
+                        //Debug.Log("(Server) Setting var " + varName);
                         getServerVariable(varName).set(varValue);
                         break;
                     case "addToVar":
                         varName = messageContents.Split("~")[1];
                         varValue = messageContents.Split("~")[2];
-                        Debug.Log("(Server) Adding to var " + varName);
+                        //Debug.Log("(Server) Adding to var " + varName);
                         getServerVariable(varName).add(varValue);
                         break;
                     default:
