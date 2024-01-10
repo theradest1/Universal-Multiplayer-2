@@ -257,7 +257,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
-  camRotateSpeed: 250
+  camRotateSpeed: 3
   maxCamAngle: 80
   playerRB: {fileID: 180985657}
   playerCam: {fileID: 963194228}

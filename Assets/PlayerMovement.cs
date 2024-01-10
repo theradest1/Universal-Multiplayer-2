@@ -54,10 +54,10 @@ public class PlayerMovement : MonoBehaviour
         //playerRB.MovePosition(playerRB.position +  * moveSpeed * playerRB.transform.forward * Time.deltaTime + Input.GetAxis("Horizontal") * moveSpeed * playerRB.transform.right * Time.deltaTime);
 
         //player rotation
-        playerRB.MoveRotation(playerRB.rotation * Quaternion.Euler(0, Input.GetAxis("Mouse X") * camRotateSpeed * Time.deltaTime, 0));
+        playerRB.MoveRotation(playerRB.rotation * Quaternion.Euler(0, Input.GetAxis("Mouse X") * camRotateSpeed, 0));
 
         //cam rotation
-        camX = Math.Clamp(camX - Input.GetAxis("Mouse Y") * camRotateSpeed * Time.deltaTime, -maxCamAngle, maxCamAngle);
+        camX = Math.Clamp(camX - Input.GetAxis("Mouse Y") * camRotateSpeed, -maxCamAngle, maxCamAngle);
         playerCam.transform.rotation = Quaternion.Euler(camX, playerCam.transform.rotation.eulerAngles.y, playerCam.transform.rotation.eulerAngles.z);
     }
 
