@@ -103,6 +103,7 @@ public class PlayerMovement : MonoBehaviour
 
         //limit speed
         float horizontalSpeed = new Vector3(playerRB.velocity.x, 0f, playerRB.velocity.z).magnitude;
+        Debug.Log(horizontalSpeed);
         if (horizontalSpeed > maxSpeed)
         {
             playerRB.velocity = new Vector3(playerRB.velocity.x, 0f, playerRB.velocity.z).normalized * maxSpeed + new Vector3(0f, playerRB.velocity.y, 0f);
