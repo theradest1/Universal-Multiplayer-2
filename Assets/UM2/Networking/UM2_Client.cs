@@ -37,13 +37,17 @@ public class UM2_Client : MonoBehaviour
 
     float udpPingStartTime;
     float udpPing;
+    int sentBytesUDP;
+    int gotBytesUDP;
     float tcpPingStartTime;
     float tcpPing;
+    int sentBytesTCP;
+    int gotBytesTCP;
     float httpPingStartTime;
     float httpPing;
+    int sentBytesHTTP;
+    int gotBytesHTTP;
 
-    int sentBytes = 0;
-    int receivedBytes = 0;
     int failedMessages = 0;
 
     public UM2_Server server;
@@ -56,7 +60,13 @@ public class UM2_Client : MonoBehaviour
 
     public static UM2_Client client;
 
-    public float httpUpdateRate = .1f;
+    //public float httpUpdateRate = .1f;
+
+    public bool debugUDPMessages = false;
+    public bool debugTCPMessages = false;
+    public bool debugHTTPMessages = false;
+
+
 
     private void OnDestroy()
     {
@@ -100,23 +110,19 @@ public class UM2_Client : MonoBehaviour
         }
 
         debugger.addSpace("Client:");
-        debugger.setDebug("UDP Ping", "n/a");
-        debugger.setDebug("TCP Ping", "n/a");
-        debugger.setDebug("HTTP Ping", "n/a");
-        debugger.setDebug("Bytes/Sec sent", "0");
-        debugger.setDebug("Bytes/Sec recieved", "0");
+        debugger.setDebug("UDP", "ms B/s↑ B/s↓");
+        debugger.setDebug("TCP", "ms B/s↑ B/s↓");
+        debugger.setDebug("HTTP", "ms B/s↑ B/s↓");
         debugger.setDebug("Failed/Sec", "0");
 
         if (hostingServer)
         {
             debugger.addSpace();
             debugger.addSpace("Server:");
-            debugger.setDebug("UDP status", "offline");
-            debugger.setDebug("TCP status", "offline");
-            debugger.setDebug("HTTP status", "offline");
-            debugger.setDebug("Bytes/Sec sent ", "0");
-            debugger.setDebug("Bytes/Sec recieved ", "0");
-            debugger.setDebug("Failed/Sec ", "0");
+            debugger.setDebug(" UDP", "offline B/s↑ B/s↓");
+            debugger.setDebug(" TCP", "offline B/s↑ B/s↓");
+            debugger.setDebug(" HTTP", "offline B/s↑ B/s↓");
+            debugger.setDebug(" Failed/Sec ", "0");
         }
 
         if (!hostingServer) //client gets started by server so it doesnt try to join before server is up
@@ -129,7 +135,7 @@ public class UM2_Client : MonoBehaviour
         }
 
         InvokeRepeating("updateDebug", 1f, 1f);
-        InvokeRepeating("clearHTTPQueue", 1f, httpUpdateRate);
+        //InvokeRepeating("clearHTTPQueue", 1f, httpUpdateRate);
     }
 
     public void clearHTTPQueue(){
@@ -184,12 +190,17 @@ public class UM2_Client : MonoBehaviour
 
     void updateDebug()
     {
-        debugger.setDebug("Bytes/Sec sent", sentBytes + "");
-        debugger.setDebug("Bytes/Sec recieved", receivedBytes + "");
+        debugger.setDebug("UDP", $"{(int)(udpPing * 1000)}ms  {sentBytesUDP}B/s↑  {gotBytesUDP}B/s↓");
+        debugger.setDebug("TCP", $"{(int)(tcpPing * 1000)}ms  {sentBytesTCP}B/s↑  {gotBytesTCP}B/s↓");
+        debugger.setDebug("HTTP", $"{(int)(httpPing * 1000)}ms  {sentBytesHTTP}B/s↑  {gotBytesHTTP}B/s↓");
         debugger.setDebug("Failed/Sec", failedMessages + "");
 
-        sentBytes = 0;
-        receivedBytes = 0;
+        sentBytesUDP = 0;
+        gotBytesUDP = 0;
+        sentBytesTCP = 0;
+        gotBytesTCP = 0;
+        sentBytesHTTP = 0;
+        gotBytesHTTP = 0;
         failedMessages = 0;
     }
 
@@ -383,6 +394,8 @@ public class UM2_Client : MonoBehaviour
                 }
             }
         }
+
+        //prepping dividers
         message = clientID + "~" + message;
 
         if(protocol != "UDP"){
@@ -394,22 +407,37 @@ public class UM2_Client : MonoBehaviour
             message += "|";
         }
 
+
+        //per protocol sending
         if (protocol == "UDP")
         {
             sendUDPMessage(message);
+            sentBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugUDPMessages){
+                Debug.Log("Sent UDP: " + message);
+            }
         }
         else if (protocol == "TCP")
         {
             sendTCPMessage(message);
+            sentBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugTCPMessages){
+                Debug.Log("Sent TCP: " + message);
+            }
         }
         else if (protocol == "HTTP")
         {
             sendHTTPMessage(message);
+            sentBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugHTTPMessages){
+                Debug.Log("Sent HTTP: " + message);
+            }
+        }
+        else{
+            Debug.LogError("Unknown protocol: " + protocol + "\nMessage: " + message);
         }
 
         //Debug.Log("Sent message: " + message);
-
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
     }
 
     void processMessage(string message, string protocol)
@@ -430,7 +458,31 @@ public class UM2_Client : MonoBehaviour
             return;
         }
 
-        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+        if (protocol == "UDP")
+        {
+            gotBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugUDPMessages){
+                Debug.Log("Got UDP: " + message);
+            }
+        }
+        else if (protocol == "TCP")
+        {
+            gotBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugTCPMessages){
+                Debug.Log("Got TCP: " + message);
+            }
+        }
+        else if (protocol == "HTTP")
+        {
+            gotBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugHTTPMessages){
+                Debug.Log("Got HTTP: " + message);
+            }
+        }
+        else{
+            Debug.LogError("Unknown protocol: " + protocol + "\nI have no idea how this happened lol");
+        }
+
         string methodToCall = message.Split('~')[0];
         //Debug.Log("recieved message: " + message);
         message = message.Substring(methodToCall.Length);
@@ -496,17 +548,17 @@ public class UM2_Client : MonoBehaviour
         if (protocol == "UDP")
         {
             udpPing = Time.time - udpPingStartTime;
-            debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
+            //debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
         }
         else if (protocol == "TCP")
         {
             tcpPing = Time.time - tcpPingStartTime;
-            debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
+            //debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
         }
         else if (protocol == "HTTP")
         {
             httpPing = Time.time - httpPingStartTime;
-            debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
+            //debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
         }
     }
 

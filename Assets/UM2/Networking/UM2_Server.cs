@@ -72,19 +72,27 @@ public class UM2_Server : MonoBehaviour
     int httpPort = 5002;
 
     UdpClient udpServer;
-    public bool udpOnline;
+    bool udpOnline;
 
     TcpListener tcpServer;
-    public bool tcpOnline;
+    bool tcpOnline;
 
     HttpListener httpListener;
-    public bool httpOnline;
+    bool httpOnline;
 
     public static string localIpAddress;
     public static string publicIpAddress;
 
-    int sentBytes = 0;
-    int receivedBytes = 0;
+    public bool debugUDPMessages = false;
+    int sentBytesUDP = 0;
+    int gotBytesUDP = 0;
+    public bool debugTCPMessages = false;
+    int sentBytesTCP = 0;
+    int gotBytesTCP = 0;
+    public bool debugHTTPMessages = false;
+    int sentBytesHTTP = 0;
+    int gotBytesHTTP = 0;
+
     int failedMessages = 0;
 
 
@@ -97,8 +105,6 @@ public class UM2_Server : MonoBehaviour
 
 
     List<Client> clients = new List<Client>();
-
-    public bool debugMessages = false;
 
 	//server-variables
 	List<ServerVariable> serverVariables = new List<ServerVariable>();
@@ -132,12 +138,18 @@ public class UM2_Server : MonoBehaviour
 
     void updateDebug()
     {
-        debugger.setDebug("Bytes/Sec sent ", sentBytes + "");
-        debugger.setDebug("Bytes/Sec recieved ", receivedBytes + "");
-        debugger.setDebug("Failed/Sec ", failedMessages + "");
+        debugger.setDebug(" UDP", $"{sentBytesUDP}B/s↑  {gotBytesUDP}B/s↓  ({(udpOnline ? "online" : "offline")})");
+        debugger.setDebug(" TCP", $"{sentBytesTCP}B/s↑  {gotBytesTCP}B/s↓  ({(tcpOnline ? "online" : "offline")})");
+        debugger.setDebug(" HTTP", $"{sentBytesHTTP}B/s↑  {gotBytesHTTP}B/s↓  ({(httpOnline ? "online" : "offline")})");
+        debugger.setDebug(" Failed/Sec ", failedMessages + "");
+        
+        sentBytesUDP = 0;
+        gotBytesUDP = 0;
+        sentBytesTCP = 0;
+        gotBytesTCP = 0;
+        sentBytesHTTP = 0;
+        gotBytesHTTP = 0;
 
-        sentBytes = 0;
-        receivedBytes = 0;
         failedMessages = 0;
     }
 
@@ -175,10 +187,7 @@ public class UM2_Server : MonoBehaviour
         try
         {
             httpListener.Start();
-            debugger.setDebug("HTTP status", "online");
-            if(debugMessages){
-                Debug.Log("(Server) HTTP Server started on port " + httpPort);
-            }
+            Debug.Log("(Server) HTTP Server started on port " + httpPort);
 
             httpOnline = true;
 
@@ -188,7 +197,6 @@ public class UM2_Server : MonoBehaviour
         {
             Debug.LogError("(Server) Failed to start HTTP: " + e.Message);
             httpOnline = false;
-            debugger.setDebug("HTTP status", "offline");
         }
     }
 
@@ -224,9 +232,6 @@ public class UM2_Server : MonoBehaviour
                     {
                         // process the message
                         string message = request.RawUrl.Substring(1);
-                        if(debugMessages){
-                            Debug.Log("(Server) Got HTTP: " + message);
-                        }
                         string responseMessage = processSplitMessages(message, "HTTP");
                         responseMessage += "|";
 
@@ -234,11 +239,12 @@ public class UM2_Server : MonoBehaviour
                         byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseMessage);
                         response.ContentType = "text/html";
                         response.ContentLength64 = buffer.Length;
-                        if(debugMessages){
+                        if(debugHTTPMessages){
+                            Debug.Log("(Server) Got HTTP: " + message);
                             Debug.Log("(Server) Sent HTTP: " + responseMessage);
                         }
 
-                        sentBytes += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
+                        sentBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(responseMessage);
                         response.OutputStream.Write(buffer, 0, buffer.Length);
                         response.OutputStream.Close();
                     }
@@ -266,7 +272,27 @@ public class UM2_Server : MonoBehaviour
 
     string processMessage(string message, string protocol)
     {
-        receivedBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+        if (protocol == "UDP")
+        {
+            gotBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugUDPMessages){
+                Debug.Log("Got UDP: " + message);
+            }
+        }
+        else if (protocol == "TCP")
+        {
+            gotBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugTCPMessages){
+                Debug.Log("Got TCP: " + message);
+            }
+        }
+        else if (protocol == "HTTP")
+        {
+            gotBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
+            if(debugHTTPMessages){
+                Debug.Log("Got HTTP: " + message);
+            }
+        }
 
         string clientIDString = message.Split("~")[0];
         string messageType = message.Split("~")[1];
@@ -404,11 +430,8 @@ public class UM2_Server : MonoBehaviour
 
             //make it call udpReciever when message
             udpServer.BeginReceive(udpReciever, null);
-            if(debugMessages){
-                Debug.Log("(Server) UDP Server started on port " + udpPort);
-            }
+            Debug.Log("(Server) UDP Server started on port " + udpPort);
             udpOnline = true;
-            debugger.setDebug("UDP status", "online");
         }
         catch (Exception e)
         {
@@ -428,10 +451,7 @@ public class UM2_Server : MonoBehaviour
             tcpServer = new TcpListener(IPAddress.Any, tcpPort);
             tcpServer.Start();
             tcpOnline = true;
-            debugger.setDebug("TCP status", "online");
-            if(debugMessages){
-                Debug.Log("(Server) TCP Server started on port " + tcpPort);
-            }
+            Debug.Log("(Server) TCP Server started on port " + tcpPort);
 
             while (tcpOnline)
             {
@@ -456,7 +476,7 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                if(debugMessages){
+                if(debugTCPMessages){
                     Debug.Log("(Server) Got TCP: " + receivedMessage);
                 }
                 
@@ -489,10 +509,10 @@ public class UM2_Server : MonoBehaviour
     {   
         message += "|";
         byte[] sendData = Encoding.ASCII.GetBytes(message);
-        if(debugMessages){
+        if(debugTCPMessages){
             Debug.Log("(Server) Sent TCP: " + message);
         }
-        sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+        sentBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
         await stream.WriteAsync(sendData, 0, sendData.Length);
     }
 
@@ -504,7 +524,7 @@ public class UM2_Server : MonoBehaviour
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
-        if(debugMessages){
+        if(debugUDPMessages){
             Debug.Log("(Server) Got UDP: " + receivedData);
         }
 
@@ -536,10 +556,10 @@ public class UM2_Server : MonoBehaviour
         {
             //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
             byte[] data = Encoding.UTF8.GetBytes(message);
-            if(debugMessages){
+            if(debugUDPMessages){
                 Debug.Log("(Server) Sent UDP: " + message);
             }
-            sentBytes += System.Text.Encoding.UTF8.GetByteCount(message);
+            sentBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
             udpServer.Send(data, data.Length, clientEndPoint);
         }
         catch (Exception e)

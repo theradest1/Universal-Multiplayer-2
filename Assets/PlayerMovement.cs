@@ -13,7 +13,6 @@ public class PlayerMovement : MonoBehaviour
 	public float decceleration = .95f;
 	public float inAirDecceleration = .03f;
 	public float jumpSpeed = 3.5f;
-	public float maxSpeed;
 
     //small settings
     public float groundCheckHeight = 1f;
@@ -67,9 +66,9 @@ public class PlayerMovement : MonoBehaviour
 
         RaycastHit hit;
 		isGrounded = Physics.Raycast(transform.position + Vector3.up * groundCheckHeight, -Vector3.up, out hit, groundCheckDistance, groundMask);
+        isGrounded = isGrounded && playerRB.velocity.y < 1f;
         jumping = Input.GetKey("space");
-        //Debug.DrawRay(transform.position + Vector3.up * groundCheckHeight, -Vector3.up * groundCheckDistance, Color.red);
-        //Debug.Log(isGrounded);
+        Debug.DrawRay(transform.position + Vector3.up * groundCheckHeight, -Vector3.up * groundCheckDistance, Color.red);
 
         if (isGrounded)
         {
@@ -86,7 +85,8 @@ public class PlayerMovement : MonoBehaviour
 		{
 			//playerRB.AddForce(Vector3.up * jumpPower);// += new Vector3(0f, jumpPower, 0f);
 			playerRB.velocity = new Vector3(playerRB.velocity.x, jumpSpeed, playerRB.velocity.z);
-		}
+            isGrounded = false;
+        }
 
 		//friction (not vertical)
 		Vector3 velocity = playerRB.velocity;
@@ -100,13 +100,5 @@ public class PlayerMovement : MonoBehaviour
 		{
 			playerRB.velocity = velocity * inAirDecceleration + yVelocity;
 		}
-
-        //limit speed
-        float horizontalSpeed = new Vector3(playerRB.velocity.x, 0f, playerRB.velocity.z).magnitude;
-        Debug.Log(horizontalSpeed);
-        if (horizontalSpeed > maxSpeed)
-        {
-            playerRB.velocity = new Vector3(playerRB.velocity.x, 0f, playerRB.velocity.z).normalized * maxSpeed + new Vector3(0f, playerRB.velocity.y, 0f);
-        }
     }
 }

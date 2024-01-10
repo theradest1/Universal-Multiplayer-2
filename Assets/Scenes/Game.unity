@@ -246,14 +246,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fa5e520a3de7b3478e5cf773ac29f83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 300
-  inAirAcceleration: 200
-  decceleration: 0.8
-  inAirDecceleration: 0.95
+  acceleration: 200
+  inAirAcceleration: 0
+  decceleration: 0.3
+  inAirDecceleration: 0.97
   jumpSpeed: 3.5
-  maxSpeed: 0
-  groundCheckHeight: -0.95
-  groundCheckDistance: 0.1
+  groundCheckHeight: -0.99
+  groundCheckDistance: 0.02
   groundMask:
     serializedVersion: 2
     m_Bits: 8
