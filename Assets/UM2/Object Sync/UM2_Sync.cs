@@ -92,12 +92,11 @@ public class UM2_Sync : MonoBehaviour
     }
 
     public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond){
-        //Debug.Log("Made a new synced object: " + objectID);
+        Debug.Log("Made a new synced object: " + objectID);
 
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
         newPrefab.objectID = objectID;
-        //newPrefab.ticksPerSecond = ticksPerSecond;
     }
 
     void getReserveNewObjectID(){

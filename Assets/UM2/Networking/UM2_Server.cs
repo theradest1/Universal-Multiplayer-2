@@ -201,7 +201,7 @@ public class UM2_Server : MonoBehaviour
     }
 
     void sendHTTPMessage(string message, int clientID){
-        getClientFromID(clientID).messageQueue.Add(message + "|");
+        getClient(clientID).messageQueue.Add(message + "|");
     }
 
     void httpReciever()
@@ -332,7 +332,7 @@ public class UM2_Server : MonoBehaviour
                         string varValue = messageContents.Split("~")[2];
                         string varType = messageContents.Split("~")[3];
                         serverVariables.Add(new ServerVariable(varName, varValue, varType, this));
-                        sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP");
+                        sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP", clientID);
                         //Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
                     case "setVar":
@@ -362,21 +362,18 @@ public class UM2_Server : MonoBehaviour
             case "direct":  //send message to specified other client
                 int targetClientID = int.Parse(messageContents.Split("~")[0]);
                 messageContents = messageContents.Substring(messageContents.Split("~")[0].Length + 1);
-                foreach(Client client in clients){
-                    if(client.clientID == targetClientID){
-                        if(protocol == "UDP" && client.udpEndpoint != null){
-                            SendUDPMessage(messageContents, client.udpEndpoint);
-                        }
-                        else if(client.tcpClient != null && client.networkStream != null){
-                            sendTCPMessage(messageContents, client.networkStream);
-                        }
-                        else{
-                            sendHTTPMessage(messageContents, clientID);
-                        }
-                        break;
-                    }
+                Client client = getClient(targetClientID);
+                
+                if(protocol == "UDP" && client.udpEndpoint != null){
+                    SendUDPMessage(messageContents, client.udpEndpoint);
                 }
-                Debug.LogError("(Server) Couldnt find client with ID " + targetClientID);
+                else if(client.tcpClient != null && client.networkStream != null){
+                    sendTCPMessage(messageContents, client.networkStream);
+                }
+                else{
+                    sendHTTPMessage(messageContents, clientID);
+                }
+
                 break;
             default:
                 Debug.LogError("(Server) Unknown message type: " + messageType + " (from " + message + ")");
@@ -385,7 +382,7 @@ public class UM2_Server : MonoBehaviour
 
         //check if queued messages for http
         if(protocol == "HTTP" && clientID != -1){
-            Client currentClient = getClientFromID(clientID);
+            Client currentClient = getClient(clientID);
             foreach(string queuedMessage in currentClient.messageQueue){
                 responseMessage += "|" + queuedMessage;
             }
@@ -402,6 +399,16 @@ public class UM2_Server : MonoBehaviour
             }
         }
         Debug.LogError("(Server) Could not find server variable: " + name);
+        return null;
+    }
+
+    public Client getClient(int clientID){
+        foreach(Client client in clients){
+            if(client.clientID == clientID){
+                return client;
+            }
+        }
+        Debug.LogError("(Server) Couldnt find client with ID " + clientID);
         return null;
     }
 
@@ -484,7 +491,7 @@ public class UM2_Server : MonoBehaviour
 
                 //need to change how this works (right now it checks if a client exists every message)
                 if(receivedMessage.Split("~")[0] != "-1"){
-                    Client clientData = getClientFromID(int.Parse(receivedMessage.Split("~")[0]));
+                    Client clientData = getClient(int.Parse(receivedMessage.Split("~")[0]));
                     clientData.networkStream = stream;
                     clientData.tcpClient = client;
                 }
@@ -532,7 +539,7 @@ public class UM2_Server : MonoBehaviour
         
         //need to change how this works (right now it checks if a client exists every message)
         if(receivedData.Split("~")[0] != "-1"){
-            Client clientData = getClientFromID(int.Parse(receivedData.Split("~")[0]));
+            Client clientData = getClient(int.Parse(receivedData.Split("~")[0]));
             clientData.udpEndpoint = clientEndPoint;
         }
 
@@ -545,7 +552,7 @@ public class UM2_Server : MonoBehaviour
 
     private void SendUDPMessage(string message, int clientID)
     {
-        IPEndPoint udpEndpoint = getClientFromID(clientID).udpEndpoint;
+        IPEndPoint udpEndpoint = getClient(clientID).udpEndpoint;
         SendUDPMessage(message, udpEndpoint);
     }
 
@@ -610,16 +617,5 @@ public class UM2_Server : MonoBehaviour
 
             UM2_Server.publicIpAddress = response;
         }
-    }
-
-    public Client getClientFromID(int clientID){
-        foreach(Client client in clients){
-            if(client.clientID == clientID){
-                return client;
-            }
-        }
-
-        Debug.LogError("(Server) Couldnt find client with ID " + clientID);
-        return null;
     }
 }

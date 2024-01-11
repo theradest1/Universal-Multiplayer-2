@@ -66,7 +66,13 @@ public class UM2_Client : MonoBehaviour
     public bool debugTCPMessages = false;
     public bool debugHTTPMessages = false;
 
+    public void sendDebugMessage(string message){
+        messageToOtherClient("printMessage~" + message, clientID);
+    }
 
+    public void printMessage(string message, string protocol){
+        print($"({protocol}) {message}");
+    }
 
     private void OnDestroy()
     {
@@ -202,6 +208,8 @@ public class UM2_Client : MonoBehaviour
         sentBytesHTTP = 0;
         gotBytesHTTP = 0;
         failedMessages = 0;
+
+        //sendDebugMessage("test");
     }
 
     public void StartClient()
@@ -213,7 +221,7 @@ public class UM2_Client : MonoBehaviour
         }
         initHTTP();
 
-        InvokeRepeating("Ping", 0, 3f);
+        InvokeRepeating("Ping", 0, 1f);
         join(); //get client ID from the server
     }
 
