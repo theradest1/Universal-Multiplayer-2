@@ -49,7 +49,7 @@ public class UM2_Sync : MonoBehaviour
     private void Start()
     {
         client = gameObject.GetComponent<UM2_Client>();
-
+        
         StartCoroutine(checkIfAllObjectsExist());
 
         reserveIDLoop();
@@ -117,6 +117,7 @@ public class UM2_Sync : MonoBehaviour
     }
 
     IEnumerator checkIfAllObjectsExist(){
+        //wait untill this client has an ID
         yield return new WaitUntil(() => UM2_Client.clientID != -1);
 
         client.messageOtherClients("giveAllSyncedObjects~" + UM2_Client.clientID);

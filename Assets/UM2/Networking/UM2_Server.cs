@@ -347,6 +347,15 @@ public class UM2_Server : MonoBehaviour
                         //Debug.Log("(Server) Adding to var " + varName);
                         getServerVariable(varName).add(varValue);
                         break;
+                    case "giveAllVariables":
+                        //Debug.Log("giving all variables");
+                        foreach(ServerVariable serverVariable in serverVariables){
+                            varName = serverVariable.name;
+                            varValue = serverVariable.value;
+                            varType = serverVariable.type + "";
+                            sendMessageToClient("syncNewVar~" + varName + "~" + varValue + "~" + varType, protocol, clientID);
+                        }
+                        break;
                     default:
                         Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
                         break;
@@ -425,6 +434,19 @@ public class UM2_Server : MonoBehaviour
                     sendHTTPMessage(message, client.clientID);
                 }
             }
+        }
+    }
+
+    public void sendMessageToClient(string message, string protocol, int clientID){
+        Client client = getClient(clientID);
+        if(protocol == "UDP" && client.udpEndpoint != null){
+            SendUDPMessage(message, client.udpEndpoint);
+        }
+        else if(client.tcpClient != null && client.networkStream != null){
+            sendTCPMessage(message, client.networkStream);
+        }
+        else{
+            sendHTTPMessage(message, client.clientID);
         }
     }
 
