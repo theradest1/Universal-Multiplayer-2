@@ -73,11 +73,11 @@ public class UM2_Sync : MonoBehaviour
         //Debug.Log("used reserved ID " + startedObject.objectID);
         reservedIDs.RemoveAt(0);
         
-        client.messageAllClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
+        client.messageOtherClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
-        client.messageAllClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
+        client.messageOtherClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){

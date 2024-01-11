@@ -23,7 +23,7 @@ public class UM2_Prefab : MonoBehaviour
         pastPos = transform.position;
         pastRot = transform.rotation;
 
-        targetPos = new Vector3(-position.x, position.y, position.z);
+        targetPos = position;//new Vector3(-position.x, position.y, position.z);
         targetRot = rotation;
 
     }
