@@ -98,5 +98,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 1814554127673409255, guid: 1e06c4fdc415f6045b93fe5c9c548136, type: 3}
   objectID: -1
-  ticksPerSecond: 15
+  ticksPerSecond: 5
   syncTransform: 1
+  optimizeTransoformSync: 1

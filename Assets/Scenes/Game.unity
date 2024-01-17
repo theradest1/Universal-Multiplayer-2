@@ -304,6 +304,7 @@ MonoBehaviour:
   objectID: 0
   ticksPerSecond: 32
   syncTransform: 1
+  optimizeTransoformSync: 1
 --- !u!114 &180985660
 MonoBehaviour:
   m_ObjectHideFlags: 0

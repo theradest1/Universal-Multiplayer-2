@@ -15,8 +15,12 @@ public class UM2_Object : MonoBehaviour
 	UM2_Variables variables;
 
     public bool syncTransform = true;
+    public bool optimizeTransoformSync = true;
     bool pastSyncTransform = false;
     bool initialized = false;
+
+    Vector3 pastSyncedPos;
+    Quaternion pastSyncedRot;
 
     private void Start()
     {
@@ -51,7 +55,14 @@ public class UM2_Object : MonoBehaviour
 
     async void updateTransform(){
         if(this != null && syncTransform){
-            sync.updateObject(objectID, transform.position, transform.rotation);
+            //this if statement only goes through if transform isnt changed
+            //(not including scale)
+            //(only if optimizeTransoformSync is true)
+            if(pastSyncedPos != transform.position || pastSyncedRot != transform.rotation || !optimizeTransoformSync){
+                sync.updateObject(objectID, transform.position, transform.rotation);
+                pastSyncedPos = transform.position;
+                pastSyncedRot = transform.rotation;
+            }
 
             await Task.Delay((int)(1/ticksPerSecond*1000));
             updateTransform();
