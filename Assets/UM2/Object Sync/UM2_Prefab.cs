@@ -14,18 +14,21 @@ public class UM2_Prefab : MonoBehaviour
     float pastTime = 0;
     Vector3 targetPos = Vector3.zero;
     Quaternion targetRot = Quaternion.identity;
-    float tickTime = 0;
+    float tickTime = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
-        tickTime = Time.time - pastTime;
+        //tickTime = Time.time - pastTime;
+        //pastTime = Time.time;
 
-        pastTime = Time.time;
         pastPos = transform.position;
         pastRot = transform.rotation;
 
         targetPos = position;//new Vector3(-position.x, position.y, position.z);
         targetRot = rotation;
+    }
 
+    public void setTPS(float newTPS){
+        tickTime = 1/newTPS;
     }
 
     private void Update()

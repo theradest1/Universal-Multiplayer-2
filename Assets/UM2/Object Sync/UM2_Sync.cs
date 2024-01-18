@@ -66,7 +66,7 @@ public class UM2_Sync : MonoBehaviour
 
         while(reservedIDs.Count == 0){
             getReserveNewObjectID();
-            await Task.Delay(50);
+            await Task.Delay(200);
         }
 
         startedObject.objectID = reservedIDs[0];
@@ -80,10 +80,25 @@ public class UM2_Sync : MonoBehaviour
         client.messageOtherClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
     }
 
+    public void updateTPS(int objectID, float newTPS){
+        client.messageOtherClients("updateObjectTPS~" + objectID + "~" + newTPS, false);
+    }
+
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
         foreach(UM2_Prefab prefab in syncedObjects){
             if(prefab.objectID == objectID){
                 prefab.newTransform(position, rotation);
+                return;
+            }
+        }
+
+        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+    }
+
+    public void updateObjectTPS(int objectID, float newTPS){
+        foreach(UM2_Prefab prefab in syncedObjects){
+            if(prefab.objectID == objectID){
+                prefab.setTPS(newTPS);
                 return;
             }
         }

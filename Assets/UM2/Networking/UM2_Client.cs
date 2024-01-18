@@ -268,7 +268,7 @@ public class UM2_Client : MonoBehaviour
             tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
             tcpRecieveThread.Start();
 
-            Debug.Log("Connected to TCP");
+            Debug.Log("(Client) Connected to TCP");
             connectedToTCP = true;
         }
         catch (Exception e)
@@ -280,7 +280,7 @@ public class UM2_Client : MonoBehaviour
     void initHTTP()
     {
         //nothing needs to be done to start http, but I'm leaving this here for some consistancy
-        Debug.Log("Connected to HTTP");
+        Debug.Log("(Client) Connected to HTTP");
         connectedToHTTP = true;
     }
 
@@ -289,7 +289,7 @@ public class UM2_Client : MonoBehaviour
         try
         {
             connectedToUDP = true;
-            Debug.Log("Connected to UDP");
+            Debug.Log("(Client) Connected to UDP");
             while (true)
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
@@ -422,7 +422,7 @@ public class UM2_Client : MonoBehaviour
             sendUDPMessage(message);
             sentBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugUDPMessages){
-                Debug.Log("Sent UDP: " + message);
+                Debug.Log("(Client) Sent UDP: " + message);
             }
         }
         else if (protocol == "TCP")
@@ -430,7 +430,7 @@ public class UM2_Client : MonoBehaviour
             sendTCPMessage(message);
             sentBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugTCPMessages){
-                Debug.Log("Sent TCP: " + message);
+                Debug.Log("(Client) Sent TCP: " + message);
             }
         }
         else if (protocol == "HTTP")
@@ -438,7 +438,7 @@ public class UM2_Client : MonoBehaviour
             sendHTTPMessage(message);
             sentBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugHTTPMessages){
-                Debug.Log("Sent HTTP: " + message);
+                Debug.Log("(Client) Sent HTTP: " + message);
             }
         }
         else{
@@ -470,21 +470,21 @@ public class UM2_Client : MonoBehaviour
         {
             gotBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugUDPMessages){
-                Debug.Log("Got UDP: " + message);
+                Debug.Log("(Client) Got UDP: " + message);
             }
         }
         else if (protocol == "TCP")
         {
             gotBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugTCPMessages){
-                Debug.Log("Got TCP: " + message);
+                Debug.Log("(Client) Got TCP: " + message);
             }
         }
         else if (protocol == "HTTP")
         {
             gotBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugHTTPMessages){
-                Debug.Log("Got HTTP: " + message);
+                Debug.Log("(Client) Got HTTP: " + message);
             }
         }
         else{

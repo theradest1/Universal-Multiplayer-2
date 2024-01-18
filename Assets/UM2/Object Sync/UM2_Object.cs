@@ -10,6 +10,7 @@ public class UM2_Object : MonoBehaviour
     [HideInInspector] public int objectID = -1;
 
     [Range(1,64)]
+    float pastTicksPerSecond = -1;
     public float ticksPerSecond;
     UM2_Sync sync;
 	UM2_Variables variables;
@@ -49,6 +50,11 @@ public class UM2_Object : MonoBehaviour
                 if(syncTransform){
                     updateTransform();
                 }
+            }
+
+            if(pastTicksPerSecond != ticksPerSecond){
+                pastTicksPerSecond = ticksPerSecond;
+                sync.updateTPS(objectID, ticksPerSecond);
             }
         }
     }

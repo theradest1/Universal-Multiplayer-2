@@ -240,7 +240,6 @@ public class UM2_Server : MonoBehaviour
                         response.ContentType = "text/html";
                         response.ContentLength64 = buffer.Length;
                         if(debugHTTPMessages){
-                            Debug.Log("(Server) Got HTTP: " + message);
                             Debug.Log("(Server) Sent HTTP: " + responseMessage);
                         }
 
@@ -276,21 +275,21 @@ public class UM2_Server : MonoBehaviour
         {
             gotBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugUDPMessages){
-                Debug.Log("Got UDP: " + message);
+                Debug.Log("(Server) Got UDP: " + message);
             }
         }
         else if (protocol == "TCP")
         {
             gotBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugTCPMessages){
-                Debug.Log("Got TCP: " + message);
+                Debug.Log("(Server) Got TCP: " + message);
             }
         }
         else if (protocol == "HTTP")
         {
             gotBytesHTTP += System.Text.Encoding.UTF8.GetByteCount(message);
             if(debugHTTPMessages){
-                Debug.Log("Got HTTP: " + message);
+                Debug.Log("(Server) Got HTTP: " + message);
             }
         }
 
@@ -505,9 +504,6 @@ public class UM2_Server : MonoBehaviour
             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
             {
                 string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                if(debugTCPMessages){
-                    Debug.Log("(Server) Got TCP: " + receivedMessage);
-                }
                 
                 string responseMessage = processSplitMessages(receivedMessage, "TCP");
 
@@ -552,10 +548,6 @@ public class UM2_Server : MonoBehaviour
         IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
         byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
-
-        if(debugUDPMessages){
-            Debug.Log("(Server) Got UDP: " + receivedData);
-        }
 
         string responseMessage = processSplitMessages(receivedData, "UDP");
         
