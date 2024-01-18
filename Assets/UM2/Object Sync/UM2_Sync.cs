@@ -73,7 +73,7 @@ public class UM2_Sync : MonoBehaviour
         //Debug.Log("used reserved ID " + startedObject.objectID);
         reservedIDs.RemoveAt(0);
         
-        client.messageOtherClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond);
+        client.messageOtherClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond + "~" + startedObject.transform.position + "~" + startedObject.transform.rotation);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
@@ -106,12 +106,12 @@ public class UM2_Sync : MonoBehaviour
         Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
     }
 
-    public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond){
+    public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond, Vector3 position, Quaternion rotation){
         Debug.Log("Made a new synced object: " + objectID);
 
-        UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject).AddComponent<UM2_Prefab>(); 
+        UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
-        newPrefab.objectID = objectID;
+        newPrefab.initialize(objectID, ticksPerSecond, position, rotation);
     }
 
     void getReserveNewObjectID(){
@@ -126,7 +126,7 @@ public class UM2_Sync : MonoBehaviour
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond, requestingClientID);
+            client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond + "~" + clientSideObject.transform.position + "~" + clientSideObject.transform.rotation, requestingClientID);
         }
     }
 

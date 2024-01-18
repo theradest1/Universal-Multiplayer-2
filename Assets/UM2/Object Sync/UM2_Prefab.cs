@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using UnityEngine;
 using UnityEngine.Timeline;
@@ -17,8 +18,8 @@ public class UM2_Prefab : MonoBehaviour
     float tickTime = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
-        tickTime = Time.time - pastTime;
-        pastTime = Time.time;
+        //tickTime = Time.time - pastTime;
+        //pastTime = Time.time;
 
         pastPos = transform.position;
         pastRot = transform.rotation;
@@ -28,7 +29,17 @@ public class UM2_Prefab : MonoBehaviour
     }
 
     public void setTPS(float newTPS){
-        //tickTime = 1/newTPS;
+        tickTime = 1/newTPS;
+    }
+
+    public void initialize(int setObjectID, float TPS, Vector3 position, Quaternion rotation){
+        Debug.Log("Did stuff");
+        objectID = setObjectID;
+        setTPS(TPS);
+        pastPos = position;
+        transform.position = position;
+        pastRot = rotation;
+        transform.rotation = rotation;
     }
 
     private void Update()
