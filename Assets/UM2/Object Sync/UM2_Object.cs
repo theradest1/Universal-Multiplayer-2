@@ -59,12 +59,12 @@ public class UM2_Object : MonoBehaviour
         }
     }
 
-    async void updateTransform(){
+    public async void updateTransform(bool forced = false){
         if(this != null && syncTransform){
             //this if statement only goes through if transform isnt changed
             //(not including scale)
             //(only if optimizeTransoformSync is true)
-            if(pastSyncedPos != transform.position || pastSyncedRot != transform.rotation || !optimizeTransoformSync){
+            if(pastSyncedPos != transform.position || pastSyncedRot != transform.rotation || !optimizeTransoformSync || forced){
                 sync.updateObject(objectID, transform.position, transform.rotation);
                 pastSyncedPos = transform.position;
                 pastSyncedRot = transform.rotation;

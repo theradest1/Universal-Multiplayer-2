@@ -126,7 +126,6 @@ public class UM2_Sync : MonoBehaviour
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            Debug.Log("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond);
             client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond, requestingClientID);
         }
     }

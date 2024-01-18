@@ -17,8 +17,8 @@ public class UM2_Prefab : MonoBehaviour
     float tickTime = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
-        //tickTime = Time.time - pastTime;
-        //pastTime = Time.time;
+        tickTime = Time.time - pastTime;
+        pastTime = Time.time;
 
         pastPos = transform.position;
         pastRot = transform.rotation;
@@ -28,7 +28,7 @@ public class UM2_Prefab : MonoBehaviour
     }
 
     public void setTPS(float newTPS){
-        tickTime = 1/newTPS;
+        //tickTime = 1/newTPS;
     }
 
     private void Update()

@@ -309,6 +309,9 @@ public class UM2_Server : MonoBehaviour
                 messageContents = message.Substring(clientIDString.Length + messageType.Length + messageCommand.Length + 3 - 1);
                 switch (messageCommand)
                 {
+                    case "saveProtocol":
+                        responseMessage = "recordedProtocol~" + protocol;
+                        break;
                     case "ping":
                         responseMessage = "pong";
                         break;
@@ -507,15 +510,13 @@ public class UM2_Server : MonoBehaviour
                 
                 string responseMessage = processSplitMessages(receivedMessage, "TCP");
 
-                //need to change how this works (right now it checks if a client exists every message)
-                if(receivedMessage.Split("~")[0] != "-1"){
-                    Client clientData = getClient(int.Parse(receivedMessage.Split("~")[0]));
-                    clientData.networkStream = stream;
-                    clientData.tcpClient = client;
-                }
-
                 if (responseMessage != null && responseMessage != "||" && responseMessage != "|")
                 {
+                    if(responseMessage.Contains("recordedProtocol~TCP")){
+                        Client clientData = getClient(int.Parse(receivedMessage.Split("~")[0]));
+                        clientData.networkStream = stream;
+                        clientData.tcpClient = client;
+                    }
                     sendTCPMessage(responseMessage, stream);
                 }
             }
@@ -550,15 +551,13 @@ public class UM2_Server : MonoBehaviour
         string receivedData = Encoding.UTF8.GetString(receivedBytes);
 
         string responseMessage = processSplitMessages(receivedData, "UDP");
-        
-        //need to change how this works (right now it checks if a client exists every message)
-        if(receivedData.Split("~")[0] != "-1"){
-            Client clientData = getClient(int.Parse(receivedData.Split("~")[0]));
-            clientData.udpEndpoint = clientEndPoint;
-        }
 
         if (responseMessage != null && responseMessage != "|")
         {
+            if(responseMessage.Contains("recordedProtocol~UDP")){
+                Client clientData = getClient(int.Parse(receivedData.Split("~")[0]));
+                clientData.udpEndpoint = clientEndPoint;
+            }
             SendUDPMessage(responseMessage, clientEndPoint);
         }
 

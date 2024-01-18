@@ -107,12 +107,7 @@ public class UM2_Client : MonoBehaviour
 
         //load all scripts attached to this object for calling functions
         foreach(MonoBehaviour script in GetComponents<MonoBehaviour>()){
-            try{
-                UM2Scripts.Add(script);
-            }
-            catch{
-                //I dont think this can happen, but I did a catch just in case
-            }
+            UM2Scripts.Add(script);
         }
 
         debugger.addSpace("Client:");
@@ -149,6 +144,7 @@ public class UM2_Client : MonoBehaviour
     }
 
     public void join(){
+        //sendMessage("server~join", true, false);
         sendMessage("server~join", "HTTP", true);
     }
 
@@ -222,7 +218,12 @@ public class UM2_Client : MonoBehaviour
         initHTTP();
 
         InvokeRepeating("Ping", 0, 1f);
-        join(); //get client ID from the server
+
+        join();
+    }
+
+    public void recordedProtocol(string protocol){
+        Debug.Log("Recorded: " + protocol);
     }
 
     void Ping()
@@ -572,6 +573,10 @@ public class UM2_Client : MonoBehaviour
 
     public void setID(int id){
         clientID = id;
+
+        sendMessage("server~saveProtocol", "UDP", false);
+        sendMessage("server~saveProtocol", "TCP", false);
+        //http is only client->server->client (no disjointed response)
     }
     
     //a bunch of helper methods (make them static and put in a seperate script later-----------------
