@@ -305,6 +305,7 @@ MonoBehaviour:
   ticksPerSecond: 32
   syncTransform: 1
   optimizeTransoformSync: 1
+  minTicksPerSecond: 3
 --- !u!114 &180985660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1379,6 +1380,10 @@ PrefabInstance:
     - target: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
       propertyPath: m_Name
       value: testCube
+      objectReference: {fileID: 0}
+    - target: {fileID: 8617445729963216109, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
+      propertyPath: minTicksPerSecond
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
