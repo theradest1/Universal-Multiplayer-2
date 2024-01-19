@@ -291,7 +291,6 @@ public class UM2_Client : MonoBehaviour
     {
         try
         {
-            Debug.Log("(Client) Connected to UDP");
             Debug.Log("(Client) UDP Online");
             UDPOnline = true;
             while (true)
