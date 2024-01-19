@@ -26,10 +26,12 @@ public class UM2_Client : MonoBehaviour
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
     bool connectedToUDP = false;
+    bool UDPOnline = false;
 
     TcpClient tcpClient;
     NetworkStream tcpStream;
-    bool connectedToTCP = false;
+    bool connectedToTCP = false; //this is if the server can be pinged
+    bool TCPOnline = false; //this is if the reciever is on
     Thread tcpRecieveThread;
 
     bool connectedToHTTP = false;
@@ -79,7 +81,7 @@ public class UM2_Client : MonoBehaviour
         connectedToServer = false;
 
         //close tcp
-        connectedToTCP = false;
+        TCPOnline = false;
         if (tcpStream != null)
             tcpStream.Close();
 
@@ -269,8 +271,8 @@ public class UM2_Client : MonoBehaviour
             tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
             tcpRecieveThread.Start();
 
-            Debug.Log("(Client) Connected to TCP");
-            connectedToTCP = true;
+            Debug.Log("(Client) TCP Online");
+            TCPOnline = true;
         }
         catch (Exception e)
         {
@@ -281,7 +283,7 @@ public class UM2_Client : MonoBehaviour
     void initHTTP()
     {
         //nothing needs to be done to start http, but I'm leaving this here for some consistancy
-        Debug.Log("(Client) Connected to HTTP");
+        Debug.Log("(Client) HTTP Online");
         connectedToHTTP = true;
     }
 
@@ -289,8 +291,9 @@ public class UM2_Client : MonoBehaviour
     {
         try
         {
-            connectedToUDP = true;
             Debug.Log("(Client) Connected to UDP");
+            Debug.Log("(Client) UDP Online");
+            UDPOnline = true;
             while (true)
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
@@ -303,13 +306,14 @@ public class UM2_Client : MonoBehaviour
         {
             Debug.Log("UDP client exception: " + e);
             failedMessages += 1;
+            UDPOnline = false;
         }
     }
 
     private void tcpReciever()
     {
         byte[] buffer = new byte[1024];
-        while (connectedToTCP)
+        while (TCPOnline)
         {
             try
             {
@@ -329,19 +333,16 @@ public class UM2_Client : MonoBehaviour
     }
 
     public void sendTCPMessage(string message)
-    {
-        if (connectedToTCP)
+    {   
+        try
         {
-            try
-            {
-                byte[] data = Encoding.ASCII.GetBytes(message);
-                tcpStream.Write(data, 0, data.Length);
-            }
-            catch (Exception e)
-            {
-                Debug.Log("Error sending tcp data: " + e.Message);
-                failedMessages += 1;
-            }
+            byte[] data = Encoding.ASCII.GetBytes(message);
+            tcpStream.Write(data, 0, data.Length);
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Error sending tcp data: " + e.Message);
+            failedMessages += 1;
         }
     }
 
@@ -398,8 +399,8 @@ public class UM2_Client : MonoBehaviour
         if(!sendWithoutID){
             if(clientID == -1){
                 while(clientID == -1){
-                    await Task.Delay(500);
-                    //Debug.Log("Wating for connection to send message: " + message + ". Current ID: " + clientID);
+                    await Task.Delay(100);
+                    Debug.Log("Wating for ID to send message: " + message + ". Current ID: " + clientID);
                 }
             }
         }
@@ -407,7 +408,10 @@ public class UM2_Client : MonoBehaviour
         //prepping dividers
         message = clientID + "~" + message;
 
-        if(protocol != "UDP"){
+
+        //UDP cant do queued messages because they are only for consistant protocols
+        //HTTP cant because it can only do one message at a time (for now)
+        if(protocol != "UDP" && protocol != "HTTP"){
             message += messageQueue;
             messageQueue = "";
         }
@@ -557,11 +561,13 @@ public class UM2_Client : MonoBehaviour
         if (protocol == "UDP")
         {
             udpPing = Time.time - udpPingStartTime;
+            connectedToUDP = true;
             //debugger.setDebug("UDP Ping", (int)(udpPing * 1000) + "ms");
         }
         else if (protocol == "TCP")
         {
             tcpPing = Time.time - tcpPingStartTime;
+            connectedToTCP = true;
             //debugger.setDebug("TCP Ping", (int)(tcpPing * 1000) + "ms");
         }
         else if (protocol == "HTTP")
