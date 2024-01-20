@@ -276,7 +276,7 @@ public class UM2_Client : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Error connecting to server: " + e.Message);
+            Debug.Log("Error connecting to server: " + e);
         }
     }
 
@@ -293,7 +293,7 @@ public class UM2_Client : MonoBehaviour
         {
             Debug.Log("(Client) UDP Online");
             UDPOnline = true;
-            while (true)
+            while (UDPOnline)
             {
                 UdpReceiveResult result = await udpClient.ReceiveAsync();
                 string message = Encoding.ASCII.GetString(result.Buffer);
@@ -325,7 +325,7 @@ public class UM2_Client : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.Log("Error receiving tcp data: " + e.Message);
+                Debug.Log("Error receiving tcp data: " + e);
                 failedMessages += 1;
             }
         }
@@ -340,7 +340,7 @@ public class UM2_Client : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Error sending tcp data: " + e.Message);
+            Debug.Log("Error sending tcp data: " + e);
             failedMessages += 1;
         }
     }
@@ -548,7 +548,7 @@ public class UM2_Client : MonoBehaviour
                     }
                 }
                 catch(Exception e){
-                    Debug.LogError(e.Message);
+                    Debug.LogError(e);
                 }
             }
         }

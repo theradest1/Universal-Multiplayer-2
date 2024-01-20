@@ -26,14 +26,9 @@ public class Client{
     public List<string> messageQueue = new List<string>();
     
     public float lastMessageTime;
-    float timeoutTime;
 
-    public Client(int id, float timeoutTime){
+    public Client(int id){
         clientID = id;
-    }
-
-    async void checkTimeoutTimer(){
-        if(timeout)
     }
 
     public void resetTimoutTimer(){
@@ -116,6 +111,8 @@ public class UM2_Server : MonoBehaviour
     int currentPlayerID = 0;
     int currentObjectID = 0;
 
+    float currentTime;
+
 
     List<Client> clients = new List<Client>();
 
@@ -148,7 +145,6 @@ public class UM2_Server : MonoBehaviour
         tcpOnline = false;
     }
 
-
     void updateDebug()
     {
         debugger.setDebug(" UDP", $"{sentBytesUDP}B/s↑  {gotBytesUDP}B/s↓  ({(udpOnline ? "online" : "offline")})");
@@ -166,9 +162,15 @@ public class UM2_Server : MonoBehaviour
         failedMessages = 0;
     }
 
+    private void Update() {
+        //this is disgusting, but for some reason I cant get the time while in the http thread
+        currentTime = Time.time; 
+    }
+
     public void StartServer()
     {
         InvokeRepeating("updateDebug", 1f, 1f);
+        InvokeRepeating("checkTimoutTimers", 1f, 1f);
 
         if (localIpAddress == null || publicIpAddress == null)
         {
@@ -185,6 +187,16 @@ public class UM2_Server : MonoBehaviour
         initHTTP();
 
         client.StartClient();
+    }
+
+    
+
+    void checkTimeoutTimers(){
+        foreach(Client client in clients){
+            if(timeoutTime <= Time.time - client.lastMessageTime){
+                Debug.Log("Timout " + client.clientID);
+            }
+        }
     }
 
     void initHTTP()
@@ -208,7 +220,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("(Server) Failed to start HTTP: " + e.Message);
+            Debug.LogError("(Server) Failed to start HTTP: " + e);
             httpOnline = false;
         }
     }
@@ -263,7 +275,7 @@ public class UM2_Server : MonoBehaviour
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("(Server) Error handling request: " + e.Message);
+                    Debug.LogError("(Server) Error handling request: " + e);
                     failedMessages += 1;
                 }
             }
@@ -310,9 +322,13 @@ public class UM2_Server : MonoBehaviour
         string messageType = message.Split("~")[1];
         string messageContents = message.Substring(clientIDString.Length + messageType.Length + 2);
         string messageCommand;
-        string[] messageParameters = message.Split("~");
+        //string[] messageParameters = message.Split("~");
         
         int clientID = int.Parse(clientIDString);
+
+        if(clientID != -1){
+            getClient(clientID).lastMessageTime = Time.time;
+        }
 
         string responseMessage = null;
         switch (messageType)
@@ -479,7 +495,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("(Server) Error starting UDP server: " + e.Message);
+            Debug.LogError("(Server) Error starting UDP server: " + e);
         }
     }
 
@@ -505,7 +521,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Server) Error starting TCP server: " + e.Message);
+            Debug.LogError("Server) Error starting TCP server: " + e);
         }
     }
 
@@ -539,7 +555,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("(Server) Error handling client: " + e.Message);
+            Debug.LogError("(Server) Error handling client: " + e);
             failedMessages += 1;
         }
     }
@@ -597,7 +613,7 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("(Server) Error sending response: " + e.Message);
+            Debug.LogError("(Server) Error sending response: " + e);
             failedMessages += 1;
         }
     }

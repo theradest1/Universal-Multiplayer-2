@@ -16,7 +16,7 @@ public class UM2_Prefab : MonoBehaviour
     Quaternion targetRot = Quaternion.identity;
     float tickTime = -1;
     public bool destroyWhenCreatorLeaves = false;
-    int creatorID = -1;
+    //int creatorID = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
         //dynamic TPS
