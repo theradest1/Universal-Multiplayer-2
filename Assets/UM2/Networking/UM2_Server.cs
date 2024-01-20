@@ -24,9 +24,20 @@ public class Client{
     public int clientID;
 
     public List<string> messageQueue = new List<string>();
+    
+    public float lastMessageTime;
+    float timeoutTime;
 
-    public Client(int id){
+    public Client(int id, float timeoutTime){
         clientID = id;
+    }
+
+    async void checkTimeoutTimer(){
+        if(timeout)
+    }
+
+    public void resetTimoutTimer(){
+        lastMessageTime = Time.time;
     }
 }
 
@@ -70,6 +81,8 @@ public class UM2_Server : MonoBehaviour
     int udpPort = 5000;
     int tcpPort = 5001;
     int httpPort = 5002;
+
+    public float timeoutTime = 10;
 
     UdpClient udpServer;
     bool udpOnline;

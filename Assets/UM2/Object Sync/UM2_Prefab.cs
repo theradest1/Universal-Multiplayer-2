@@ -8,7 +8,6 @@ using UnityEngine.Timeline;
 public class UM2_Prefab : MonoBehaviour
 {
     public int objectID;
-    //public float ticksPerSecond;
 
     Vector3 pastPos = Vector3.zero;
     Quaternion pastRot = Quaternion.identity;
@@ -16,8 +15,11 @@ public class UM2_Prefab : MonoBehaviour
     Vector3 targetPos = Vector3.zero;
     Quaternion targetRot = Quaternion.identity;
     float tickTime = -1;
+    public bool destroyWhenCreatorLeaves = false;
+    int creatorID = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
+        //dynamic TPS
         //tickTime = Time.time - pastTime;
         //pastTime = Time.time;
 
@@ -33,7 +35,6 @@ public class UM2_Prefab : MonoBehaviour
     }
 
     public void initialize(int setObjectID, float TPS, Vector3 position, Quaternion rotation){
-        Debug.Log("Did stuff");
         objectID = setObjectID;
         setTPS(TPS);
         pastPos = position;
