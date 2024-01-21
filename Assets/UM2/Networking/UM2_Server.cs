@@ -31,7 +31,7 @@ public class Client{
         clientID = id;
     }
 
-    public void resetTimoutTimer(){
+    public void resettimeoutTimer(){
         lastMessageTime = Time.time;
     }
 }
@@ -170,7 +170,7 @@ public class UM2_Server : MonoBehaviour
     public void StartServer()
     {
         InvokeRepeating("updateDebug", 1f, 1f);
-        InvokeRepeating("checkTimoutTimers", 1f, 1f);
+        InvokeRepeating("checkTimeoutTimers", 1f, 1f);
 
         if (localIpAddress == null || publicIpAddress == null)
         {
@@ -194,7 +194,7 @@ public class UM2_Server : MonoBehaviour
     void checkTimeoutTimers(){
         foreach(Client client in clients){
             if(timeoutTime <= Time.time - client.lastMessageTime){
-                Debug.Log("Timout " + client.clientID);
+                Debug.Log("timeout " + client.clientID);
             }
         }
     }
@@ -327,7 +327,7 @@ public class UM2_Server : MonoBehaviour
         int clientID = int.Parse(clientIDString);
 
         if(clientID != -1){
-            getClient(clientID).lastMessageTime = Time.time;
+            getClient(clientID).lastMessageTime = currentTime;
         }
 
         string responseMessage = null;
