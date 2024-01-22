@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -123,6 +123,23 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &171297151 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
+  m_PrefabInstance: {fileID: 3801147668578014520}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &171297156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171297151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09bc6b63a8e372347ac622ca5f3f5e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &180985650
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,6 +323,7 @@ MonoBehaviour:
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 3
+  destroyWhenCreatorLeaves: 1
 --- !u!114 &180985660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -975,8 +993,9 @@ GameObject:
   - component: {fileID: 1054571549}
   - component: {fileID: 1054571552}
   - component: {fileID: 1054571553}
+  - component: {fileID: 1054571554}
   m_Layer: 0
-  m_Name: Networking
+  m_Name: UM2 Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -994,8 +1013,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c0b7dedcee9bb4499acca6aae50ed95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeoutTime: 10
   debugUDPMessages: 0
-  debugTCPMessages: 1
+  debugTCPMessages: 0
   debugHTTPMessages: 0
   client: {fileID: 1054571550}
   debugger: {fileID: 1542006208}
@@ -1014,7 +1034,7 @@ MonoBehaviour:
   server: {fileID: 1054571549}
   debugger: {fileID: 1542006208}
   debugUDPMessages: 0
-  debugTCPMessages: 1
+  debugTCPMessages: 0
   debugHTTPMessages: 0
 --- !u!4 &1054571551
 Transform:
@@ -1055,6 +1075,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51ed2d7f748e38c4eb231fb3d8f10ef3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1054571554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054571548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7031b1143c54484458084ea5fb9f4dc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1168736109
@@ -1388,7 +1420,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 171297156}
   m_SourcePrefab: {fileID: 100100000, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

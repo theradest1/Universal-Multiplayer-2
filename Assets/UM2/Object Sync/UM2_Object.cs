@@ -26,6 +26,8 @@ public class UM2_Object : MonoBehaviour
     Vector3 pastSyncedPos;
     Quaternion pastSyncedRot;
 
+    public bool destroyWhenCreatorLeaves = false;
+
     private void Start()
     {
         sync = UM2_Sync.sync;

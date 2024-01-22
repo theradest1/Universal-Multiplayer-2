@@ -16,10 +16,10 @@ public class UM2_Prefab : MonoBehaviour
     Quaternion targetRot = Quaternion.identity;
     float tickTime = -1;
     public bool destroyWhenCreatorLeaves = false;
-    //int creatorID = -1;
+    int creatorID = -1;
 
     public void newTransform(Vector3 position, Quaternion rotation){
-        //dynamic TPS
+        //dynamic TPS (not currently using)
         //tickTime = Time.time - pastTime;
         //pastTime = Time.time;
 
@@ -34,13 +34,16 @@ public class UM2_Prefab : MonoBehaviour
         tickTime = 1/newTPS;
     }
 
-    public void initialize(int setObjectID, float TPS, Vector3 position, Quaternion rotation){
+    public void initialize(int setObjectID, float TPS, Vector3 position, Quaternion rotation, int _creatorID, bool _destroyWhenCreatorLeaves){
         objectID = setObjectID;
         setTPS(TPS);
         pastPos = position;
         transform.position = position;
         pastRot = rotation;
         transform.rotation = rotation;
+
+        creatorID = _creatorID;
+        destroyWhenCreatorLeaves = _destroyWhenCreatorLeaves;
     }
 
     private void Update()
