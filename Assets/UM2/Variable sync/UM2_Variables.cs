@@ -6,7 +6,8 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-public class LocalServerVariable{
+public class LocalServerVariable
+{
     string value;
     Type type;
     public string name;
@@ -53,7 +54,7 @@ public class LocalServerVariable{
     }
 }
 
-public class UM2_Variables : MonoBehaviour
+public class UM2_Variables : MonoBehaviourUM2
 {
     List<LocalServerVariable> serverVariables = new List<LocalServerVariable>();
     UM2_Client client;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class UM2_Object : MonoBehaviour
+public class UM2_Object : MonoBehaviourUM2
 {
     public GameObject prefab;
     [HideInInspector] public int objectID = -1;

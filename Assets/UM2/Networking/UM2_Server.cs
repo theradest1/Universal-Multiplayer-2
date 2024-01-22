@@ -349,7 +349,9 @@ public class UM2_Server : MonoBehaviour
                         clients.Add(newClient);
 
                         responseMessage = "setID~" + currentPlayerID + "";
+                        sendMessageToAll("clientJoined~" + currentPlayerID, "TCP", currentPlayerID);
                         currentPlayerID++;
+
                         break;
                     case "reserveObjectID":
                         responseMessage = "reservedObjectID~" + currentObjectID;

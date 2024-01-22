@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Reflection;
 
-public class UM2_Methods : MonoBehaviour
+public class UM2_Methods : MonoBehaviourUM2
 {
 
     public static List<MonoBehaviourUM2> subscribedClasses = new List<MonoBehaviourUM2>();

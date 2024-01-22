@@ -6,7 +6,7 @@ using System.IO;
 using System;
 using System.Threading.Tasks;
 
-public class UM2_Sync : MonoBehaviour
+public class UM2_Sync : MonoBehaviourUM2
 {
     List<GameObject> prefabs = new List<GameObject>();
     List<UM2_Object> clientSideObjects = new List<UM2_Object>();

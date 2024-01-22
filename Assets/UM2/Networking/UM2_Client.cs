@@ -13,7 +13,7 @@ using Unity.VisualScripting;
 using System.Reflection;
 using UnityEngine.Video;
 
-public class UM2_Client : MonoBehaviour
+public class UM2_Client : MonoBehaviourUM2
 {
     public static string serverIP = null;
     public static int serverUdpPort = 5000;
@@ -67,6 +67,12 @@ public class UM2_Client : MonoBehaviour
     public bool debugUDPMessages = false;
     public bool debugTCPMessages = false;
     public bool debugHTTPMessages = false;
+
+    public void clientJoined(int newClientID){
+        Debug.Log("Client with ID " + newClientID + " joined");
+
+        UM2_Methods.callGlobalMethod("OnConnect");
+    }
 
     public void sendDebugMessage(string message){
         messageToOtherClient("printMessage~" + message, clientID);
@@ -146,8 +152,7 @@ public class UM2_Client : MonoBehaviour
     }
 
     public void join(){
-        //sendMessage("server~join", true, false);
-        sendMessage("server~join", "HTTP", true);
+        sendMessage("server~join", true, true);
     }
 
     public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true, bool sendWithoutID = false){

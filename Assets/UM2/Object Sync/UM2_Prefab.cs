@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using UnityEngine;
 using UnityEngine.Timeline;
 
-public class UM2_Prefab : MonoBehaviour
+public class UM2_Prefab : MonoBehaviourUM2
 {
     public int objectID;
 
