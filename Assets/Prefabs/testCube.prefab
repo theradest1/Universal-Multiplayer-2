@@ -102,4 +102,4 @@ MonoBehaviour:
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 0
-  destroyWhenCreatorLeaves: 1
+  destroyWhenCreatorLeaves: 0

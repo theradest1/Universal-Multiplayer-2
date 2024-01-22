@@ -18,6 +18,12 @@ public class UM2_Prefab : MonoBehaviourUM2
     public bool destroyWhenCreatorLeaves = false;
     int creatorID = -1;
 
+    public override void OnPlayerLeave(int clientID){
+        if(clientID == creatorID && destroyWhenCreatorLeaves){
+            Destroy(this.gameObject);
+        }
+    }
+
     public void newTransform(Vector3 position, Quaternion rotation){
         //dynamic TPS (not currently using)
         //tickTime = Time.time - pastTime;

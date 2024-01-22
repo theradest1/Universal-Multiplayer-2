@@ -77,7 +77,7 @@ public class UM2_Server : MonoBehaviour
     int tcpPort = 5001;
     int httpPort = 5002;
 
-    public float timeoutTime = 10;
+    public float timeoutTime = 5; //seconds
 
     UdpClient udpServer;
     bool udpOnline;
@@ -195,6 +195,9 @@ public class UM2_Server : MonoBehaviour
         foreach(Client client in clients){
             if(timeoutTime <= Time.time - client.lastMessageTime){
                 Debug.Log("timeout " + client.clientID);
+                sendMessageToAll("clientDisconnected~" + client.clientID, "TCP", client.clientID);
+                clients.Remove(client);
+                return;
             }
         }
     }

@@ -71,7 +71,11 @@ public class UM2_Client : MonoBehaviourUM2
     public void clientJoined(int newClientID){
         Debug.Log("Client with ID " + newClientID + " joined");
 
-        UM2_Methods.callGlobalMethod("OnConnect");
+        UM2_Methods.callGlobalMethod("OnPlayerJoin", new object[] {newClientID});
+    }
+
+    public void clientDisconnected(int goneClientID){
+        UM2_Methods.callGlobalMethod("OnPlayerLeave", new object[] {goneClientID});
     }
 
     public void sendDebugMessage(string message){
