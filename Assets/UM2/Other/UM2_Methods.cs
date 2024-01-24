@@ -5,12 +5,6 @@ using System;
 using System.Reflection;
 using System.Linq;
 
-public enum UM2_RecipientGroups{
-    Server = -1,
-    Global = -2,
-    Others = -3
-}
-
 public class UM2_Methods : MonoBehaviourUM2
 {
     /*
@@ -67,33 +61,24 @@ public class UM2_Methods : MonoBehaviourUM2
         }
     }
 
-    public static void invokeNetworkMethod(UM2_RecipientGroups recipients, string methodName, params object[] parameters)
-    {
-        invokeNetworkMethod((int)recipients, methodName, parameters);
-    }
-
-    public static void invokeNetworkMethod(int recipient, string methodName, params object[] parameters)
-    {
+    public static void networkMethodServer(string methodName, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
-        switch(recipient){
-            case (int)UM2_RecipientGroups.Global:
-                Debug.Log("Global message");
-                message = "all~" + message;
-                UM2_Client.client.sendMessage(message, true, false);
-                break;
-            case (int)UM2_RecipientGroups.Others:
-                Debug.Log("Others message");
-                message = "others~" + message;
-                UM2_Client.client.sendMessage(message, true, false);
-                break;
-            case (int)UM2_RecipientGroups.Server:
-                message = "server~" + message;
-                UM2_Client.client.sendMessage(message, true, false);
-                break;
-            default:
-                message = "direct~" + recipient + "~" + message;
-                UM2_Client.client.sendMessage(message, true, false);
-                break;
-        }
+        message = "server~" + message;
+        UM2_Client.client.sendMessage(message, true, false);
+    }
+    public static void networkMethodOthers(string methodName, params object[] parameters){
+        string message = methodName + "~" + String.Join("~", parameters);
+        message = "others~" + message;
+        UM2_Client.client.sendMessage(message, true, false);
+    }
+    public static void networkMethodGlobal(string methodName, params object[] parameters){
+        string message = methodName + "~" + String.Join("~", parameters);
+        message = "all~" + message;
+        UM2_Client.client.sendMessage(message, true, false);
+    }
+    public static void networkMethodDirect(int recipientID, string methodName, params object[] parameters){
+        string message = methodName + "~" + String.Join("~", parameters);
+        message = "direct~" + recipientID + "~" + message;
+        UM2_Client.client.sendMessage(message, true, false);
     }
 }

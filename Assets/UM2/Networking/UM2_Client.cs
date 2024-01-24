@@ -79,7 +79,7 @@ public class UM2_Client : MonoBehaviourUM2
     }
 
     public void sendDebugMessage(string message){
-        UM2_Methods.invokeNetworkMethod(clientID, "printMessage", message);
+        UM2_Methods.networkMethodServer("printMessage", message);
     }
 
     public void printMessage(string message, string protocol){
@@ -157,27 +157,6 @@ public class UM2_Client : MonoBehaviourUM2
 
     public void join(){
         sendMessage("server~join", true, true);
-    }
-
-    /*
-    public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true, bool sendWithoutID = false){
-        message = "direct~" + recievingClientID + "~" + message;
-        sendMessage(message, reliableProtocol, sendWithoutID);
-    }*/
-
-    /*public void messageServer(string message, bool reliableProtocol = true, bool sendWithoutID = false){
-        message = "server~" + message;
-        sendMessage(message, reliableProtocol, sendWithoutID);
-    }*/
-
-    public void messageOtherClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){
-        message = "others~" + message;
-        sendMessage(message, reliableProtocol, sendWithoutID);
-    }
-
-    public void messageAllClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this also messages this client
-        message = "all~" + message;
-        sendMessage(message, reliableProtocol, sendWithoutID);
     }
 
     public void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use and has some protections

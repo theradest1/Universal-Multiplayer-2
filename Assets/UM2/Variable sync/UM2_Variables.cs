@@ -28,7 +28,7 @@ public class LocalServerVariable
             Debug.LogError("Could not parse initial value: " + initialValue + " into " + setType);
             return;
         }
-        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "newVar", name, value, type);
+        UM2_Methods.networkMethodServer("newVar", name, value, type);
         //client.messageServer("newVar~" + name + "~" + value + "~" + type);
     }
 
@@ -131,11 +131,11 @@ public class UM2_Variables : MonoBehaviourUM2
 
     public void addToVar(string name, object value){
         //client.messageServer("addToVar~" + name + "~" + value);
-        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "addToVar", name, value);
+        UM2_Methods.networkMethodServer("addToVar", name, value);
     }
 
     public void setVar(string name, object value){
-        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "setVar", name, value);
+        UM2_Methods.networkMethodServer("setVar", name, value);
         //client.messageServer("setVar~" + name + "~" + value);
     }
 
@@ -154,7 +154,7 @@ public class UM2_Variables : MonoBehaviourUM2
         yield return new WaitUntil(() => UM2_Client.clientID != -1);
 
         //client.messageServer("giveAllVariables~" + UM2_Client.clientID);
-        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "giveAllVariables", UM2_Client.clientID);
+        UM2_Methods.networkMethodServer("giveAllVariables", UM2_Client.clientID);
 
         yield return null;
     }

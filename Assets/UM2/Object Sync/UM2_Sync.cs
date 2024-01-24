@@ -73,15 +73,16 @@ public class UM2_Sync : MonoBehaviourUM2
         //Debug.Log("used reserved ID " + startedObject.objectID);
         reservedIDs.RemoveAt(0);
         
-        client.messageOtherClients("newSyncedObject~" + startedObject.objectID + "~" + prefabID + "~" + startedObject.ticksPerSecond + "~" + startedObject.transform.position + "~" + startedObject.transform.rotation + "~" + UM2_Client.clientID + "~" + startedObject.destroyWhenCreatorLeaves);
+        UM2_Methods.networkMethodOthers("newSyncedObject", startedObject.objectID, prefabID, startedObject.ticksPerSecond, startedObject.transform.position, startedObject.transform.rotation, UM2_Client.clientID, startedObject.destroyWhenCreatorLeaves);
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
-        client.messageOtherClients("updateObjectTransform~" + objectID + "~" + position + "~" + rotation, false);
+        string message = "others~updateObjectTransform~" + position + "~" + rotation;
+        UM2_Client.client.sendMessage(message, false, false);
     }
 
     public void updateTPS(int objectID, float newTPS){
-        client.messageOtherClients("updateObjectTPS~" + objectID + "~" + newTPS, false);
+        UM2_Methods.networkMethodOthers("updateObjectTPS", objectID, newTPS);
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
@@ -116,7 +117,7 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     void getReserveNewObjectID(){
-        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "reserveObjectID");
+        UM2_Methods.networkMethodServer("reserveObjectID");
         //client.messageServer("reserveObjectID");
     }
 
@@ -128,8 +129,7 @@ public class UM2_Sync : MonoBehaviourUM2
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            UM2_Methods.invokeNetworkMethod(requestingClientID, "newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
-            //client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond + "~" + clientSideObject.transform.position + "~" + clientSideObject.transform.rotation + "~" + UM2_Client.clientID + "~" + clientSideObject.destroyWhenCreatorLeaves, requestingClientID);
+            UM2_Methods.networkMethodServer("newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
         }
     }
 
@@ -137,7 +137,7 @@ public class UM2_Sync : MonoBehaviourUM2
         //wait untill this client has an ID
         yield return new WaitUntil(() => UM2_Client.clientID != -1);
 
-        client.messageOtherClients("giveAllSyncedObjects~" + UM2_Client.clientID);
+        UM2_Methods.networkMethodOthers("giveAllSyncedObjects", UM2_Client.clientID);
 
         yield return null;
     }
