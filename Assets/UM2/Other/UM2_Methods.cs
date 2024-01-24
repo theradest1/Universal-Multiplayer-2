@@ -4,6 +4,8 @@ using UnityEngine;
 using System;
 using System.Reflection;
 using System.Linq;
+using UnityEngine.UIElements;
+using Unity.VisualScripting;
 
 public class UM2_Methods : MonoBehaviourUM2
 {
@@ -52,12 +54,52 @@ public class UM2_Methods : MonoBehaviourUM2
         }
     }
 
-    public static void callServerMethod(string methodName, object[] perameters){
+    public static void invokeNetworkMethod(string methodName, string[] perameters){
+        int perameterCount = perameters.Length;
+        
+        List<(MethodInfo, MonoBehaviour)> possibleMethodsAndScripts = new List<(MethodInfo, MonoBehaviour)>();
+        
         foreach(MonoBehaviour subscribedScript in serverMethodScripts){
-            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            if(methodInfo != null){
-                methodInfo.Invoke(subscribedScript, perameters);
+            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+            if(methodInfo != null && methodInfo.GetParameters().Length == perameterCount){
+                possibleMethodsAndScripts.Add((methodInfo, subscribedScript));
             }
+        }
+        
+        int succeededCalls = 0;
+        int failedCalls = 0;
+        foreach((MethodInfo methodInfo, MonoBehaviour script) in possibleMethodsAndScripts){
+            try{
+                //trying to parse perameters
+                ParameterInfo[] methodPerameters = methodInfo.GetParameters();
+                object[] parsedParameters = new object[methodPerameters.Length];
+                for (int i = 0; i < methodPerameters.Length; i++)
+                {
+                    Type parameterType = methodPerameters[i].ParameterType;
+                    object parsedValue = QuickMethods.ParseValue(perameters[i], parameterType);
+                    parsedParameters[i] = parsedValue;
+                }
+
+                //try to call that method with parsed perameters
+                methodInfo.Invoke(script, perameters);
+                succeededCalls++;
+            }
+            catch{
+                failedCalls++;
+            }
+        }
+
+        //now thats a chunky debugging message tree
+        if(succeededCalls == 0){
+            if(failedCalls == 0){
+                Debug.LogError("Function was not found\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
+            }
+            else{
+                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it. It is most likley the perameter types.");
+            }
+        }
+        else if(failedCalls != 0){
+            Debug.LogError(failedCalls + " network method(s) werent called because of an error (" + succeededCalls + " were called without a problem)");
         }
     }
 

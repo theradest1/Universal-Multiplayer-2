@@ -499,8 +499,10 @@ public class UM2_Client : MonoBehaviourUM2
             messageParts = message.Split("~");
         }
 
+        UM2_Methods.invokeNetworkMethod(methodToCall, messageParts);
+
         //get function
-        foreach(MonoBehaviour script in UM2Scripts){
+        /*foreach(MonoBehaviour script in UM2Scripts){
             MethodInfo methodInfo = null;
             try{
                 methodInfo = script.GetType().GetMethod(methodToCall);
@@ -540,8 +542,8 @@ public class UM2_Client : MonoBehaviourUM2
                     Debug.LogError(e);
                 }
             }
-        }
-        Debug.LogError("Function not found, or function didnt have correct parameter count: \"" + methodToCall + "\" with " + messageParts.Length + " perameters (or +1)\nClick on this message for a debug checklist.\nGotten message: " + initialMessage + "\n1. Parameters must be same as message\n2. The name must be exactly the same as message\n3. the method must be void public \n4. Script with the method must be assigned to the \"" + this.gameObject.name + "\" game object\nhappy debugging (:\n");
+        }*/
+        
         return;
     }
 

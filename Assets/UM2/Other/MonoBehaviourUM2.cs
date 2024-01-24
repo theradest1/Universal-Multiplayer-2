@@ -6,11 +6,17 @@ public class MonoBehaviourUM2 : MonoBehaviour
 {
     void OnEnable()
     {
+        //you can also put these lines in a regular monobehaviour script 
+        //if u dont want to derive from this class
+        //(dont forget the remove lines)
+        //universal methods wont work
         UM2_Methods.addToGlobalMethods(this);
+        UM2_Methods.addToServerMethods(this);
     }
 
     void OnDisable(){
         UM2_Methods.removeFromGlobalMethods(this);
+        UM2_Methods.removeFromServerMethods(this);
     }
     
 
