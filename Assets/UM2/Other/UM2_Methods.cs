@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Reflection;
+using System.Linq;
 
 public enum UM2_RecipientGroups{
     Server = -1,
@@ -17,7 +18,7 @@ public class UM2_Methods : MonoBehaviourUM2
     inhariting the methods of MonoBehaviourUM2
     so they can be called efficiently
     
-    look in MonoBehaviourUM2 for the methods
+    look in MonoBehaviourUM2 for the global methods
     */
 
     static List<MonoBehaviour> globalMethodScripts = new List<MonoBehaviour>();
@@ -73,24 +74,28 @@ public class UM2_Methods : MonoBehaviourUM2
 
     public static void invokeNetworkMethod(int recipient, string methodName, params object[] parameters)
     {
-        if(recipient == (int)UM2_RecipientGroups.Global){
-            Debug.Log("Global message");
+        string message = methodName + "~" + String.Join("~", parameters);
+        switch(recipient){
+            case (int)UM2_RecipientGroups.Global:
+                Debug.Log("Global message");
+                message = "all~" + message;
+                UM2_Client.client.sendMessage(message, true, false);
+                break;
+            case (int)UM2_RecipientGroups.Others:
+                Debug.Log("Others message");
+                message = "others~" + message;
+                UM2_Client.client.sendMessage(message, true, false);
+                break;
+            case (int)UM2_RecipientGroups.Server:
+                Debug.Log("Server message");
+                message = "server~" + message;
+                UM2_Client.client.sendMessage(message, true, false);
+                break;
+            default:
+                Debug.Log("Direct message to " + recipient);
+                message = "direct~" + recipient + "~" + message;
+                UM2_Client.client.sendMessage(message, true, false);
+                break;
         }
-        else if(recipient == (int)UM2_RecipientGroups.Others){
-            Debug.Log("Others message");
-        }
-        else if(recipient == (int)UM2_RecipientGroups.Server){
-            Debug.Log("Server message");
-        }
-        else{
-            Debug.Log("Direct message to " + recipient);
-        }
-
-        string finalString = "{";
-        foreach (object element in parameters)
-        {
-            finalString += element + ", ";
-        }
-        Debug.Log("Perameters: " + finalString.Substring(0, finalString.Length - 2) + "}");
     }
 }

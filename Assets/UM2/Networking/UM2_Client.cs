@@ -542,7 +542,7 @@ public class UM2_Client : MonoBehaviourUM2
                         for (int i = 0; i < messageParts.Length; i++)
                         {
                             Type parameterType = parameters[i].ParameterType;
-                            object parsedValue = ParseValue(messageParts[i], parameterType);
+                            object parsedValue = QuickMethods.ParseValue(messageParts[i], parameterType);
                             parsedParameters[i] = parsedValue;
                         }
 
@@ -611,81 +611,5 @@ public class UM2_Client : MonoBehaviourUM2
         {
             Debug.LogError("Function " + functionName + " not found!");
         }
-    }
-
-    private object ParseValue(string token, Type type)
-    {   
-        if(type == typeof(Vector3)){
-            // Remove parentheses and split string into components
-            string[] components = token.Replace("(", "").Replace(")", "").Split(',');
-
-            // Parse components to floats
-            float x = float.Parse(components[0]);
-            float y = float.Parse(components[1]);
-            float z = float.Parse(components[2]);
-
-            return new Vector3(x, y, z);
-        }
-        else if(type == typeof(Quaternion)){
-            // Remove parentheses and split string into components
-            string[] components = token.Replace("(", "").Replace(")", "").Split(',');
-
-            // Parse components to floats
-            float w = float.Parse(components[0]);
-            float x = float.Parse(components[1]);
-            float y = float.Parse(components[2]);
-            float z = float.Parse(components[3]);
-
-            return new Quaternion(w, x, y, z);
-        }
-        else if (type == typeof(int))
-        {
-            return int.Parse(token);
-        }
-        else if (type == typeof(float))
-        {
-            return float.Parse(token);
-        }
-        else if (type == typeof(bool))
-        {
-            return bool.Parse(token);
-        }
-        else if (type == typeof(string))
-        {
-            return token;
-        }
-        else
-        {
-            throw new ArgumentException("Unsupported parameter type: " + type + ". Add to ParseValue method in UM2_Client");
-        }
-    }
-
-    public static void PrintList<T>(List<T> list)
-    {
-        string finalString = "{";
-        foreach (T element in list)
-        {
-            finalString += element + ", ";
-        }
-        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
-    }
-    public static void PrintArrayTypes<T>(T[] array)
-    {
-        string finalString = "{";
-        foreach (T element in array)
-        {
-            finalString += element.GetType() + ", ";
-        }
-        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
-    }
-
-    public static void PrintArray<T>(T[] array)
-    {
-        string finalString = "{";
-        foreach (T element in array)
-        {
-            finalString += element + ", ";
-        }
-        Debug.Log(finalString.Substring(0, finalString.Length - 2) + "}");
     }
 }
