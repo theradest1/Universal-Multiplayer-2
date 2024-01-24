@@ -127,7 +127,8 @@ public class UM2_Sync : MonoBehaviourUM2
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond + "~" + clientSideObject.transform.position + "~" + clientSideObject.transform.rotation + "~" + UM2_Client.clientID + "~" + clientSideObject.destroyWhenCreatorLeaves, requestingClientID);
+            UM2_Methods.invokeNetworkMethod(requestingClientID, "newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
+            //client.messageToOtherClient("newSyncedObject~" + clientSideObject.objectID + "~" + prefabID + "~" + clientSideObject.ticksPerSecond + "~" + clientSideObject.transform.position + "~" + clientSideObject.transform.rotation + "~" + UM2_Client.clientID + "~" + clientSideObject.destroyWhenCreatorLeaves, requestingClientID);
         }
     }
 

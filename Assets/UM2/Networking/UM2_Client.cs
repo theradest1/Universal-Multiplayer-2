@@ -79,7 +79,7 @@ public class UM2_Client : MonoBehaviourUM2
     }
 
     public void sendDebugMessage(string message){
-        messageToOtherClient("printMessage~" + message, clientID);
+        UM2_Methods.invokeNetworkMethod(clientID, "printMessage", message);
     }
 
     public void printMessage(string message, string protocol){
@@ -159,10 +159,11 @@ public class UM2_Client : MonoBehaviourUM2
         sendMessage("server~join", true, true);
     }
 
+    /*
     public void messageToOtherClient(string message, int recievingClientID, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "direct~" + recievingClientID + "~" + message;
         sendMessage(message, reliableProtocol, sendWithoutID);
-    }
+    }*/
 
     public void messageServer(string message, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "server~" + message;
