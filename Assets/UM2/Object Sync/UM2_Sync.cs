@@ -77,7 +77,7 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
-        string message = "others~updateObjectTransform~" + position + "~" + rotation;
+        string message = "others~updateObjectTransform~" + objectID + "~" + position + "~" + rotation;
         UM2_Client.client.sendMessage(message, false, false);
     }
 
@@ -129,7 +129,7 @@ public class UM2_Sync : MonoBehaviourUM2
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            UM2_Methods.networkMethodServer("newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
+            UM2_Methods.networkMethodOthers("newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
         }
     }
 
