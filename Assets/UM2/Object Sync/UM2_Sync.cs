@@ -116,7 +116,8 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     void getReserveNewObjectID(){
-        client.messageServer("reserveObjectID");
+        UM2_Methods.invokeNetworkMethod(UM2_RecipientGroups.Server, "reserveObjectID");
+        //client.messageServer("reserveObjectID");
     }
 
     public void reservedObjectID(int newReservedID){

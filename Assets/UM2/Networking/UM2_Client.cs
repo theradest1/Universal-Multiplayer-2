@@ -165,10 +165,10 @@ public class UM2_Client : MonoBehaviourUM2
         sendMessage(message, reliableProtocol, sendWithoutID);
     }*/
 
-    public void messageServer(string message, bool reliableProtocol = true, bool sendWithoutID = false){
+    /*public void messageServer(string message, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "server~" + message;
         sendMessage(message, reliableProtocol, sendWithoutID);
-    }
+    }*/
 
     public void messageOtherClients(string message, bool reliableProtocol = true, bool sendWithoutID = false){
         message = "others~" + message;

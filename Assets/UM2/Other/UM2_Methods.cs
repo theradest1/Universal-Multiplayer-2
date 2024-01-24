@@ -87,12 +87,10 @@ public class UM2_Methods : MonoBehaviourUM2
                 UM2_Client.client.sendMessage(message, true, false);
                 break;
             case (int)UM2_RecipientGroups.Server:
-                Debug.Log("Server message");
                 message = "server~" + message;
                 UM2_Client.client.sendMessage(message, true, false);
                 break;
             default:
-                Debug.Log("Direct message to " + recipient);
                 message = "direct~" + recipient + "~" + message;
                 UM2_Client.client.sendMessage(message, true, false);
                 break;
