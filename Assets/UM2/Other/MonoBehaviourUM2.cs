@@ -6,11 +6,11 @@ public class MonoBehaviourUM2 : MonoBehaviour
 {
     void OnEnable()
     {
-        UM2_Methods.addToCallback(this);
+        UM2_Methods.addToGlobalMethods(this);
     }
 
     void OnDisable(){
-        UM2_Methods.removeFromCallback(this);
+        UM2_Methods.removeFromGlobalMethods(this);
     }
     
 

@@ -533,7 +533,7 @@ public class UM2_Client : MonoBehaviourUM2
                 try{
                     ParameterInfo[] parameters = methodInfo.GetParameters();
 
-                    // Check if the number of parameters matches the number of tokens
+                    //check if the number of parameters matches (or +1 for protocol)
                     if (parameters.Length == messageParts.Length + 1 || parameters.Length == messageParts.Length)
                     {
                         //create parsed parameters list
@@ -551,7 +551,7 @@ public class UM2_Client : MonoBehaviourUM2
                             parsedParameters[parsedParameters.Length - 1] = protocol;
                         }
 
-                        // Call the function dynamically with parsed parameters
+                        //call the function with parsed parameters
                         methodInfo.Invoke(script, parsedParameters);
                         return;
                     }
