@@ -60,7 +60,8 @@ public class UM2_Methods : MonoBehaviourUM2
         List<(MethodInfo, MonoBehaviour)> possibleMethodsAndScripts = new List<(MethodInfo, MonoBehaviour)>();
         
         foreach(MonoBehaviour subscribedScript in serverMethodScripts){
-            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+            //Debug.Log("subscribed: " + subscribedScript);
+            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.Public);
             if(methodInfo != null && methodInfo.GetParameters().Length == perameterCount){
                 possibleMethodsAndScripts.Add((methodInfo, subscribedScript));
             }
@@ -92,14 +93,14 @@ public class UM2_Methods : MonoBehaviourUM2
         //now thats a chunky debugging message tree
         if(succeededCalls == 0){
             if(failedCalls == 0){
-                Debug.LogError("Function was not found\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
+                Debug.LogError("Function was not found: " + methodName + "\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
             }
             else{
-                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it. It is most likley the perameter types.");
+                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it: " + methodName + "\nIt is most likley the perameter types.");
             }
         }
         else if(failedCalls != 0){
-            Debug.LogError(failedCalls + " network method(s) werent called because of an error (" + succeededCalls + " were called without a problem)");
+            Debug.LogError(failedCalls + " network method(s) werent called because of an error: " + methodName + " (" + succeededCalls + " were called without a problem)");
         }
     }
 

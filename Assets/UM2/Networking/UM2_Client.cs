@@ -79,7 +79,7 @@ public class UM2_Client : MonoBehaviourUM2
     }
 
     public void sendDebugMessage(string message){
-        UM2_Methods.networkMethodServer("printMessage", message);
+        UM2_Methods.networkMethodDirect(clientID, "printMessage", message);
     }
 
     public void printMessage(string message, string protocol){
