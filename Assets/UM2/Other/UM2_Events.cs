@@ -29,7 +29,7 @@ public class UM2_Events : MonoBehaviourUM2
         client.sendMessage("server~saveProtocol", "TCP", false);
         //nothing for http since it is only client->server->client (no disjointed response)
 
-        UM2_Methods.callGlobalMethod("OnConnect");
+        UM2_Methods.callGlobalMethod("OnConnect", new object[] {id});
     }
 
     public void recordedProtocol(string protocol){
