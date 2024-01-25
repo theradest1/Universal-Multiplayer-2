@@ -61,7 +61,7 @@ public class UM2_Methods : MonoBehaviourUM2
         
         foreach(MonoBehaviour subscribedScript in serverMethodScripts){
             //Debug.Log("subscribed: " + subscribedScript);
-            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.Public);
+            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName);
             if(methodInfo != null && methodInfo.GetParameters().Length == perameterCount){
                 possibleMethodsAndScripts.Add((methodInfo, subscribedScript));
             }
@@ -82,25 +82,27 @@ public class UM2_Methods : MonoBehaviourUM2
                 }
 
                 //try to call that method with parsed perameters
-                methodInfo.Invoke(script, perameters);
+                methodInfo.Invoke(script, parsedParameters);
                 succeededCalls++;
             }
-            catch{
+            catch(Exception e){
                 failedCalls++;
+                Debug.Log(e);
             }
         }
 
         //now thats a chunky debugging message tree
+        string perameterString = QuickMethods.ArrayToString(perameters);
         if(succeededCalls == 0){
             if(failedCalls == 0){
-                Debug.LogError("Function was not found: " + methodName + "\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
+                Debug.LogError("Function was not found: Name: " + methodName + " Perameters: " + perameterString + "\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
             }
             else{
-                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it: " + methodName + "\nIt is most likley the perameter types.");
+                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it. Name: " + methodName + " Perameters: " + perameterString + "\nIt is most likley the perameter types.");
             }
         }
         else if(failedCalls != 0){
-            Debug.LogError(failedCalls + " network method(s) werent called because of an error: " + methodName + " (" + succeededCalls + " were called without a problem)");
+            Debug.LogError(failedCalls + " network method(s) werent called because of an error. Name: " + methodName + " Perameters: " + perameterString + " (" + succeededCalls + " were called without a problem)");
         }
     }
 

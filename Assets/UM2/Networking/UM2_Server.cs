@@ -345,7 +345,7 @@ public class UM2_Server : MonoBehaviour
                         responseMessage = "recordedProtocol~" + protocol;
                         break;
                     case "ping":
-                        responseMessage = "pong";
+                        responseMessage = "pong~" + protocol;
                         break;
                     case "join":
                         Client newClient = new Client(currentPlayerID);
