@@ -2,18 +2,11 @@ using System.Collections.Generic;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
-using TMPro;
-using UnityEngine.SceneManagement;
-using System.Runtime.InteropServices;
-using Unity.VisualScripting;
-using System.Xml.Schema;
 
 public class Client{
     public IPEndPoint udpEndpoint;
@@ -188,8 +181,6 @@ public class UM2_Server : MonoBehaviour
 
         client.StartClient();
     }
-
-    
 
     void checkTimeoutTimers(){
         List<Client> clientsToDisconnect = new List<Client>();
@@ -598,12 +589,6 @@ public class UM2_Server : MonoBehaviour
             SendUDPMessage(responseMessage, clientEndPoint);
         }
 
-    }
-
-    private void SendUDPMessage(string message, int clientID)
-    {
-        IPEndPoint udpEndpoint = getClient(clientID).udpEndpoint;
-        SendUDPMessage(message, udpEndpoint);
     }
 
     private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
