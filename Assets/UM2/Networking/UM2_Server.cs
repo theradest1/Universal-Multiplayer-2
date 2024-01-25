@@ -192,13 +192,16 @@ public class UM2_Server : MonoBehaviour
     
 
     void checkTimeoutTimers(){
+        List<Client> clientsToDisconnect = new List<Client>();
         foreach(Client client in clients){
             if(timeoutTime <= Time.time - client.lastMessageTime){
-                Debug.Log("timeout " + client.clientID);
                 sendMessageToAll("clientDisconnected~" + client.clientID, "TCP", client.clientID);
-                clients.Remove(client);
-                return;
+                clientsToDisconnect.Add(client);
             }
+        }
+
+        foreach(Client client in clientsToDisconnect){
+            clients.Remove(client);
         }
     }
 

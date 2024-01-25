@@ -302,10 +302,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 6784705878260703352, guid: 75ba9de79c18c45418ef1113b563faa7, type: 3}
   objectID: 0
-  ticksPerSecond: 32
+  ticksPerSecond: 16
   syncTransform: 1
   optimizeTransoformSync: 1
-  minTicksPerSecond: 3
+  minTicksPerSecond: 5
   destroyWhenCreatorLeaves: 1
 --- !u!114 &180985660
 MonoBehaviour:

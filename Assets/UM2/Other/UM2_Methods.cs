@@ -18,7 +18,7 @@ public class UM2_Methods : MonoBehaviourUM2
     */
 
     static List<MonoBehaviour> globalMethodScripts = new List<MonoBehaviour>();
-    static List<MonoBehaviour> serverMethodScripts = new List<MonoBehaviour>();
+    static List<MonoBehaviour> networkMethodScripts = new List<MonoBehaviour>();
 
 
     public static void addToGlobalMethods(MonoBehaviour scriptToAdd){
@@ -26,7 +26,7 @@ public class UM2_Methods : MonoBehaviourUM2
     }
 
     public static void addToServerMethods(MonoBehaviour scriptToAdd){
-        serverMethodScripts.Add(scriptToAdd);
+        networkMethodScripts.Add(scriptToAdd);
     }
 
     public static void removeFromGlobalMethods(MonoBehaviour scriptToRemove){
@@ -39,8 +39,8 @@ public class UM2_Methods : MonoBehaviourUM2
     }
 
     public static void removeFromServerMethods(MonoBehaviour scriptToRemove){
-        if(serverMethodScripts.Contains(scriptToRemove)){
-            serverMethodScripts.Remove(scriptToRemove);
+        if(networkMethodScripts.Contains(scriptToRemove)){
+            networkMethodScripts.Remove(scriptToRemove);
         }
         else{
             Debug.LogWarning("Tried to remove class from subscription list that wasnt there");
@@ -48,9 +48,14 @@ public class UM2_Methods : MonoBehaviourUM2
     }
 
     public static void callGlobalMethod(String methodName, object[] perameters = null){
-        foreach(MonoBehaviour subscribedScript in globalMethodScripts){
-            MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            methodInfo.Invoke(subscribedScript, perameters);
+        //this is so there isnt an error if one of the global method scripts are destroyed
+        List<MonoBehaviour> globalMethodScriptsCopy = globalMethodScripts.ToList();
+        
+        foreach(MonoBehaviour subscribedScript in globalMethodScriptsCopy){
+            if(subscribedScript != null){
+                MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                methodInfo.Invoke(subscribedScript, perameters);
+            }
         }
     }
 
@@ -59,7 +64,7 @@ public class UM2_Methods : MonoBehaviourUM2
         
         List<(MethodInfo, MonoBehaviour)> possibleMethodsAndScripts = new List<(MethodInfo, MonoBehaviour)>();
         
-        foreach(MonoBehaviour subscribedScript in serverMethodScripts){
+        foreach(MonoBehaviour subscribedScript in networkMethodScripts){
             //Debug.Log("subscribed: " + subscribedScript);
             MethodInfo methodInfo = subscribedScript.GetType().GetMethod(methodName);
             if(methodInfo != null && methodInfo.GetParameters().Length == perameterCount){
@@ -69,6 +74,7 @@ public class UM2_Methods : MonoBehaviourUM2
         
         int succeededCalls = 0;
         int failedCalls = 0;
+
         foreach((MethodInfo methodInfo, MonoBehaviour script) in possibleMethodsAndScripts){
             try{
                 //trying to parse perameters
