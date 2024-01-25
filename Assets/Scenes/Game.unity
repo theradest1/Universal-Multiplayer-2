@@ -977,6 +977,7 @@ GameObject:
   - component: {fileID: 1054571552}
   - component: {fileID: 1054571553}
   - component: {fileID: 1054571554}
+  - component: {fileID: 1054571555}
   m_Layer: 0
   m_Name: UM2 Manager
   m_TagString: Untagged
@@ -1070,6 +1071,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7112755d51e6e6c4fba3fb8ccd49db97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1054571555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054571548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95dd01fb30b2b9a41b028a9d50005ac9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1168736109

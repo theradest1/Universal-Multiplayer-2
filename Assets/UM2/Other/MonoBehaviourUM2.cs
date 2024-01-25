@@ -22,7 +22,7 @@ public class MonoBehaviourUM2 : MonoBehaviour
 
     //leave all of these blank (they are overriden)
     public virtual void OnConnect(int clientID){}
-    public virtual void OnDisconnect(){}
+    //public virtual void OnDisconnect(){}
     public virtual void OnPlayerJoin(int clientID){}
     public virtual void OnPlayerLeave(int clientID){}
 }

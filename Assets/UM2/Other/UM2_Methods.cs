@@ -87,7 +87,7 @@ public class UM2_Methods : MonoBehaviourUM2
             }
             catch(Exception e){
                 failedCalls++;
-                Debug.Log(e);
+                Debug.LogError(e);
             }
         }
 
