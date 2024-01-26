@@ -331,6 +331,7 @@ public class UM2_Client : MonoBehaviourUM2
                 failedMessages += 1;
             }
         }
+        Debug.LogWarning("TCP reciever closed");
     }
 
     public void sendTCPMessage(string message)
