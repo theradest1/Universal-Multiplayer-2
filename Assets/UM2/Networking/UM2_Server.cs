@@ -544,6 +544,8 @@ public class UM2_Server : MonoBehaviour
                         Client clientData = getClient(int.Parse(receivedMessage.Split("~")[0]));
                         clientData.networkStream = stream;
                         clientData.tcpClient = client;
+
+                        Debug.Log("(Server) Recorded client's TCP stream: " + clientData.clientID + "\n" + stream + "\n" + client);
                     }
                     sendTCPMessage(responseMessage, stream);
                 }

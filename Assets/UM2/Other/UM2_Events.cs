@@ -25,8 +25,8 @@ public class UM2_Events : MonoBehaviourUM2
     public void setID(int id){
         UM2_Client.clientID = id;
 
-        client.sendMessage("server~saveProtocol", "UDP", false);
-        client.sendMessage("server~saveProtocol", "TCP", false);
+        //client.sendMessage("server~saveProtocol", "UDP", false);
+        //client.sendMessage("server~saveProtocol", "TCP", false);
         //nothing for http since it is only client->server->client (no disjointed response)
 
         UM2_Methods.callGlobalMethod("OnConnect", new object[] {id});
@@ -34,5 +34,15 @@ public class UM2_Events : MonoBehaviourUM2
 
     public void recordedProtocol(string protocol){
         Debug.Log("Recorded: " + protocol);
+
+        if(protocol == "TCP"){
+            client.tcpRecorded = true;
+        }
+        else if(protocol == "UDP"){
+            client.udpRecorded = true;
+        }
+        else{
+            Debug.LogError("Recorded protocol that does exist???");
+        }
     }
 }
