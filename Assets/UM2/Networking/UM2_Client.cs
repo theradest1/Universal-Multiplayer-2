@@ -270,11 +270,12 @@ public class UM2_Client : MonoBehaviourUM2
             tcpClient.Connect(IPAddress.Parse(serverIP), serverTcpPort);
             tcpStream = tcpClient.GetStream();
 
+            TCPOnline = true;
+
             tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
             tcpRecieveThread.Start();
 
             Debug.Log("(Client) TCP Online");
-            TCPOnline = true;
         }
         catch (Exception e)
         {
@@ -319,7 +320,7 @@ public class UM2_Client : MonoBehaviourUM2
             try
             {
                 int bytesRead = tcpStream.Read(buffer, 0, buffer.Length);
-                if (bytesRead > 0)
+                if (bytesRead > 0)  
                 {
                     string receivedData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                     MainThreadDispatcher.Enqueue(() => processMessage(receivedData, "TCP"));
@@ -331,7 +332,6 @@ public class UM2_Client : MonoBehaviourUM2
                 failedMessages += 1;
             }
         }
-        Debug.LogWarning("TCP reciever closed");
     }
 
     public void sendTCPMessage(string message)
