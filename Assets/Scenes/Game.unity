@@ -1015,6 +1015,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fecffd66900f14f8389610145ea69c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  udpRecorded: 0
+  tcpRecorded: 0
+  httpUpdateTPS: 10
+  udpPing: 0
+  sentBytesUDP: 0
+  gotBytesUDP: 0
+  tcpPing: 0
+  sentBytesTCP: 0
+  gotBytesTCP: 0
+  httpPing: 0
+  sentBytesHTTP: 0
+  gotBytesHTTP: 0
+  failedMessages: 0
   server: {fileID: 1054571549}
   debugger: {fileID: 1542006208}
   debugUDPMessages: 0

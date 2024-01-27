@@ -37,6 +37,7 @@ public class UM2_Client : MonoBehaviourUM2
     Thread tcpRecieveThread;
 
     bool connectedToHTTP = false;
+    public float httpUpdateTPS;
 
 
     float udpPingStartTime;
@@ -107,7 +108,7 @@ public class UM2_Client : MonoBehaviourUM2
         {
             server.StartServer();
         }
-        //InvokeRepeating("clearHTTPQueue", 1f, httpUpdateRate);
+        InvokeRepeating("clearHTTPQueue", 1f, 1f/httpUpdateTPS);
     }
 
     public void clearHTTPQueue(){
