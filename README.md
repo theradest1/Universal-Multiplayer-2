@@ -14,18 +14,22 @@
        
 
 What this can do right now:
-- UDP, TCP, and HTTP connections
+- UDP, TCP, and HTTP connections (works with all combinations other than only UDP)
 - Host server directly from game (peer to peer)
-- WebGL build
+- WebGL build (working status can change from commit to commit since it's not important right now)
 - Transform syncing with one script (and a prefab)
 - Automatic ID system for both synced objects and players
-- Extremly robust and flexible event system
+- Extremly chunky and flexible event system
+- Variable syncing that is used like playerPrefs
+- Good network debugging
+- Network methods - call another client's method
+- global methods (on connect...)
 
 What this will be able to do in the future:
 - Dedicated server (might even be written in c++ in the future)
-- Websockets: while http is great, its neither fast or 2 way
-- Variable syncing that will be used like playerPrefs
-- Debugging
+- Websockets: while http is great, its neither fast nor 2 way
+- animation syncing
+- quick network objects (for particle systems, bullets...)
 
 What this will be able to do far in the future:
 - Voice chat (this might actually not be that far off)
