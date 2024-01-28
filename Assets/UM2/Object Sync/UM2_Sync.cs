@@ -93,7 +93,10 @@ public class UM2_Sync : MonoBehaviourUM2
             }
         }
 
-        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        //its kind of a bad idea to hide this warning, but the sysem is proven
+        if(client.debugBasicMessages){
+            Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        }
     }
 
     public void updateObjectTPS(int objectID, float newTPS){

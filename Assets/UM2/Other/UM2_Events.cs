@@ -13,7 +13,7 @@ public class UM2_Events : MonoBehaviourUM2
     }
 
     public void clientJoined(int newClientID){
-        Debug.Log("Client with ID " + newClientID + " joined");
+        //Debug.Log("Client with ID " + newClientID + " joined");
 
         UM2_Methods.callGlobalMethod("OnPlayerJoin", new object[] {newClientID});
     }
