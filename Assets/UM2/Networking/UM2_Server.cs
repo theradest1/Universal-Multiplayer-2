@@ -66,53 +66,69 @@ public class ServerVariable
 
 public class UM2_Server : MonoBehaviour
 {
+    public static string localIpAddress;
+    public static string publicIpAddress;
+
     int udpPort = 5000;
     int tcpPort = 5001;
     int httpPort = 5002;
 
-    public float timeoutTime = 5; //seconds
-
-    UdpClient udpServer;
-    bool udpOnline;
-
-    TcpListener tcpServer;
-    bool tcpOnline;
-
-    HttpListener httpListener;
-    bool httpOnline;
-
-    public static string localIpAddress;
-    public static string publicIpAddress;
-
-    public bool debugUDPMessages = false;
-    int sentBytesUDP = 0;
-    int gotBytesUDP = 0;
-    public bool debugTCPMessages = false;
-    int sentBytesTCP = 0;
-    int gotBytesTCP = 0;
-    public bool debugHTTPMessages = false;
-    int sentBytesHTTP = 0;
-    int gotBytesHTTP = 0;
-
-    int failedMessages = 0;
-
-    public bool debugBasicMessages = false;
-
-
-    public UM2_Client client;
-
-    public Debugger debugger;
-
-    int currentPlayerID = 0;
-    int currentObjectID = 0;
-
+    UM2_Client client;
+    public static UM2_Server server;
     float currentTime;
 
 
-    List<Client> clients = new List<Client>();
+    [Header("Settings:")]
+    [Tooltip("How long (in seconds) it takes for a client to be timed out")]
+    public float timeoutTime = 5; //seconds
 
-	//server-variables
+    [Header("Debug:")]
+    public bool udpOnline;
+    UdpClient udpServer;
+
+    TcpListener tcpServer;
+    public bool tcpOnline;
+
+    HttpListener httpListener;
+    public bool httpOnline;
+
+
+
+    public int sentBytesUDP = 0;
+    public int gotBytesUDP = 0;
+
+    public int sentBytesTCP = 0;
+    public int gotBytesTCP = 0;
+
+    public int sentBytesHTTP = 0;
+    public int gotBytesHTTP = 0;
+
+    public int failedMessages = 0;
+
+
+    [SerializeField] int currentPlayerID = 0;
+    [SerializeField] int currentObjectID = 0;
+
+
+    [Header("Console debug settings:")]
+    public bool debugUDPMessages = false;
+    public bool debugTCPMessages = false;
+    public bool debugHTTPMessages = false;
+    public bool debugBasicMessages = false;
+
+
+    List<Client> clients = new List<Client>();
 	List<ServerVariable> serverVariables = new List<ServerVariable>();
+
+    void Awake()
+    {
+        server = this;
+    }
+
+    void Start()
+    {
+        client = UM2_Client.client;
+    }
 
 	private void OnDestroy()
     {
@@ -138,23 +154,6 @@ public class UM2_Server : MonoBehaviour
             tcpServer.Stop();
         }
         tcpOnline = false;
-    }
-
-    void updateDebug()
-    {
-        debugger.setDebug(" UDP", $"{sentBytesUDP}B/s↑  {gotBytesUDP}B/s↓  ({(udpOnline ? "online" : "offline")})");
-        debugger.setDebug(" TCP", $"{sentBytesTCP}B/s↑  {gotBytesTCP}B/s↓  ({(tcpOnline ? "online" : "offline")})");
-        debugger.setDebug(" HTTP", $"{sentBytesHTTP}B/s↑  {gotBytesHTTP}B/s↓  ({(httpOnline ? "online" : "offline")})");
-        debugger.setDebug(" Failed/Sec ", failedMessages + "");
-        
-        sentBytesUDP = 0;
-        gotBytesUDP = 0;
-        sentBytesTCP = 0;
-        gotBytesTCP = 0;
-        sentBytesHTTP = 0;
-        gotBytesHTTP = 0;
-
-        failedMessages = 0;
     }
 
     private void Update() {

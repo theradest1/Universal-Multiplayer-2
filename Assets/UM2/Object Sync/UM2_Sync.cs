@@ -10,12 +10,15 @@ public class UM2_Sync : MonoBehaviourUM2
 {
     List<GameObject> prefabs = new List<GameObject>();
     List<UM2_Object> clientSideObjects = new List<UM2_Object>();
-    public string prefabFolderPath;
+
+    [Tooltip("Put any prefabs or other stuff that will be used by UM2 in this folder (default is Assets/UM2/Object Sync/Resources)")]
+    public string prefabFolderPath = "Assets/UM2/Object Sync/Resources";
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
     UM2_Client client;
     public static UM2_Sync sync;
     List<int> reservedIDs = new List<int>();
 
+    [Tooltip("Each synced object needs an ID - these IDs need to be gotten from the server so there isnt any overwriting of synced objects going on. Instead of waiting for the server to respond every time we create an object, this queues up new object IDs (this variable is how many will try to be queued)")]
     public int targetPreppedObjects = 10;
 
     private void Awake()

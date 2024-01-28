@@ -11,6 +11,7 @@ public class Debugger : MonoBehaviour
     public GameObject debugTextPrefab;
     public static Debugger debugger;
     UM2_Client client;
+    UM2_Server server;
 
     private void Awake() {
         debugger = this;
@@ -18,6 +19,7 @@ public class Debugger : MonoBehaviour
 
     private void Start() {
         client = UM2_Client.client;
+        server = UM2_Server.server;
 
         debugger.addSpace("Client:");
         debugger.setDebug("UDP", "ms B/s↑ B/s↓");
@@ -70,6 +72,7 @@ public class Debugger : MonoBehaviour
 
     void updateDebug()
     {
+        //client
         setDebug("UDP", $"{(int)(client.udpPing * 1000)}ms  {client.sentBytesUDP}B/s↑  {client.gotBytesUDP}B/s↓");
         setDebug("TCP", $"{(int)(client.tcpPing * 1000)}ms  {client.sentBytesTCP}B/s↑  {client.gotBytesTCP}B/s↓");
         setDebug("HTTP", $"{(int)(client.httpPing * 1000)}ms  {client.sentBytesHTTP}B/s↑  {client.gotBytesHTTP}B/s↓");
@@ -82,6 +85,22 @@ public class Debugger : MonoBehaviour
         client.sentBytesHTTP = 0;
         client.gotBytesHTTP = 0;
         client.failedMessages = 0;
+
+        if(UM2_Client.hostingServer){
+            setDebug(" UDP", $"{server.sentBytesUDP}B/s↑  {server.gotBytesUDP}B/s↓  ({(server.udpOnline ? "online" : "offline")})");
+            setDebug(" TCP", $"{server.sentBytesTCP}B/s↑  {server.gotBytesTCP}B/s↓  ({(server.tcpOnline ? "online" : "offline")})");
+            setDebug(" HTTP", $"{server.sentBytesHTTP}B/s↑  {server.gotBytesHTTP}B/s↓  ({(server.httpOnline ? "online" : "offline")})");
+            setDebug(" Failed/Sec ", server.failedMessages + "");
+            
+            server.sentBytesUDP = 0;
+            server.gotBytesUDP = 0;
+            server.sentBytesTCP = 0;
+            server.gotBytesTCP = 0;
+            server.sentBytesHTTP = 0;
+            server.gotBytesHTTP = 0;
+
+            server.failedMessages = 0;
+        }
 
         //sendDebugMessage("test");
     }

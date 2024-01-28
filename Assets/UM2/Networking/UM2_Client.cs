@@ -17,22 +17,33 @@ public class UM2_Client : MonoBehaviourUM2
     public static bool hostingServer = false;
     public static bool webGLBuild;
     public static int clientID = -1;
+    
 
+    public static UM2_Client client;
+    UM2_Server server;
+    string messageQueue = "";
+
+
+    [Header("Settings:")]
+    [Tooltip("How often http clears the message queue (higher means less latency, but also more messages)")]
+    public float httpUpdateTPS;
+
+
+    [Header("Debug variables:")]
+    public bool udpRecorded = false; 
     IPEndPoint serverEndpoint;
     UdpClient udpClient;
     bool connectedToUDP = false;
     bool UDPOnline = false;
-    public bool udpRecorded = false; 
 
     TcpClient tcpClient;
     NetworkStream tcpStream;
     bool connectedToTCP = false; //this is if the server can be pinged
     bool TCPOnline = false; //this is if the reciever is on
-    public bool tcpRecorded = false; 
+    public bool tcpRecorded = false; //this is if the server has said that it recorded the client's TCP stream
     Thread tcpRecieveThread;
 
     bool connectedToHTTP = false;
-    public float httpUpdateTPS;
 
 
     float udpPingStartTime;
@@ -50,20 +61,16 @@ public class UM2_Client : MonoBehaviourUM2
 
     public int failedMessages = 0;
 
-    public UM2_Server server;
-    public Debugger debugger;
 
     public static bool connectedToServer = true;
-    string messageQueue = "";
 
-    public static UM2_Client client;
 
-    //public float httpUpdateRate = .1f;
-
+    [Header("Console debug settings:")]
     public bool debugUDPMessages = false;
     public bool debugTCPMessages = false;
     public bool debugHTTPMessages = false;
     public bool debugBasicMessages = false;
+
 
     private void OnDestroy()
     {
@@ -87,6 +94,7 @@ public class UM2_Client : MonoBehaviourUM2
 
     private void Start()
     {
+        server = UM2_Server.server;
         connectedToServer = true;
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
