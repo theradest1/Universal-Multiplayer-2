@@ -5,13 +5,8 @@ using System.Text;
 using UnityEngine;
 using System.Threading.Tasks;
 using System.Threading;
-using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using System.Reflection;
-using UnityEngine.Video;
 
 public class UM2_Client : MonoBehaviourUM2
 {
@@ -68,6 +63,7 @@ public class UM2_Client : MonoBehaviourUM2
     public bool debugUDPMessages = false;
     public bool debugTCPMessages = false;
     public bool debugHTTPMessages = false;
+    public bool debugBasicMessages = false;
 
     private void OnDestroy()
     {
@@ -276,7 +272,9 @@ public class UM2_Client : MonoBehaviourUM2
             tcpRecieveThread = new Thread(new ThreadStart(tcpReciever));
             tcpRecieveThread.Start();
 
-            Debug.Log("(Client) TCP Online");
+            if(debugBasicMessages){
+                Debug.Log("(Client) TCP Online");
+            }
         }
         catch (Exception e)
         {
@@ -287,7 +285,9 @@ public class UM2_Client : MonoBehaviourUM2
     void initHTTP()
     {
         //nothing needs to be done to start http, but I'm leaving this here for some consistancy
-        Debug.Log("(Client) HTTP Online");
+        if(debugBasicMessages){
+            Debug.Log("(Client) HTTP Online");
+        }
         connectedToHTTP = true;
     }
 
@@ -295,7 +295,9 @@ public class UM2_Client : MonoBehaviourUM2
     {
         try
         {
-            Debug.Log("(Client) UDP Online");
+            if(debugBasicMessages){
+                Debug.Log("(Client) UDP Online");
+            }
             UDPOnline = true;
             while (UDPOnline)
             {

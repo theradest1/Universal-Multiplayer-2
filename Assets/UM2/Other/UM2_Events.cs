@@ -33,7 +33,7 @@ public class UM2_Events : MonoBehaviourUM2
     }
 
     public void recordedProtocol(string protocol){
-        Debug.Log("Recorded: " + protocol);
+        //Debug.Log("Recorded: " + protocol);
 
         if(protocol == "TCP"){
             client.tcpRecorded = true;

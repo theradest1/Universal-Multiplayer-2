@@ -96,6 +96,8 @@ public class UM2_Server : MonoBehaviour
 
     int failedMessages = 0;
 
+    public bool debugBasicMessages = false;
+
 
     public UM2_Client client;
 
@@ -209,7 +211,9 @@ public class UM2_Server : MonoBehaviour
         try
         {
             httpListener.Start();
-            Debug.Log("(Server) HTTP Server started on port " + httpPort);
+            if(debugBasicMessages){
+                Debug.Log("(Server) HTTP Server started on port " + httpPort);
+            }
 
             httpOnline = true;
 
@@ -489,7 +493,9 @@ public class UM2_Server : MonoBehaviour
 
             //make it call udpReciever when message
             udpServer.BeginReceive(udpReciever, null);
-            Debug.Log("(Server) UDP Server started on port " + udpPort);
+            if(debugBasicMessages){
+                Debug.Log("(Server) UDP Server started on port " + udpPort);
+            }
             udpOnline = true;
         }
         catch (Exception e)
@@ -510,7 +516,9 @@ public class UM2_Server : MonoBehaviour
             tcpServer = new TcpListener(IPAddress.Any, tcpPort);
             tcpServer.Start();
             tcpOnline = true;
-            Debug.Log("(Server) TCP Server started on port " + tcpPort);
+            if(debugBasicMessages){
+                Debug.Log("(Server) TCP Server started on port " + tcpPort);
+            }
 
             while (tcpOnline)
             {
@@ -545,7 +553,7 @@ public class UM2_Server : MonoBehaviour
                         clientData.networkStream = stream;
                         clientData.tcpClient = client;
 
-                        Debug.Log("(Server) Recorded client's TCP stream: " + clientData.clientID + "\n" + stream + "\n" + client);
+                        //Debug.Log("(Server) Recorded client's TCP stream: " + clientData.clientID + "\n" + stream + "\n" + client);
                     }
                     sendTCPMessage(responseMessage, stream);
                 }

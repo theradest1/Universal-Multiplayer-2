@@ -9,11 +9,11 @@ public class UM2_Prefab : MonoBehaviourUM2
 {
     public int objectID;
 
-    Vector3 pastPos = Vector3.zero;
-    Quaternion pastRot = Quaternion.identity;
+    Vector3 pastPos;
+    Quaternion pastRot;
     float pastTime = 0;
-    Vector3 targetPos = Vector3.zero;
-    Quaternion targetRot = Quaternion.identity;
+    Vector3 targetPos;
+    Quaternion targetRot;
     float tickTime = -1;
     public bool destroyWhenCreatorLeaves = false;
     int creatorID = -1;
@@ -40,16 +40,20 @@ public class UM2_Prefab : MonoBehaviourUM2
         tickTime = 1/newTPS;
     }
 
-    public void initialize(int setObjectID, float TPS, Vector3 position, Quaternion rotation, int _creatorID, bool _destroyWhenCreatorLeaves){
+    public void initialize(int setObjectID, float TPS, Vector3 _position, Quaternion _rotation, int _creatorID, bool _destroyWhenCreatorLeaves){
         objectID = setObjectID;
-        setTPS(TPS);
-        pastPos = position;
-        transform.position = position;
-        pastRot = rotation;
-        transform.rotation = rotation;
-
         creatorID = _creatorID;
         destroyWhenCreatorLeaves = _destroyWhenCreatorLeaves;
+
+        setTPS(TPS);
+
+        pastPos = _position;
+        targetPos = _position;
+        transform.position = _position;
+
+        pastRot = _rotation;
+        targetRot = _rotation;
+        transform.rotation = _rotation;
     }
 
     private void Update()
