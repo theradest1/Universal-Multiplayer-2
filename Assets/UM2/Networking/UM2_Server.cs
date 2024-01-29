@@ -163,7 +163,6 @@ public class UM2_Server : MonoBehaviour
 
     public void StartServer()
     {
-        InvokeRepeating("updateDebug", 1f, 1f);
         InvokeRepeating("checkTimeoutTimers", 1f, 1f);
 
         if (localIpAddress == null || publicIpAddress == null)

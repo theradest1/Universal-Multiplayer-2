@@ -302,7 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 6784705878260703352, guid: 75ba9de79c18c45418ef1113b563faa7, type: 3}
   objectID: 0
-  ticksPerSecond: 16
+  ticksPerSecond: 32
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 5
@@ -320,6 +320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cubePrefab: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
+  quickObjectPrefab: {fileID: 8463915166535900988, guid: 36bb989d309260d4ca15a4262544b01e, type: 3}
 --- !u!1 &334502187
 GameObject:
   m_ObjectHideFlags: 0
@@ -998,11 +999,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeoutTime: 10
+  udpOnline: 0
+  tcpOnline: 0
+  httpOnline: 0
+  sentBytesUDP: 0
+  gotBytesUDP: 0
+  sentBytesTCP: 0
+  gotBytesTCP: 0
+  sentBytesHTTP: 0
+  gotBytesHTTP: 0
+  failedMessages: 0
+  currentPlayerID: 0
+  currentObjectID: 0
   debugUDPMessages: 0
   debugTCPMessages: 0
   debugHTTPMessages: 0
-  client: {fileID: 1054571550}
-  debugger: {fileID: 1542006208}
+  debugBasicMessages: 0
 --- !u!114 &1054571550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1015,9 +1027,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fecffd66900f14f8389610145ea69c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  httpUpdateTPS: 10
   udpRecorded: 0
   tcpRecorded: 0
-  httpUpdateTPS: 10
   udpPing: 0
   sentBytesUDP: 0
   gotBytesUDP: 0
@@ -1028,11 +1040,10 @@ MonoBehaviour:
   sentBytesHTTP: 0
   gotBytesHTTP: 0
   failedMessages: 0
-  server: {fileID: 1054571549}
-  debugger: {fileID: 1542006208}
   debugUDPMessages: 0
   debugTCPMessages: 0
   debugHTTPMessages: 0
+  debugBasicMessages: 0
 --- !u!4 &1054571551
 Transform:
   m_ObjectHideFlags: 0
@@ -1370,67 +1381,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &3801147668578014520
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.51
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -3.24
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3007244666326711629, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: m_Name
-      value: testCube
-      objectReference: {fileID: 0}
-    - target: {fileID: 8617445729963216109, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
-      propertyPath: minTicksPerSecond
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1443,4 +1393,3 @@ SceneRoots:
   - {fileID: 1405071520}
   - {fileID: 180985654}
   - {fileID: 334502191}
-  - {fileID: 3801147668578014520}

@@ -6,6 +6,7 @@ public class ObjectSpawnExample : MonoBehaviour
 {
     UM2_Sync sync;
     public GameObject cubePrefab;
+    public GameObject quickObjectPrefab;
 
     void Start()
     {
@@ -15,8 +16,12 @@ public class ObjectSpawnExample : MonoBehaviour
     void Update()
     {
         if(Input.GetKeyDown("e")){
-            Debug.Log("Spawning object");
+            Debug.Log("Spawning synced object");
             Instantiate(cubePrefab, transform.position, transform.rotation);
+        }
+        if(Input.GetKeyDown("q")){
+            Debug.Log("Spawning quick object");
+            UM2_Sync.sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
         }
     }
 }

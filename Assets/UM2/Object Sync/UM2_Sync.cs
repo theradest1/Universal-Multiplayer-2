@@ -79,6 +79,20 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Methods.networkMethodOthers("newSyncedObject", startedObject.objectID, prefabID, startedObject.ticksPerSecond, startedObject.transform.position, startedObject.transform.rotation, UM2_Client.clientID, startedObject.destroyWhenCreatorLeaves);
     }
 
+    public void createQuickObject(GameObject prefab, Vector3 position, Quaternion rotation, bool createLocally = true){
+        int prefabID = prefabs.IndexOf(prefab);
+        if(prefabID == -1){
+            Debug.LogError("Could not find " + prefab + " in the resources folder");
+            return;
+        }
+        if(createLocally){
+            UM2_Methods.networkMethodGlobal("newQuickObject", prefabID, position, rotation);
+        }
+        else{
+            UM2_Methods.networkMethodOthers("newQuickObject", prefabID, position, rotation);
+        }
+    }
+
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
         string message = "others~updateObjectTransform~" + objectID + "~" + position + "~" + rotation;
         UM2_Client.client.sendMessage(message, false, false);
@@ -119,6 +133,10 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
         newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+    }
+
+    public void newQuickObject(int prefabID, Vector3 position, Quaternion rotation){
+        GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation);
     }
 
     void getReserveNewObjectID(){

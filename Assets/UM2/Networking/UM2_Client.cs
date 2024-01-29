@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
+using System.Collections.Generic;
 
 public class UM2_Client : MonoBehaviourUM2
 {
@@ -21,7 +22,9 @@ public class UM2_Client : MonoBehaviourUM2
 
     public static UM2_Client client;
     UM2_Server server;
-    string messageQueue = "";
+
+    List<String> messageQueue = new List<string>();
+    //string messageQueue = "";
 
 
     [Header("Settings:")]
@@ -89,7 +92,7 @@ public class UM2_Client : MonoBehaviourUM2
     {
         client = this;
 
-        messageQueue = "";
+        messageQueue = new List<string>();
     }
 
     private void Start()
@@ -140,7 +143,7 @@ public class UM2_Client : MonoBehaviourUM2
         
         if(reliableProtocol){
             Debug.Log("Added message to queue: " + message);
-            messageQueue += "|" + message;
+            messageQueue.Add(message);
         }
     }
 
@@ -170,8 +173,10 @@ public class UM2_Client : MonoBehaviourUM2
         //UDP cant do queued messages because they are only for consistant protocols
         //HTTP cant because it can only do one message at a time (for now)
         if(protocol != "UDP" && protocol != "HTTP"){
-            message += messageQueue;
-            messageQueue = "";
+            if(protocol == "TCP"){
+                message += "|" + String.Join("|", messageQueue);
+                messageQueue = new List<string>();
+            }
         }
 
         if(protocol != "HTTP"){ //http cant do the symbol "|", but it doesnt need it since there is no chance of smashing messages
