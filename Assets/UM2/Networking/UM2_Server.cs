@@ -388,6 +388,11 @@ public class UM2_Server : MonoBehaviour
                             sendMessageToClient("syncNewVar~" + varName + "~" + varValue + "~" + varType, protocol, clientID);
                         }
                         break;
+                    case "disconnect":
+                        Client disconnectedClient = getClient(clientID);
+                        sendMessageToAll("clientDisconnected~" + disconnectedClient.clientID, "TCP", disconnectedClient.clientID);
+                        clients.Remove(disconnectedClient);
+                        break;
                     default:
                         Debug.LogError("(Server) Unknown message from " + protocol + ": " + message);
                         break;
