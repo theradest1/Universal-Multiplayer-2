@@ -41,6 +41,8 @@ public class UM2_Object : MonoBehaviourUM2
     }
 
     async void initialize(){
+        await Task.Delay(100); //this skuffed af but I dont really care (:
+
         while (UM2_Client.clientID == -1){
             await Task.Delay(50);
 

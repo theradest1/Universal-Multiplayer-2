@@ -36,27 +36,30 @@ public class UM2_Sync : MonoBehaviourUM2
         }
     }
 
-    public void claimSyncedObject(int objectID, int ownerID){
-        UM2_Methods.networkMethodDirect(ownerID, "giveSyncedObject", objectID, UM2_Client.clientID);
-
-        UM2_Prefab claimedObject = getSyncedObject(objectID);
-        UM2_Object newObject = claimedObject.gameObject.AddComponent<UM2_Object>();
-
-        clientSideObjects.Add(newObject);
-        syncedObjects.Remove(claimedObject);
-
-
+    public void claimSyncedObject(int objectID){
+        claimSyncedObject(getSyncedObject(objectID));
     }
 
-    public void giveSyncedObject(int objectID, int newOwnerID){
+    public void claimSyncedObject(UM2_Prefab claimedObject){
+        int ownerID = claimedObject.creatorID;
+        UM2_Methods.networkMethodDirect(ownerID, "giveSyncedObject", claimedObject.objectID);
+
+        UM2_Object newObject = claimedObject.gameObject.AddComponent<UM2_Object>();
+
+        //move settings over
+        newObject.ticksPerSecond = 1/claimedObject.tickTime;
+        newObject.prefab = prefabs[claimedObject.prefabID];
+        newObject.minTicksPerSecond = .5f;
+
+        syncedObjects.Remove(claimedObject);
+        Destroy(claimedObject); //doesnt destroy the gameobject
+    }
+
+    public void giveSyncedObject(int objectID){
         UM2_Object objectToGive = getClientsideObject(objectID);
-        UM2_Prefab newPrefab = objectToGive.gameObject.AddComponent<UM2_Prefab>();
 
         clientSideObjects.Remove(objectToGive);
-        syncedObjects.Add(newPrefab);
-
-        newPrefab.initialize(objectID, objectToGive.ticksPerSecond, objectToGive.transform.position, objectToGive.transform.rotation, newOwnerID, objectToGive.destroyWhenCreatorLeaves);
-        Destroy(objectToGive); //this doesnt destroy the gameobject, just the object script
+        Destroy(objectToGive.gameObject);
     }
 
     async void reserveIDLoop(){
@@ -139,7 +142,7 @@ public class UM2_Sync : MonoBehaviourUM2
         
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
-        newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+        newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave, prefabID);
     }
 
     public void destroySyncedObject(UM2_Object objectToRemove){
