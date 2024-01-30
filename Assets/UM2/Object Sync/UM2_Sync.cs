@@ -5,6 +5,7 @@ using UnityEditor;
 using System.IO;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 public class UM2_Sync : MonoBehaviourUM2
 {
@@ -33,6 +34,29 @@ public class UM2_Sync : MonoBehaviourUM2
                 prefabs.Add((GameObject)prefabFile);
             }
         }
+    }
+
+    public void claimSyncedObject(int objectID, int ownerID){
+        UM2_Methods.networkMethodDirect(ownerID, "giveSyncedObject", objectID, UM2_Client.clientID);
+
+        UM2_Prefab claimedObject = getSyncedObject(objectID);
+        UM2_Object newObject = claimedObject.gameObject.AddComponent<UM2_Object>();
+
+        clientSideObjects.Add(newObject);
+        syncedObjects.Remove(claimedObject);
+
+
+    }
+
+    public void giveSyncedObject(int objectID, int newOwnerID){
+        UM2_Object objectToGive = getClientsideObject(objectID);
+        UM2_Prefab newPrefab = objectToGive.gameObject.AddComponent<UM2_Prefab>();
+
+        clientSideObjects.Remove(objectToGive);
+        syncedObjects.Add(newPrefab);
+
+        newPrefab.initialize(objectID, objectToGive.ticksPerSecond, objectToGive.transform.position, objectToGive.transform.rotation, newOwnerID, objectToGive.destroyWhenCreatorLeaves);
+        Destroy(objectToGive); //this doesnt destroy the gameobject, just the object script
     }
 
     async void reserveIDLoop(){
@@ -131,6 +155,17 @@ public class UM2_Sync : MonoBehaviourUM2
 
     public UM2_Prefab getSyncedObject(int objectID){
         foreach(UM2_Prefab syncedObject in syncedObjects){
+            if(syncedObject.objectID == objectID){
+                return syncedObject;
+            }
+        }
+
+        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        return null;
+    }
+
+    public UM2_Object getClientsideObject(int objectID){
+        foreach(UM2_Object syncedObject in clientSideObjects){
             if(syncedObject.objectID == objectID){
                 return syncedObject;
             }
