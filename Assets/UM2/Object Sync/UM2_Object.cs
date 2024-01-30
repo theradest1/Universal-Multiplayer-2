@@ -35,6 +35,11 @@ public class UM2_Object : MonoBehaviourUM2
         initialize();
     }
 
+    void OnDestroy()
+    {
+        sync.destroySyncedObject(this);
+    }
+
     async void initialize(){
         while (UM2_Client.clientID == -1){
             await Task.Delay(50);

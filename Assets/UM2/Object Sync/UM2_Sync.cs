@@ -103,28 +103,11 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
-        foreach(UM2_Prefab prefab in syncedObjects){
-            if(prefab.objectID == objectID){
-                prefab.newTransform(position, rotation);
-                return;
-            }
-        }
-
-        //its kind of a bad idea to hide this warning, but the sysem is proven
-        if(client.debugBasicMessages){
-            Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
-        }
+        getSyncedObject(objectID).newTransform(position, rotation);
     }
 
     public void updateObjectTPS(int objectID, float newTPS){
-        foreach(UM2_Prefab prefab in syncedObjects){
-            if(prefab.objectID == objectID){
-                prefab.setTPS(newTPS);
-                return;
-            }
-        }
-
-        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        getSyncedObject(objectID).setTPS(newTPS);
     }
 
     public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond, Vector3 position, Quaternion rotation, int creatorID, bool destroyOnCreatorLeave){
@@ -133,6 +116,28 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
         syncedObjects.Add(newPrefab);
         newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+    }
+
+    public void destroySyncedObject(UM2_Object objectToRemove){
+        clientSideObjects.Remove(objectToRemove);
+        UM2_Methods.networkMethodOthers("removeSyncedObject", objectToRemove.objectID);
+    }
+
+    public void removeSyncedObject(int objectID){
+        UM2_Prefab syncedObject = getSyncedObject(objectID);
+        syncedObjects.Remove(syncedObject);
+        Destroy(syncedObject.gameObject);
+    }
+
+    public UM2_Prefab getSyncedObject(int objectID){
+        foreach(UM2_Prefab syncedObject in syncedObjects){
+            if(syncedObject.objectID == objectID){
+                return syncedObject;
+            }
+        }
+
+        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        return null;
     }
 
     public void newQuickObject(int prefabID, Vector3 position, Quaternion rotation){
