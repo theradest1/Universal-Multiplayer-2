@@ -14,10 +14,9 @@ public class UM2_Prefab : MonoBehaviourUM2
     float pastTime = 0;
     Vector3 targetPos;
     Quaternion targetRot;
-    [HideInInspector] public float tickTime = -1;
+    float tickTime = -1;
     public bool destroyWhenCreatorLeaves = false;
-    [HideInInspector] public int creatorID = -1;
-    [HideInInspector] public int prefabID;
+    int creatorID = -1;
 
     public override void OnPlayerLeave(int clientID){
         if(clientID == creatorID && destroyWhenCreatorLeaves){
@@ -47,7 +46,7 @@ public class UM2_Prefab : MonoBehaviourUM2
         }
     }
 
-    public void initialize(int setObjectID, float TPS, Vector3 _position, Quaternion _rotation, int _creatorID, bool _destroyWhenCreatorLeaves, int _prefabID){
+    public void initialize(int setObjectID, float TPS, Vector3 _position, Quaternion _rotation, int _creatorID, bool _destroyWhenCreatorLeaves){
         objectID = setObjectID;
         creatorID = _creatorID;
         destroyWhenCreatorLeaves = _destroyWhenCreatorLeaves;
@@ -61,8 +60,6 @@ public class UM2_Prefab : MonoBehaviourUM2
         pastRot = _rotation;
         targetRot = _rotation;
         transform.rotation = _rotation;
-
-        prefabID = _prefabID;
     }
 
     private void Update()
