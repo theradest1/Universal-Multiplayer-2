@@ -37,7 +37,7 @@ public class UM2_Object : MonoBehaviourUM2
 
     void OnDestroy()
     {
-        //sync.destroySyncedObject(this);
+        sync.destroySyncedObject(this);
     }
 
     async void initialize(){
