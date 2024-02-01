@@ -27,7 +27,7 @@ public class UM2_Prefab : MonoBehaviourUM2
     public void newTransform(Vector3 position, Quaternion rotation){
         //dynamic TPS (not currently using)
         //tickTime = Time.time - pastTime;
-        //pastTime = Time.time;
+        pastTime = Time.time;
 
         pastPos = transform.position;
         pastRot = transform.rotation;
