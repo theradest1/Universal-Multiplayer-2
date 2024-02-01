@@ -8,6 +8,7 @@ using System.Threading;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 public class UM2_Client : MonoBehaviourUM2
 {
@@ -142,7 +143,9 @@ public class UM2_Client : MonoBehaviourUM2
         }
         
         if(reliableProtocol){
-            Debug.Log("Added message to queue: " + message);
+            if(debugBasicMessages){
+                Debug.Log("Added message to queue: " + message);
+            }
             messageQueue.Add(message);
         }
     }
@@ -344,8 +347,13 @@ public class UM2_Client : MonoBehaviourUM2
             }
             catch (Exception e)
             {
-                Debug.Log("Error receiving tcp data: " + e);
-                failedMessages += 1;
+                if (e.GetType() != typeof(System.IO.IOException)){ //if the client gets closed
+                    Debug.Log("(Client) Error receiving tcp data: " + e);
+                    failedMessages += 1;
+                }
+                else if(debugBasicMessages){
+                    Debug.Log("(Client) Closed TCP client");
+                }
             }
         }
     }
@@ -359,8 +367,13 @@ public class UM2_Client : MonoBehaviourUM2
         }
         catch (Exception e)
         {
-            Debug.Log("Error sending tcp data: " + e);
-            failedMessages += 1;
+            if(e.GetType() != typeof(System.ObjectDisposedException)){
+                Debug.Log("Error sending tcp data: " + e);
+                failedMessages += 1;
+            }
+            else if(debugBasicMessages){
+                Debug.Log("(Client) TCP connection closed");
+            }
         }
     }
 

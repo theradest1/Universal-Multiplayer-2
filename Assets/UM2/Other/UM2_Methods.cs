@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Reflection;
 using System.Linq;
-using UnityEngine.UIElements;
-using Unity.VisualScripting;
 
 public class UM2_Methods : MonoBehaviourUM2
 {
@@ -74,6 +71,7 @@ public class UM2_Methods : MonoBehaviourUM2
         
         int succeededCalls = 0;
         int failedCalls = 0;
+        string errorMessage = "";
 
         foreach((MethodInfo methodInfo, MonoBehaviour script) in possibleMethodsAndScripts){
             try{
@@ -93,7 +91,8 @@ public class UM2_Methods : MonoBehaviourUM2
             }
             catch(Exception e){
                 failedCalls++;
-                Debug.LogError(e);
+                //Debug.LogError(e);
+                errorMessage = e + ""; //only carries one at a time (would get confusing if like 5 error were shown at once)
             }
         }
 
@@ -104,7 +103,7 @@ public class UM2_Methods : MonoBehaviourUM2
                 Debug.LogError("Function was not found: Name: " + methodName + " Perameters: " + perameterString + "\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");
             }
             else{
-                Debug.LogError("Function was found, and has same perameter count, but there was an error calling it. Name: " + methodName + " Perameters: " + perameterString + "\nIt is most likley the perameter types.");
+                Debug.LogError("There was an error calling a network method. \nName: " + methodName + " \nPerameters: " + perameterString + "\nError message: " + errorMessage);
             }
         }
         else if(failedCalls != 0){

@@ -136,8 +136,8 @@ public class UM2_Sync : MonoBehaviourUM2
             }
         }
 
-        Debug.LogWarning("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
-        return null;
+        throw new Exception("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        //return null;
     }
 
     public void newQuickObject(int prefabID, Vector3 position, Quaternion rotation){

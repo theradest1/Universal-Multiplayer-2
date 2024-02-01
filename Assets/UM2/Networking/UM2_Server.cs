@@ -274,8 +274,13 @@ public class UM2_Server : MonoBehaviour
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("(Server) Error handling request: " + e);
-                    failedMessages += 1;
+                    if(e.Message != "Listener closed"){
+                        Debug.LogError("(Server) Error handling request: " + e);
+                        failedMessages += 1;
+                    }
+                    else if(debugBasicMessages){
+                        Debug.Log("(Server) HTTP server closed");
+                    }
                 }
             }
         });
@@ -531,7 +536,12 @@ public class UM2_Server : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Server) Error starting TCP server: " + e);
+            if (e.GetType() != typeof(ObjectDisposedException)){ //if the server gets closed
+                Debug.LogError("Server) Error starting TCP server: " + e);
+            }
+            else if(debugBasicMessages){
+                Debug.Log("(Server) Closed TCP server");
+            }
         }
     }
 
@@ -574,13 +584,20 @@ public class UM2_Server : MonoBehaviour
 
     async void sendTCPMessage(string message, NetworkStream stream)
     {   
-        message += "|";
-        byte[] sendData = Encoding.ASCII.GetBytes(message);
-        if(debugTCPMessages){
-            Debug.Log("(Server) Sent TCP: " + message);
+        try{
+            message += "|";
+            byte[] sendData = Encoding.ASCII.GetBytes(message);
+            if(debugTCPMessages){
+                Debug.Log("(Server) Sent TCP: " + message);
+            }
+            sentBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
+            await stream.WriteAsync(sendData, 0, sendData.Length);
         }
-        sentBytesTCP += System.Text.Encoding.UTF8.GetByteCount(message);
-        await stream.WriteAsync(sendData, 0, sendData.Length);
+        catch(Exception e){
+            if(e.GetType() != typeof(ObjectDisposedException)){
+                Debug.LogError(e);
+            }
+        }
     }
 
     private void udpReciever(IAsyncResult result)
