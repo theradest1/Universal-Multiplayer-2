@@ -4,8 +4,40 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
+class SyncedObjectVariable{
+    Type type;
+    public object value;
+    int objectID;
+    public int variableID; //object relative
+    public string name;
+
+
+    public SyncedObjectVariable(Type _type, object _value, int _objectID, int _variableID, string _name){
+        type = _type;
+        value = _value;
+        objectID = _objectID;
+        variableID = _variableID;
+        name = _name;
+    }
+
+    void sendValue(){
+        UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
+    }
+
+    public void setValue(object _value, bool syncWithOthers = true){
+        value = _value;
+        if(syncWithOthers){
+            sendValue();
+        }
+    }
+}
+
 public class UM2_Object : MonoBehaviourUM2
 {
+
+    List<SyncedObjectVariable> syncedObjectVariables = new List<SyncedObjectVariable>();
+    List<string> syncedObjectVariableNames = new List<string>();
+
     public GameObject prefab;
     [HideInInspector] public int objectID = -1;
 
@@ -38,6 +70,21 @@ public class UM2_Object : MonoBehaviourUM2
     void OnDestroy()
     {
         sync.destroySyncedObject(this);
+    }
+
+    public void createNewObjectVariable<T>(string variableName, T initialValue){
+        int variableID = syncedObjectVariables.Count; //idk why this wouldn't work
+        SyncedObjectVariable newVariable = new SyncedObjectVariable(initialValue.GetType(), initialValue, objectID, variableID, variableName);
+        syncedObjectVariableNames.Add(variableName);
+        syncedObjectVariables.Add(newVariable);
+    }
+
+    public object getVariableValue(string variableName){
+        return getVariableValue(syncedObjectVariableNames.IndexOf(variableName));
+    }
+
+    public object getVariableValue(int variableID){
+        return syncedObjectVariables[variableID].value;
     }
 
     async void initialize(){

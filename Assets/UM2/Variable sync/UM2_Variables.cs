@@ -11,12 +11,12 @@ public class LocalServerVariable
     string value;
     Type type;
     public string name;
-    UM2_Client client;
+    //UM2_Client client;
 
     public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
         type = setType;
         name = setName;
-        client = setClient;
+        //client = setClient;
         value = initialValue + "";
 
         try
