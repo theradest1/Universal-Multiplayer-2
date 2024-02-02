@@ -37,13 +37,11 @@ public class UM2_Prefab : MonoBehaviourUM2
     }
 
     public void setTPS(float newTPS){
-        if(!UM2_Client.client.tcpRecorded && !UM2_Client.client.udpRecorded){
-            //if http is the only thing, it makes the tps the same as the http update rate
-            setTPS(UM2_Client.client.httpUpdateTPS);
-        }
-        else{
-            tickTime = 1/newTPS;
-        }
+        //if(!UM2_Client.client.tcpRecorded && !UM2_Client.client.udpRecorded){
+        //    //if http is the only thing, it makes the tps the same as the http update rate
+        //    newTPS = UM2_Client.client.httpUpdateTPS;
+        //}
+        tickTime = 1/newTPS;
     }
 
     public void initialize(int setObjectID, float TPS, Vector3 _position, Quaternion _rotation, int _creatorID, bool _destroyWhenCreatorLeaves){

@@ -57,6 +57,10 @@ public class UM2_Methods : MonoBehaviourUM2
     }
 
     public static void invokeNetworkMethod(string methodName, string[] perameters){
+        if(!UM2_Client.connectedToServer){ //if server is off (sometimes some stray messages get through)
+            return;
+        }
+        
         int perameterCount = perameters.Length;
         
         List<(MethodInfo, MonoBehaviour)> possibleMethodsAndScripts = new List<(MethodInfo, MonoBehaviour)>();
