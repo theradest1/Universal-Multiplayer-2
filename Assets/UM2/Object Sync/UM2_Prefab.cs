@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using UnityEngine;
-using UnityEngine.Timeline;
 
 public class UM2_Prefab : MonoBehaviourUM2
 {
-    public int objectID;
+    [HideInInspector] public int objectID;
+    [HideInInspector] public int creatorID = -1;
 
     Vector3 pastPos;
     Quaternion pastRot;
@@ -15,8 +15,7 @@ public class UM2_Prefab : MonoBehaviourUM2
     Vector3 targetPos;
     Quaternion targetRot;
     float tickTime = -1;
-    public bool destroyWhenCreatorLeaves = false;
-    int creatorID = -1;
+    bool destroyWhenCreatorLeaves = false;
 
     public override void OnPlayerLeave(int clientID){
         if(clientID == creatorID && destroyWhenCreatorLeaves){
