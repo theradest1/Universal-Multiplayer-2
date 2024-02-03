@@ -72,7 +72,7 @@ public class UM2_Object : MonoBehaviourUM2
         sync.destroySyncedObject(this);
     }
 
-    public void createNewObjectVariable<T>(string variableName, T initialValue){
+    public void createNewVariable<T>(string variableName, T initialValue){
         int variableID = syncedObjectVariables.Count; //idk why this wouldn't work
         SyncedObjectVariable newVariable = new SyncedObjectVariable(initialValue.GetType(), initialValue, objectID, variableID, variableName);
         syncedObjectVariableNames.Add(variableName);

@@ -58,6 +58,21 @@ public class UM2_Sync : MonoBehaviourUM2
         reserveIDLoop();
     }
 
+    public void setObjVar(int objectID, int variableID, string value){
+        UM2_Prefab variableParent_prefab = getSyncedObject(objectID);
+        UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
+
+        if(variableParent_prefab != null){
+
+        }
+        else if(variableParent_object != null){
+        
+        }
+        else{
+            Debug.LogError("Could not find local or prefab synced object with ID " + objectID);
+        }
+    }
+
     public async void createSyncedObject(UM2_Object startedObject){
         clientSideObjects.Add(startedObject);
 
@@ -129,14 +144,17 @@ public class UM2_Sync : MonoBehaviourUM2
         Destroy(syncedObject.gameObject);
     }
 
-    public UM2_Prefab getSyncedObject(int objectID){
+    public UM2_Prefab getSyncedObject(int objectID, bool supressError = false){
         foreach(UM2_Prefab syncedObject in syncedObjects){
             if(syncedObject.objectID == objectID){
                 return syncedObject;
             }
         }
 
-        throw new Exception("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        if(!supressError){
+            throw new Exception("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
+        }
+        return null;
         //return null;
     }
 
@@ -159,6 +177,18 @@ public class UM2_Sync : MonoBehaviourUM2
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
             UM2_Methods.networkMethodOthers("newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
         }
+    }
+
+    public UM2_Object getLocalSyncedObject(int objectID, bool supressError = false){
+        foreach(UM2_Object localObject in clientSideObjects){
+            if(localObject.objectID == objectID){
+                return localObject;
+            }
+        }
+        if(!supressError){
+            Debug.LogError("Could not find local synced object with ID " + objectID);
+        }
+        return null;
     }
 
     IEnumerator checkIfAllObjectsExist(){ 
