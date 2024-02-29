@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 class SyncedObjectVariable{
@@ -72,9 +73,19 @@ public class UM2_Object : MonoBehaviourUM2
         sync.destroySyncedObject(this);
     }
 
+    //this is when this client wants to make a new variable on this object
     public void createNewVariable<T>(string variableName, T initialValue){
-        int variableID = syncedObjectVariables.Count; //idk why this wouldn't work
+        int variableID = syncedObjectVariables.Count; // hopefully this won't backfire (:
         SyncedObjectVariable newVariable = new SyncedObjectVariable(initialValue.GetType(), initialValue, objectID, variableID, variableName);
+        
+        syncedObjectVariableNames.Add(variableName);
+        syncedObjectVariables.Add(newVariable);
+    }
+
+    //this is when others make a new variable for this object
+    public void syncNewVariable(string variableName, Type type, object initialValue, int variableID){
+        SyncedObjectVariable newVariable = new SyncedObjectVariable(type, initialValue, objectID, variableID, variableName);
+        
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
     }
@@ -86,6 +97,15 @@ public class UM2_Object : MonoBehaviourUM2
     public object getVariableValue(int variableID){
         return syncedObjectVariables[variableID].value;
     }
+
+    public void setVariableValue(string variableName, object value){
+        setVariableValue(syncedObjectVariableNames.IndexOf(variableName), value);
+    }
+
+    public void setVariableValue(int variableID, object value){
+        syncedObjectVariables[variableID].setValue(value, false);
+    }
+
 
     async void initialize(){
         while (UM2_Client.clientID == -1){

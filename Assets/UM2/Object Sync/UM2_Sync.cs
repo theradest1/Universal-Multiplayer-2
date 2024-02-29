@@ -58,15 +58,39 @@ public class UM2_Sync : MonoBehaviourUM2
         reserveIDLoop();
     }
 
+    public void createNewObjectVar(string name, Type type, object value, int objectID, int variableID){
+        UM2_Prefab variableParent_prefab = getSyncedObject(objectID);
+        UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
+
+        if(variableParent_prefab != null){
+            Debug.LogError("Havent made this yet ):");
+        }
+        else if(variableParent_object != null){
+            variableParent_object.syncNewVariable(name, type, value, variableID);
+            Debug.Log("Created a new variable " + name + " on object " + objectID);
+        }
+        else{
+            Debug.LogError("Could not find object to create a variable for: " + objectID);
+        }
+    }
+
     public void setObjVar(int objectID, int variableID, string value){
         UM2_Prefab variableParent_prefab = getSyncedObject(objectID);
         UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
 
         if(variableParent_prefab != null){
-
+            Debug.LogError("Havent made this yet ):");
         }
         else if(variableParent_object != null){
-        
+            object variableValue = variableParent_object.getVariableValue(variableID);
+            if(variableValue != null){
+                //set variable value
+                variableParent_object.setVariableValue(variableID, value);
+            }
+            else{
+                //create variable
+                Debug.LogWarning("Variable hasn't been created yet");
+            }
         }
         else{
             Debug.LogError("Could not find local or prefab synced object with ID " + objectID);
@@ -155,7 +179,6 @@ public class UM2_Sync : MonoBehaviourUM2
             throw new Exception("Could not find synced object with ID " + objectID + "\nThis can sometimes just happen because an update message got in front of a create object message, start to panic if it keeps going");
         }
         return null;
-        //return null;
     }
 
     public void newQuickObject(int prefabID, Vector3 position, Quaternion rotation){
