@@ -21,7 +21,7 @@ public class SyncedObjectVariable{
         name = _name;
     }
 
-    void sendValue(){
+    public void sendValue(){
         UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
     }
 
@@ -37,7 +37,7 @@ public class UM2_Object : MonoBehaviourUM2
 {
 
     List<SyncedObjectVariable> syncedObjectVariables = new List<SyncedObjectVariable>();
-    List<string> syncedObjectVariableNames = new List<string>();
+    [SerializeField] List<string> syncedObjectVariableNames = new List<string>();
 
     public GameObject prefab;
     [HideInInspector] public int objectID = -1;
@@ -74,12 +74,20 @@ public class UM2_Object : MonoBehaviourUM2
     }
 
     //this is when this client wants to make a new variable on this object
-    public void createNewVariable<T>(string variableName, T initialValue){
+    public async void createNewVariable<T>(string variableName, T initialValue){
         int variableID = syncedObjectVariables.Count; // hopefully this won't backfire (:
+        
+        while(objectID == -1){
+            await Task.Delay(50);
+            Debug.Log("Waiting");
+        }
+        
         SyncedObjectVariable newVariable = new SyncedObjectVariable(initialValue.GetType(), initialValue, objectID, variableID, variableName);
         
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
+        
+        newVariable.sendValue();
     }
 
     public SyncedObjectVariable getVariable(string variableName){

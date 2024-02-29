@@ -17,7 +17,9 @@ public class ObjectSpawnExample : MonoBehaviour
     {
         if(Input.GetKeyDown("e")){
             Debug.Log("Spawning synced object");
-            Instantiate(cubePrefab, transform.position, transform.rotation);
+            GameObject cube = Instantiate(cubePrefab, transform.position, transform.rotation);
+            cube.GetComponent<UM2_Object>().createNewVariable<string>("testVar", "hola");
+
         }
         if(Input.GetKeyDown("q")){
             Debug.Log("Spawning quick object");

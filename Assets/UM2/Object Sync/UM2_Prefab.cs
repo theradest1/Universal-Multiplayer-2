@@ -8,7 +8,7 @@ using System;
 public class UM2_Prefab : MonoBehaviourUM2
 {
     List<SyncedObjectVariable> syncedObjectVariables = new List<SyncedObjectVariable>();
-    List<string> syncedObjectVariableNames = new List<string>();
+    [SerializeField] List<string> syncedObjectVariableNames = new List<string>();
 
 
     [HideInInspector] public int objectID;
