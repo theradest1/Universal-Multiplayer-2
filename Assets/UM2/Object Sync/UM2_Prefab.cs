@@ -31,6 +31,8 @@ public class UM2_Prefab : MonoBehaviourUM2
         
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
+
+        newVariable.sendValue();
     }
 
     //this is when others make a new variable for this object
