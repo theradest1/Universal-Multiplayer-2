@@ -5,6 +5,7 @@ using UnityEditor;
 using System.IO;
 using System;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 public class UM2_Sync : MonoBehaviourUM2
 {
@@ -58,16 +59,38 @@ public class UM2_Sync : MonoBehaviourUM2
         reserveIDLoop();
     }
 
+    public void requestVariableCreation(int objectID, int variableID, int clientID){
+        UM2_Prefab variableParent_prefab = getSyncedObject(objectID, true);
+        UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
+        SyncedObjectVariable objectVariable = null;
+
+        if(variableParent_prefab != null){
+            objectVariable = variableParent_object.getVariable(variableID);
+        }
+        else if(variableParent_object != null){
+            objectVariable = variableParent_object.getVariable(variableID);
+        }
+
+        
+        if(objectVariable != null){
+            UM2_Methods.networkMethodDirect(clientID, "createNewObjectVar", objectVariable.name, objectVariable.type, objectVariable.value, objectID, variableID);
+        }
+        else{
+            Debug.LogWarning("Did not have requested variable: " + variableID + " on object " + objectID);
+        }
+    }
+
     public void createNewObjectVar(string name, Type type, object value, int objectID, int variableID){
-        UM2_Prefab variableParent_prefab = getSyncedObject(objectID);
+        UM2_Prefab variableParent_prefab = getSyncedObject(objectID, true);
         UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
 
         if(variableParent_prefab != null){
-            Debug.LogError("Havent made this yet ):");
+            variableParent_prefab.syncNewVariable(name, type, value, variableID);
+            Debug.Log("Created a new variable " + name + " on synced object " + objectID);
         }
         else if(variableParent_object != null){
             variableParent_object.syncNewVariable(name, type, value, variableID);
-            Debug.Log("Created a new variable " + name + " on object " + objectID);
+            Debug.Log("Created a new variable " + name + " on local object " + objectID);
         }
         else{
             Debug.LogError("Could not find object to create a variable for: " + objectID);
@@ -75,25 +98,31 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     public void setObjVar(int objectID, int variableID, string value){
-        UM2_Prefab variableParent_prefab = getSyncedObject(objectID);
+        UM2_Prefab variableParent_prefab = getSyncedObject(objectID, true);
         UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
 
         if(variableParent_prefab != null){
-            Debug.LogError("Havent made this yet ):");
+            object variableValue = variableParent_prefab.getVariableValue(variableID);
+            if(variableValue != null){
+                variableParent_prefab.setVariableValue(variableID, value);
+            }
+            else{
+                UM2_Methods.networkMethodOthers("requestVariableCreation", objectID, variableID, UM2_Client.clientID);
+                Debug.Log("Object variable hasn't been created yet, requesting");
+            }
         }
         else if(variableParent_object != null){
             object variableValue = variableParent_object.getVariableValue(variableID);
             if(variableValue != null){
-                //set variable value
                 variableParent_object.setVariableValue(variableID, value);
             }
             else{
-                //create variable
-                Debug.LogWarning("Variable hasn't been created yet");
+                UM2_Methods.networkMethodOthers("requestVariableCreation", objectID, variableID, UM2_Client.clientID);
+                Debug.Log("Object variable hasn't been created yet, requesting");
             }
         }
         else{
-            Debug.LogError("Could not find local or prefab synced object with ID " + objectID);
+            Debug.LogError("Could not find local or synced object with ID " + objectID + " for setting a variable");
         }
     }
 

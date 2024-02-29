@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 
-class SyncedObjectVariable{
-    Type type;
+public class SyncedObjectVariable{
+    public Type type;
     public object value;
     int objectID;
     public int variableID; //object relative
@@ -80,6 +80,14 @@ public class UM2_Object : MonoBehaviourUM2
         
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
+    }
+
+    public SyncedObjectVariable getVariable(string variableName){
+        return getVariable(syncedObjectVariableNames.IndexOf(variableName));
+    }
+
+    public SyncedObjectVariable getVariable(int variableID){
+        return syncedObjectVariables[variableID];
     }
 
     //this is when others make a new variable for this object
