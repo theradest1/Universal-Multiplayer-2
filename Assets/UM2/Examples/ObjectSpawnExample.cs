@@ -22,7 +22,7 @@ public class ObjectSpawnExample : MonoBehaviour
 
         }
         if(Input.GetKeyDown("q")){
-            Debug.Log("Spawning quick object");
+            Debug.Log("Spawning quick object"); 
             UM2_Sync.sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
         }
     }

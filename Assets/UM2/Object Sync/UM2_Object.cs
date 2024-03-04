@@ -40,7 +40,8 @@ public class UM2_Object : MonoBehaviourUM2
     [SerializeField] List<string> syncedObjectVariableNames = new List<string>();
 
     public GameObject prefab;
-    [HideInInspector] public int objectID = -1;
+    
+    public int objectID = -1;
 
     float pastTicksPerSecond = -1;
     [Range(1,64)]
@@ -111,7 +112,12 @@ public class UM2_Object : MonoBehaviourUM2
     }
 
     public object getVariableValue(int variableID){
-        return syncedObjectVariables[variableID].value;
+        try{
+            return syncedObjectVariables[variableID].value;
+        }
+        catch{
+            return null;
+        }
     }
 
     public void setVariableValue(string variableName, object value){
