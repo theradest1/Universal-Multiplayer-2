@@ -88,7 +88,8 @@ public class UM2_Object : MonoBehaviourUM2
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
         
-        newVariable.sendValue();
+        //newVariable.sendValue();
+        //Isnt sent right away, only when other client asks for it. This is in case the object hasn't been made on other clients yet
     }
 
     public SyncedObjectVariable getVariable(string variableName){
@@ -125,7 +126,7 @@ public class UM2_Object : MonoBehaviourUM2
     }
 
     public void setVariableValue(int variableID, object value){
-        syncedObjectVariables[variableID].setValue(value, false);
+        syncedObjectVariables[variableID].setValue(value);
     }
 
 

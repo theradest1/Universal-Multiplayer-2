@@ -32,7 +32,8 @@ public class UM2_Prefab : MonoBehaviourUM2
         syncedObjectVariableNames.Add(variableName);
         syncedObjectVariables.Add(newVariable);
 
-        newVariable.sendValue();
+        //newVariable.sendValue();
+        //explenation in UM2_Object
     }
 
     //this is when others make a new variable for this object
@@ -48,7 +49,12 @@ public class UM2_Prefab : MonoBehaviourUM2
     }
 
     public object getVariableValue(int variableID){
-        return syncedObjectVariables[variableID].value;
+        try{
+            return syncedObjectVariables[variableID].value;
+        }
+        catch{
+            return null;
+        }
     }
 
     public void setVariableValue(string variableName, object value){

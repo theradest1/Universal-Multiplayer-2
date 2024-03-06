@@ -48,9 +48,12 @@ public class QuickMethods : MonoBehaviour
         {
             return token;
         }
+        else if (type == typeof(System.Type)){
+            return Type.GetType(token);
+        }
         else
         {
-            throw new ArgumentException("Unsupported parameter type: " + type + ". Add to ParseValue method in UM2_Client");
+            throw new ArgumentException("Unsupported parameter type: " + type + ". Add to ParseValue method in QuickMethods");
         }
     }
 

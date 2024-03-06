@@ -80,7 +80,7 @@ public class UM2_Sync : MonoBehaviourUM2
         }
     }
 
-    public void createNewObjectVar(string name, Type type, object value, int objectID, int variableID){
+    public void createNewObjectVar(string name, Type type, string value, int objectID, int variableID){
         UM2_Prefab variableParent_prefab = getSyncedObject(objectID, true);
         UM2_Object variableParent_object = getLocalSyncedObject(objectID, true);
 

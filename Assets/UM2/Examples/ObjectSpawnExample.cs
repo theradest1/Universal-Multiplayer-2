@@ -7,10 +7,22 @@ public class ObjectSpawnExample : MonoBehaviour
     UM2_Sync sync;
     public GameObject cubePrefab;
     public GameObject quickObjectPrefab;
+    UM2_Object selfObject;
 
     void Start()
     {
         sync = UM2_Sync.sync;
+
+        selfObject = this.GetComponent<UM2_Object>();
+
+        selfObject.createNewVariable<int>("health", 100);
+        selfObject.createNewVariable<int>("timer", 0);
+
+        InvokeRepeating("timerUpdate", 1, .5f);
+    }
+
+    void timerUpdate(){
+        selfObject.setVariableValue("timer", Time.time);
     }
 
     void Update()
@@ -18,7 +30,6 @@ public class ObjectSpawnExample : MonoBehaviour
         if(Input.GetKeyDown("e")){
             Debug.Log("Spawning synced object");
             GameObject cube = Instantiate(cubePrefab, transform.position, transform.rotation);
-            cube.GetComponent<UM2_Object>().createNewVariable<string>("testVar", "hola");
 
         }
         if(Input.GetKeyDown("q")){
