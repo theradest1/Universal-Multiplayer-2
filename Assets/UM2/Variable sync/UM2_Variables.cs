@@ -125,8 +125,6 @@ public class UM2_Variables : MonoBehaviourUM2
     void Start()
     {
         client = gameObject.GetComponent<UM2_Client>();
-        initialize();
-        StartCoroutine(getAllVariables());
     }
 
     public void addToVar(string name, object value){
@@ -139,23 +137,8 @@ public class UM2_Variables : MonoBehaviourUM2
         //client.messageServer("setVar~" + name + "~" + value);
     }
 
-    async void initialize(){
-        while (UM2_Client.clientID == -1){
-            await Task.Delay(50);
-
-            if(!UM2_Client.connectedToServer){
-                return;
-            }
-        }
-    }
-
-    IEnumerator getAllVariables(){
-        //wait untill this client has an ID
-        yield return new WaitUntil(() => UM2_Client.clientID != -1);
-
+    public override void OnConnect(int clientID){
         //client.messageServer("giveAllVariables~" + UM2_Client.clientID);
         UM2_Methods.networkMethodServer("giveAllVariables", UM2_Client.clientID);
-
-        yield return null;
     }
 }
