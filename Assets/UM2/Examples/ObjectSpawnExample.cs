@@ -15,14 +15,14 @@ public class ObjectSpawnExample : MonoBehaviour
 
         selfObject = this.GetComponent<UM2_Object>();
 
-        selfObject.createNewVariable<int>("health", 100);
-        selfObject.createNewVariable<int>("timer", 0);
+        //selfObject.createNewVariable<int>("health", 100);
+        //selfObject.createNewVariable<int>("timer", 0);
 
         InvokeRepeating("timerUpdate", 1, .5f);
     }
 
     void timerUpdate(){
-        selfObject.setVariableValue("timer", Time.time);
+        //selfObject.setVariableValue("timer", Time.time);
     }
 
     void Update()

@@ -5,39 +5,13 @@ using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class SyncedObjectVariable{
-    public Type type;
-    public object value;
-    int objectID;
-    public int variableID; //object relative
-    public string name;
 
-
-    public SyncedObjectVariable(Type _type, object _value, int _objectID, int _variableID, string _name){
-        type = _type;
-        value = _value;
-        objectID = _objectID;
-        variableID = _variableID;
-        name = _name;
-    }
-
-    public void sendValue(){
-        UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
-    }
-
-    public void setValue(object _value, bool syncWithOthers = true){
-        value = _value;
-        if(syncWithOthers){
-            sendValue();
-        }
-    }
-}
 
 public class UM2_Object : MonoBehaviourUM2
 {
 
-    List<SyncedObjectVariable> syncedObjectVariables = new List<SyncedObjectVariable>();
-    [SerializeField] List<string> syncedObjectVariableNames = new List<string>();
+    //List<SyncedObjectVariable> syncedObjectVariables = new List<SyncedObjectVariable>();
+    //[SerializeField] List<string> syncedObjectVariableNames = new List<string>();
 
     public GameObject prefab;
     
@@ -73,62 +47,6 @@ public class UM2_Object : MonoBehaviourUM2
     {
         sync.destroySyncedObject(this);
     }
-
-    //this is when this client wants to make a new variable on this object
-    public async void createNewVariable<T>(string variableName, T initialValue){
-        int variableID = syncedObjectVariables.Count; // hopefully this won't backfire (:
-        
-        while(objectID == -1){
-            await Task.Delay(50);
-            Debug.Log("Waiting");
-        }
-        
-        SyncedObjectVariable newVariable = new SyncedObjectVariable(initialValue.GetType(), initialValue, objectID, variableID, variableName);
-        
-        syncedObjectVariableNames.Add(variableName);
-        syncedObjectVariables.Add(newVariable);
-        
-        //newVariable.sendValue();
-        //Isnt sent right away, only when other client asks for it. This is in case the object hasn't been made on other clients yet
-    }
-
-    public SyncedObjectVariable getVariable(string variableName){
-        return getVariable(syncedObjectVariableNames.IndexOf(variableName));
-    }
-
-    public SyncedObjectVariable getVariable(int variableID){
-        return syncedObjectVariables[variableID];
-    }
-
-    //this is when others make a new variable for this object
-    public void syncNewVariable(string variableName, Type type, object initialValue, int variableID){
-        SyncedObjectVariable newVariable = new SyncedObjectVariable(type, initialValue, objectID, variableID, variableName);
-        
-        syncedObjectVariableNames.Add(variableName);
-        syncedObjectVariables.Add(newVariable);
-    }
-
-    public object getVariableValue(string variableName){
-        return getVariableValue(syncedObjectVariableNames.IndexOf(variableName));
-    }
-
-    public object getVariableValue(int variableID){
-        try{
-            return syncedObjectVariables[variableID].value;
-        }
-        catch{
-            return null;
-        }
-    }
-
-    public void setVariableValue(string variableName, object value){
-        setVariableValue(syncedObjectVariableNames.IndexOf(variableName), value);
-    }
-
-    public void setVariableValue(int variableID, object value){
-        syncedObjectVariables[variableID].setValue(value);
-    }
-
 
     async void initialize(){
         while (UM2_Client.clientID == -1){

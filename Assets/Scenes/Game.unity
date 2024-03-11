@@ -1041,9 +1041,9 @@ MonoBehaviour:
   sentBytesHTTP: 0
   gotBytesHTTP: 0
   failedMessages: 0
-  debugUDPMessages: 0
+  debugUDPMessages: 1
   debugTCPMessages: 1
-  debugHTTPMessages: 0
+  debugHTTPMessages: 1
   debugBasicMessages: 0
 --- !u!4 &1054571551
 Transform:
