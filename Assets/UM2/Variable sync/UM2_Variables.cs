@@ -1,59 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
 
-public class LocalServerVariable
-{
-    string value;
-    Type type;
-    public string name;
-    //UM2_Client client;
-
-    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
-        type = setType;
-        name = setName;
-        //client = setClient;
-        value = initialValue + "";
-
-        try
-        {
-            this.getValue();
-        }
-        catch (System.Exception)
-        {
-            Debug.LogError("Could not parse initial value: " + initialValue + " into " + setType);
-            return;
-        }
-        UM2_Methods.networkMethodServer("newVar", name, value, type);
-        //client.messageServer("newVar~" + name + "~" + value + "~" + type);
-    }
-
-    public object getValue(){
-        if (type == typeof(int))
-        {
-            return int.Parse(value);
-        }
-        else if (type == typeof(float))
-        {
-            return float.Parse(value);
-        }
-        else if (type == typeof(string))
-        {
-            return value;
-        }
-        Debug.LogError("Unknown server variable type: " + type);
-        return null;
-    }
-
-    public void setValue(string newValue){
-        value = newValue;
-        //Debug.Log(name + " = " + value);
-    }
-}
 
 public class UM2_Variables : MonoBehaviourUM2
 {
@@ -140,5 +90,83 @@ public class UM2_Variables : MonoBehaviourUM2
     public override void OnConnect(int clientID){
         //client.messageServer("giveAllVariables~" + UM2_Client.clientID);
         UM2_Methods.networkMethodServer("giveAllVariables", UM2_Client.clientID);
+    }
+}
+
+
+public class SyncedObjectVariable{
+    public Type type;
+    public object value;
+    int objectID;
+    public int variableID; //object relative
+    public string name;
+
+
+    public SyncedObjectVariable(Type _type, object _value, int _objectID, int _variableID, string _name){
+        type = _type;
+        value = _value;
+        objectID = _objectID;
+        variableID = _variableID;
+        name = _name;
+    }
+
+    public void sendValue(){
+        UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
+    }
+
+    public void setValue(object _value, bool syncWithOthers = true){
+        value = _value;
+        if(syncWithOthers){
+            sendValue();
+        }
+    }
+}
+
+public class LocalServerVariable
+{
+    string value;
+    Type type;
+    public string name;
+    //UM2_Client client;
+
+    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
+        type = setType;
+        name = setName;
+        //client = setClient;
+        value = initialValue + "";
+
+        try
+        {
+            this.getValue();
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Could not parse initial value: " + initialValue + " into " + setType);
+            return;
+        }
+        UM2_Methods.networkMethodServer("newVar", name, value, type);
+        //client.messageServer("newVar~" + name + "~" + value + "~" + type);
+    }
+
+    public object getValue(){
+        if (type == typeof(int))
+        {
+            return int.Parse(value);
+        }
+        else if (type == typeof(float))
+        {
+            return float.Parse(value);
+        }
+        else if (type == typeof(string))
+        {
+            return value;
+        }
+        Debug.LogError("Unknown server variable type: " + type);
+        return null;
+    }
+
+    public void setValue(string newValue){
+        value = newValue;
+        //Debug.Log(name + " = " + value);
     }
 }
