@@ -130,7 +130,7 @@ public class UM2_Methods : MonoBehaviourUM2
         message = "all~" + message;
         UM2_Client.client.sendMessage(message, true, false);
     }
-    public static void networkMethodDirect(int recipientID, string methodName, params object[] parameters){
+    public static void networkMethodDirect(string methodName, int recipientID, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
         message = "direct~" + recipientID + "~" + message;
         UM2_Client.client.sendMessage(message, true, false);

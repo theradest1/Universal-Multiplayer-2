@@ -29,14 +29,14 @@ public class Client{
     }
 }
 
-public class ServerVariable
+public class ServerVariable_Server
 {
 	public string name;
 	public string value;
 	public Type type;
     UM2_Server server;
 
-	public ServerVariable(string setName, string setValue, string setType, UM2_Server setServer)
+	public ServerVariable_Server(string setName, string setValue, string setType, UM2_Server setServer)
 	{
 		name = setName;
 		value = setValue;
@@ -118,7 +118,7 @@ public class UM2_Server : MonoBehaviour
 
 
     List<Client> clients = new List<Client>();
-	List<ServerVariable> serverVariables = new List<ServerVariable>();
+	List<ServerVariable_Server> serverVariables = new List<ServerVariable_Server>();
 
     void Awake()
     {
@@ -368,7 +368,7 @@ public class UM2_Server : MonoBehaviour
                         string varName = messageContents.Split("~")[1];
                         string varValue = messageContents.Split("~")[2];
                         string varType = messageContents.Split("~")[3];
-                        serverVariables.Add(new ServerVariable(varName, varValue, varType, this));
+                        serverVariables.Add(new ServerVariable_Server(varName, varValue, varType, this));
                         sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP", clientID);
                         //Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
@@ -386,7 +386,7 @@ public class UM2_Server : MonoBehaviour
                         break;
                     case "giveAllVariables":
                         //Debug.Log("giving all variables");
-                        foreach(ServerVariable serverVariable in serverVariables){
+                        foreach(ServerVariable_Server serverVariable in serverVariables){
                             varName = serverVariable.name;
                             varValue = serverVariable.value;
                             varType = serverVariable.type + "";
@@ -443,8 +443,8 @@ public class UM2_Server : MonoBehaviour
         return responseMessage;
     }
 
-    public ServerVariable getServerVariable(string name){
-        foreach(ServerVariable serverVariable in serverVariables){
+    public ServerVariable_Server getServerVariable(string name){
+        foreach(ServerVariable_Server serverVariable in serverVariables){
             if(serverVariable.name == name){
                 return serverVariable;
             }

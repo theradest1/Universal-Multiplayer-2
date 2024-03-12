@@ -3,16 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 
 public class UM2_Variables : MonoBehaviourUM2
 {
-    List<LocalServerVariable> serverVariables = new List<LocalServerVariable>();
     UM2_Client client;
 	public static UM2_Variables instance;
     
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
 
+    List<ServerVariable_Client> serverVariables = new List<ServerVariable_Client>();
     public void syncVar(string name, string value){
         getServerVariable(name).setValue(value);
     }
@@ -32,7 +33,7 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
 	public void createServerVariable<T>(string name, T initialValue){
-        foreach(LocalServerVariable serverVariable in serverVariables){
+        foreach(ServerVariable_Client serverVariable in serverVariables){
             if(serverVariable.name == name){
                 Debug.LogError("A server variable with name " + name + " already exists");
                 return;
@@ -44,15 +45,15 @@ public class UM2_Variables : MonoBehaviourUM2
             return;
         }
 
-		LocalServerVariable newVariable = new LocalServerVariable(name, initialValue, typeof(T), client);
+		ServerVariable_Client newVariable = new ServerVariable_Client(name, initialValue, typeof(T), client);
 		serverVariables.Add(newVariable);
 
         //Debug.Log("Created new server variable " + name);
 		return;
 	}
 
-    public LocalServerVariable getServerVariable(string name){ //I need to make this a dictionary in the future
-		foreach (LocalServerVariable variable in serverVariables)
+    public ServerVariable_Client getServerVariable(string name){ //I need to make this a dictionary in the future
+		foreach (ServerVariable_Client variable in serverVariables)
         {
             if(variable.name == name){
                 return variable;
@@ -94,7 +95,7 @@ public class UM2_Variables : MonoBehaviourUM2
 }
 
 
-public class SyncedObjectVariable{
+public class ObjectVariable{
     public Type type;
     public object value;
     int objectID;
@@ -102,34 +103,34 @@ public class SyncedObjectVariable{
     public string name;
 
 
-    public SyncedObjectVariable(Type _type, object _value, int _objectID, int _variableID, string _name){
-        type = _type;
-        value = _value;
-        objectID = _objectID;
-        variableID = _variableID;
-        name = _name;
+    public ObjectVariable(Type type, object value, int objectID, int variableID, string name){
+        this.type = type;
+        this.value = value;
+        this.objectID = objectID;
+        this.variableID = variableID;
+        this.name = name;
     }
 
     public void sendValue(){
         UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
     }
 
-    public void setValue(object _value, bool syncWithOthers = true){
-        value = _value;
+    public void setValue(object value, bool syncWithOthers = true){
+        this.value = value;
         if(syncWithOthers){
             sendValue();
         }
     }
 }
 
-public class LocalServerVariable
+public class ServerVariable_Client
 {
     string value;
     Type type;
     public string name;
     //UM2_Client client;
 
-    public LocalServerVariable(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
+    public ServerVariable_Client(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
         type = setType;
         name = setName;
         //client = setClient;
