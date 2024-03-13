@@ -1,12 +1,10 @@
 # This is a work in progress, but it should contain correct info (but not all info)
 
----
-
+<br></br>
 ## **Basics:**
 - All Universal Multiplayer scripts start with the prefix UM2_
 
----
-
+<br></br>
 ## Network Methods:
 A way for one client to call another client's method
 
@@ -23,8 +21,7 @@ A way for one client to call another client's method
   - change MonoBehaviour to MonoBehaviourUM2 (recommended)
   - subscribe directly with "UM2_Methods.addToServerMethods(this);"
 
----
-
+<br></br>
 ## Global Methods:
 Global methods are similar to Start, but are based on server events. 
 
@@ -45,8 +42,7 @@ Global methods are similar to Start, but are based on server events.
 - has to be one of the previously shown methods
 - needs to be a "public virtual void" 
 
----
-
+<br></br>
 ## Network Object (UM2_Object):
 - ### prefab
   - what is created for the other clients
