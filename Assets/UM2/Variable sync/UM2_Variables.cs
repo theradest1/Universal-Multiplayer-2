@@ -3,19 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 
 
 public class UM2_Variables : MonoBehaviourUM2
 {
     UM2_Client client;
 	public static UM2_Variables instance;
-    
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
+    List<NetworkVariable_Client> networkvariables = new List<NetworkVariable_Client>();
 
-    List<ServerVariable_Client> serverVariables = new List<ServerVariable_Client>();
     public void syncVar(string name, string value){
-        getServerVariable(name).setValue(value);
+        getNetworkVariable(name).setValue(value);
     }
 
     public void syncNewVar(string name, string value, string type){
@@ -33,8 +31,8 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
 	public void createServerVariable<T>(string name, T initialValue){
-        foreach(ServerVariable_Client serverVariable in serverVariables){
-            if(serverVariable.name == name){
+        foreach(NetworkVariable_Client networkVariable in networkvariables){
+            if(networkVariable.name == name){
                 Debug.LogError("A server variable with name " + name + " already exists");
                 return;
             }
@@ -45,18 +43,17 @@ public class UM2_Variables : MonoBehaviourUM2
             return;
         }
 
-		ServerVariable_Client newVariable = new ServerVariable_Client(name, initialValue, typeof(T), client);
-		serverVariables.Add(newVariable);
+		NetworkVariable_Client newVariable = new NetworkVariable_Client(name, initialValue, typeof(T), client);
+		networkvariables.Add(newVariable);
 
-        //Debug.Log("Created new server variable " + name);
 		return;
 	}
 
-    public ServerVariable_Client getServerVariable(string name){ //I need to make this a dictionary in the future
-		foreach (ServerVariable_Client variable in serverVariables)
+    public NetworkVariable_Client getNetworkVariable(string name){ //I need to make this a dictionary in the future
+		foreach (NetworkVariable_Client networkVariable in networkvariables)
         {
-            if(variable.name == name){
-                return variable;
+            if(networkVariable.name == name){
+                return networkVariable;
             }
         }
         
@@ -64,8 +61,8 @@ public class UM2_Variables : MonoBehaviourUM2
         return null;
     }
 
-    public object getServerVariableValue(string name){
-        return getServerVariable(name).getValue();
+    public object getNetworkVariableValue(string name){
+        return getNetworkVariable(name).getValue();
     }
 
 	private void Awake()
@@ -78,89 +75,46 @@ public class UM2_Variables : MonoBehaviourUM2
         client = gameObject.GetComponent<UM2_Client>();
     }
 
-    public void addToVar(string name, object value){
-        //client.messageServer("addToVar~" + name + "~" + value);
-        UM2_Methods.networkMethodServer("addToVar", name, value);
-    }
-
-    public void setVar(string name, object value){
-        UM2_Methods.networkMethodServer("setVar", name, value);
-        //client.messageServer("setVar~" + name + "~" + value);
-    }
-
     public override void OnConnect(int clientID){
-        //client.messageServer("giveAllVariables~" + UM2_Client.clientID);
         UM2_Methods.networkMethodServer("giveAllVariables", UM2_Client.clientID);
     }
 }
 
-
-public class ObjectVariable{
-    public Type type;
-    public object value;
-    int objectID;
-    public int variableID; //object relative
+public class NetworkVariable_Client
+{
     public string name;
+    object value;
+    Type type;
+    public int variableID;
+    public bool serverVariable;
 
-
-    public ObjectVariable(Type type, object value, int objectID, int variableID, string name){
-        this.type = type;
-        this.value = value;
-        this.objectID = objectID;
-        this.variableID = variableID;
+    public NetworkVariable_Client(string name, object value, Type type, bool serverVariable = false, bool newVariable = true){//, Action<string> callback = null){
         this.name = name;
+        this.value = value;
+        this.type = type;
+        this.serverVariable = serverVariable;
+
+        if(newVariable){
+            UM2_Methods.networkMethodServer("newServerVar", name, value, type);
+        }
     }
 
     public void sendValue(){
-        UM2_Methods.networkMethodOthers("setObjVar", objectID, variableID, value);
-    }
-
-    public void setValue(object value, bool syncWithOthers = true){
-        this.value = value;
-        if(syncWithOthers){
-            sendValue();
-        }
-    }
-}
-
-public class ServerVariable_Client
-{
-    string value;
-    Type type;
-    public string name;
-    //UM2_Client client;
-
-    public ServerVariable_Client(string setName, object initialValue, Type setType, UM2_Client setClient, Action<string> callback = null){
-        type = setType;
-        name = setName;
-        //client = setClient;
-        value = initialValue + "";
-
-        try
-        {
-            this.getValue();
-        }
-        catch (System.Exception)
-        {
-            Debug.LogError("Could not parse initial value: " + initialValue + " into " + setType);
-            return;
-        }
-        UM2_Methods.networkMethodServer("newVar", name, value, type);
-        //client.messageServer("newVar~" + name + "~" + value + "~" + type);
+        UM2_Methods.networkMethodServer("setServerVar", name, value, type);
     }
 
     public object getValue(){
         if (type == typeof(int))
         {
-            return int.Parse(value);
+            return (int)value;
         }
         else if (type == typeof(float))
         {
-            return float.Parse(value);
+            return (float)value;
         }
         else if (type == typeof(string))
         {
-            return value;
+            return (string)value;
         }
         Debug.LogError("Unknown server variable type: " + type);
         return null;
@@ -168,6 +122,6 @@ public class ServerVariable_Client
 
     public void setValue(string newValue){
         value = newValue;
-        //Debug.Log(name + " = " + value);
+        sendValue();
     }
 }

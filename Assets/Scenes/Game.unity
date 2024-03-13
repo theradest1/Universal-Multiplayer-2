@@ -132,13 +132,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 180985654}
+  - component: {fileID: 180985660}
+  - component: {fileID: 180985659}
   - component: {fileID: 180985653}
   - component: {fileID: 180985652}
   - component: {fileID: 180985651}
   - component: {fileID: 180985657}
   - component: {fileID: 180985656}
-  - component: {fileID: 180985659}
-  - component: {fileID: 180985660}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -300,10 +300,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a2a4dd847ed05c4e9266cc064c22d1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncedObjectVariableNames: []
   prefab: {fileID: 6784705878260703352, guid: 75ba9de79c18c45418ef1113b563faa7, type: 3}
   objectID: 0
-  ticksPerSecond: 10
+  ticksPerSecond: 20
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 5
@@ -1041,9 +1040,9 @@ MonoBehaviour:
   sentBytesHTTP: 0
   gotBytesHTTP: 0
   failedMessages: 0
-  debugUDPMessages: 1
-  debugTCPMessages: 1
-  debugHTTPMessages: 1
+  debugUDPMessages: 0
+  debugTCPMessages: 0
+  debugHTTPMessages: 0
   debugBasicMessages: 0
 --- !u!4 &1054571551
 Transform:
