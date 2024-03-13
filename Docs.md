@@ -1,4 +1,5 @@
-# This is a work in progress, but it should contain correct info (but not all info)
+# Universal Multiplayer Documentation
+This is a work in progress, but it should contain correct info (but not all info)
 
 <br></br>
 ## **Basics:**
