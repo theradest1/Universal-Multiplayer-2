@@ -29,35 +29,39 @@ public class Client{
     }
 }
 
-public class ServerVariable_Server
+public class NetworkVariable_Server
 {
 	public string name;
-	public string value;
+	public object value;
+    public int id;
 	public Type type;
     UM2_Server server;
 
-	public ServerVariable_Server(string setName, string setValue, string setType, UM2_Server setServer)
+	public NetworkVariable_Server(string name, int id, string value, Type type)
 	{
-		name = setName;
-		value = setValue;
+		this.name = name;
+		this.value = value;
+        this.id = id;
+		this.type = type;
 
-		type = Type.GetType(setType);
-        server = setServer;
+        server = UM2_Server.server;
+
+        server.sendMessageToAll("syncNewVar~" + name + "~" + value + "~" + type, "TCP");
 	}
 
     public void add(string addValue){
         if(type == typeof(int)){
-            set(int.Parse(value) + int.Parse(addValue) + "");
+            set((int)value + int.Parse(addValue));
         }
         else if(type == typeof(float)){
-            set(float.Parse(value) + float.Parse(addValue) + "");
+            set((float)value + float.Parse(addValue));
         }
         else if(type == typeof(string)){
             set(value + addValue);
         }
     }
 
-    public void set(string newValue){
+    public void set(object newValue){
         value = newValue;
         //Debug.Log("(Server) Set " + name + " to " + value);
         server.sendMessageToAll("syncVar~" + name + "~" + value, "TCP");
@@ -108,6 +112,7 @@ public class UM2_Server : MonoBehaviour
 
     [SerializeField] int currentPlayerID = 0;
     [SerializeField] int currentObjectID = 0;
+    [SerializeField] int currentNetworkVarID = 0;
 
 
     [Header("Console debug settings:")]
@@ -118,7 +123,7 @@ public class UM2_Server : MonoBehaviour
 
 
     List<Client> clients = new List<Client>();
-	List<ServerVariable_Server> serverVariables = new List<ServerVariable_Server>();
+	List<NetworkVariable_Server> networkVariables = new List<NetworkVariable_Server>();
 
     void Awake()
     {
@@ -361,36 +366,41 @@ public class UM2_Server : MonoBehaviour
                         responseMessage = "reservedObjectID~" + currentObjectID;
                         currentObjectID++;
                         break;
+                    case "reserveNetworkVarID":
+                        responseMessage = "reservedNetworkVarID~" + currentNetworkVarID;
+                        currentNetworkVarID++;
+                        break;
                     case "getQueue": //this is called by http clients to collect queued messages
                         responseMessage = "";
                         break;
                     case "newVar":
                         string varName = messageContents.Split("~")[1];
-                        string varValue = messageContents.Split("~")[2];
-                        string varType = messageContents.Split("~")[3];
-                        serverVariables.Add(new ServerVariable_Server(varName, varValue, varType, this));
-                        sendMessageToAll("syncNewVar~" + varName + "~" + varValue + "~" + varType, "TCP", clientID);
+                        string varID = messageContents.Split("~")[2];
+                        string varValue = messageContents.Split("~")[3];
+                        string varType = messageContents.Split("~")[4];
+                        networkVariables.Add(new NetworkVariable_Server(varName, int.Parse(varID), varValue, Type.GetType(varType)));
                         //Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
                     case "setVar":
                         varName = messageContents.Split("~")[1];
                         varValue = messageContents.Split("~")[2];
                         //Debug.Log("(Server) Setting var " + varName);
-                        getServerVariable(varName).set(varValue);
+                        getNetworkVariable(varName).set(varValue);
                         break;
                     case "addToVar":
                         varName = messageContents.Split("~")[1];
                         varValue = messageContents.Split("~")[2];
                         //Debug.Log("(Server) Adding to var " + varName);
-                        getServerVariable(varName).add(varValue);
+                        getNetworkVariable(varName).add(varValue);
                         break;
                     case "giveAllVariables":
                         //Debug.Log("giving all variables");
-                        foreach(ServerVariable_Server serverVariable in serverVariables){
-                            varName = serverVariable.name;
-                            varValue = serverVariable.value;
-                            varType = serverVariable.type + "";
-                            sendMessageToClient("syncNewVar~" + varName + "~" + varValue + "~" + varType, protocol, clientID);
+                        foreach(NetworkVariable_Server networkVariable in networkVariables){
+                            varName = networkVariable.name;
+                            varID = networkVariable.id + "";
+                            varValue = (string)networkVariable.value;
+                            varType = networkVariable.type + "";
+                            sendMessageToClient("syncNewVar~" + varName + "~" + varID + "~" + varValue + "~" + varType, protocol, clientID);
                         }
                         break;
                     case "disconnect":
@@ -443,10 +453,10 @@ public class UM2_Server : MonoBehaviour
         return responseMessage;
     }
 
-    public ServerVariable_Server getServerVariable(string name){
-        foreach(ServerVariable_Server serverVariable in serverVariables){
-            if(serverVariable.name == name){
-                return serverVariable;
+    public NetworkVariable_Server getNetworkVariable(string name){
+        foreach(NetworkVariable_Server networkVariable in networkVariables){
+            if(networkVariable.name == name){
+                return networkVariable;
             }
         }
         Debug.LogError("(Server) Could not find server variable: " + name);
