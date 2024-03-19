@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 
 
 public class UM2_Variables : MonoBehaviourUM2
@@ -11,26 +12,46 @@ public class UM2_Variables : MonoBehaviourUM2
 	public static UM2_Variables instance;
     List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
     List<NetworkVariable_Client> networkvariables = new List<NetworkVariable_Client>();
+    public List<String> networkVariableNames = new List<String>();
+    
+    List<int> reservedVariableIDs = new List<int>();
+    public int targetPreppedVariableIDs = 10;
+    
+    async void reserveIDLoop(){
+        await Task.Delay(100);
+
+        if(!UM2_Client.connectedToServer){
+            return;
+        }
+
+        if(reservedVariableIDs.Count < targetPreppedVariableIDs){
+            UM2_Methods.networkMethodServer("reserveVariableID");
+        }
+
+        reserveIDLoop();
+    }
+
+    public void reservedVariableID(int id){
+        Debug.Log("Reserved varible id " + id);
+        reservedVariableIDs.Add(id);
+    }
 
     public void syncVar(string name, string value){
         getNetworkVariable(name).setValue(value);
     }
 
-    public void syncNewVar(string name, string value, string type){
-        Type varType = Type.GetType(type);
+    public void syncNewVar(string name, int id, string value, Type type){
+        //check if it already exists
+        if(networkVariableNames.Contains(name)){
+            Debug.Log("Variable " + name + " already exists");
+            return;
+        }
 
-        if(varType == typeof(int)){
-            createServerVariable<int>(name, int.Parse(value));
-        }
-        else if(varType == typeof(float)){
-            createServerVariable<float>(name, float.Parse(value));
-        }
-        else if(varType == typeof(string)){
-            createServerVariable<string>(name, value);
-        }
+        NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id);
+        networkvariables.Add(newVariable);
     }
-
-	public void createServerVariable<T>(string name, T initialValue){
+    
+    public void createNetworkVariable<T>(string name, T initialValue){
         foreach(NetworkVariable_Client networkVariable in networkvariables){
             if(networkVariable.name == name){
                 Debug.LogError("A server variable with name " + name + " already exists");
@@ -43,7 +64,7 @@ public class UM2_Variables : MonoBehaviourUM2
             return;
         }
 
-		NetworkVariable_Client newVariable = new NetworkVariable_Client(name, initialValue, typeof(T), client);
+		NetworkVariable_Client newVariable = new NetworkVariable_Client(name, initialValue, typeof(T));
 		networkvariables.Add(newVariable);
 
 		return;
@@ -85,22 +106,32 @@ public class NetworkVariable_Client
     public string name;
     object value;
     Type type;
-    public int variableID;
+    public int id;
     public bool serverVariable;
+    UM2_Variables variables;
 
-    public NetworkVariable_Client(string name, object value, Type type, bool serverVariable = false, bool newVariable = true){//, Action<string> callback = null){
+    public NetworkVariable_Client(string name, object value, Type type, int id = -1){//, Action<string> callback = null){
         this.name = name;
         this.value = value;
         this.type = type;
-        this.serverVariable = serverVariable;
 
-        if(newVariable){
-            UM2_Methods.networkMethodServer("newServerVar", name, value, type);
+        StartCoroutine(initialize(id));
+    }
+
+    IEnumerator initialize(int id){
+        UM2_Variables.instance.networkVariableNames.Add(name);
+        
+        if(id == -1){
+            yield return new WaitUntil(() => UM2_Client.clientID != -1);
+
+            UM2_Methods.networkMethodServer("newVar", name, id, value, type);
         }
+
+        this.id = id;
     }
 
     public void sendValue(){
-        UM2_Methods.networkMethodServer("setServerVar", name, value, type);
+        UM2_Methods.networkMethodServer("setVarValue", name, value, type);
     }
 
     public object getValue(){

@@ -46,7 +46,7 @@ public class NetworkVariable_Server
 
         server = UM2_Server.server;
 
-        server.sendMessageToAll("syncNewVar~" + name + "~" + value + "~" + type, "TCP");
+        server.sendMessageToAll("syncNewVar~" + name + "~" + id + "~" + value + "~" + type, "TCP");
 	}
 
     public void add(string addValue){
@@ -366,8 +366,8 @@ public class UM2_Server : MonoBehaviour
                         responseMessage = "reservedObjectID~" + currentObjectID;
                         currentObjectID++;
                         break;
-                    case "reserveNetworkVarID":
-                        responseMessage = "reservedNetworkVarID~" + currentNetworkVarID;
+                    case "reserveVariableID":
+                        responseMessage = "reservedVariableID~" + currentNetworkVarID;
                         currentNetworkVarID++;
                         break;
                     case "getQueue": //this is called by http clients to collect queued messages
