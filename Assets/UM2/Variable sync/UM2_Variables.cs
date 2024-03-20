@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
+using System.Data.Common;
 
 
 public class UM2_Variables : MonoBehaviourUM2
@@ -16,6 +17,10 @@ public class UM2_Variables : MonoBehaviourUM2
     
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
+
+    public virtual void OnConnectedToServer() {
+        reserveIDLoop();
+    }
     
     async void reserveIDLoop(){
         await Task.Delay(100);
@@ -52,6 +57,7 @@ public class UM2_Variables : MonoBehaviourUM2
     }
     
     public void createNetworkVariable<T>(string name, T initialValue){
+        //make sure there arent name duplicates (remove this in the future)
         foreach(NetworkVariable_Client networkVariable in networkvariables){
             if(networkVariable.name == name){
                 Debug.LogError("A server variable with name " + name + " already exists");
@@ -59,16 +65,30 @@ public class UM2_Variables : MonoBehaviourUM2
             }
         }
 
+        //make sure it is a valid type
         if(!allowedVariableTypes.Contains(typeof(T))){
-            Debug.LogError("Type \"" + typeof(T) + "\" is not allowed to be a server variable.\nIt must be a string, int, or float (lists will be possible in the future)");
+            Debug.LogError("Type \"" + typeof(T) + "\" is not allowed to be a server variable.\nIt must be a string, int, or float");
             return;
         }
 
-		NetworkVariable_Client newVariable = new NetworkVariable_Client(name, initialValue, typeof(T));
-		networkvariables.Add(newVariable);
+        StartCoroutine(createNetworkVariable(name, initialValue, typeof(T)));
 
 		return;
 	}
+
+    IEnumerator createNetworkVariable(string name, object value, Type type){
+        Debug.Log("Waiting for a reserved variable ID...");
+
+        //wait until there are reserved IDs for variable before creating
+        yield return new WaitUntil(() => reservedVariableIDs.Count > 0);
+
+        int id = reservedVariableIDs[0];
+        reservedVariableIDs.RemoveAt(0);
+
+        NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id);
+        
+        yield return null;
+    }
 
     public NetworkVariable_Client getNetworkVariable(string name){ //I need to make this a dictionary in the future
 		foreach (NetworkVariable_Client networkVariable in networkvariables)
@@ -110,24 +130,16 @@ public class NetworkVariable_Client
     public bool serverVariable;
     UM2_Variables variables;
 
-    public NetworkVariable_Client(string name, object value, Type type, int id = -1){//, Action<string> callback = null){
+    public NetworkVariable_Client(string name, object value, Type type, int id){//, Action<string> callback = null){
+        Debug.Log("Created network variable: " + name);
+
         this.name = name;
         this.value = value;
         this.type = type;
-
-        StartCoroutine(initialize(id));
-    }
-
-    IEnumerator initialize(int id){
-        UM2_Variables.instance.networkVariableNames.Add(name);
-        
-        if(id == -1){
-            yield return new WaitUntil(() => UM2_Client.clientID != -1);
-
-            UM2_Methods.networkMethodServer("newVar", name, id, value, type);
-        }
-
         this.id = id;
+
+        UM2_Variables.instance.networkVariableNames.Add(name);
+        UM2_Methods.networkMethodServer("newVar", name, id, value, type);
     }
 
     public void sendValue(){
