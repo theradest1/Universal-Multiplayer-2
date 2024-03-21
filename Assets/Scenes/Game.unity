@@ -305,7 +305,7 @@ MonoBehaviour:
   ticksPerSecond: 20
   syncTransform: 1
   optimizeTransoformSync: 1
-  minTicksPerSecond: 5
+  minTicksPerSecond: 2
   destroyWhenCreatorLeaves: 1
 --- !u!114 &180985660
 MonoBehaviour:
@@ -1011,6 +1011,7 @@ MonoBehaviour:
   failedMessages: 0
   currentPlayerID: 0
   currentObjectID: 0
+  currentNetworkVarID: 0
   debugUDPMessages: 0
   debugTCPMessages: 0
   debugHTTPMessages: 0
@@ -1085,6 +1086,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51ed2d7f748e38c4eb231fb3d8f10ef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  networkVariableNames: []
+  targetPreppedVariableIDs: 10
 --- !u!114 &1054571554
 MonoBehaviour:
   m_ObjectHideFlags: 0

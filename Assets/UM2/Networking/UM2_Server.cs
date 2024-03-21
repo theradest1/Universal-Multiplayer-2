@@ -381,7 +381,7 @@ public class UM2_Server : MonoBehaviour
                         networkVariables.Add(new NetworkVariable_Server(varName, int.Parse(varID), varValue, Type.GetType(varType)));
                         //Debug.Log("(Server) New variable: \nName: " + varName + "\nType: " + varType + "\nValue: " + varValue);
                         break;
-                    case "setVar":
+                    case "setVarValue":
                         varName = messageContents.Split("~")[1];
                         varValue = messageContents.Split("~")[2];
                         //Debug.Log("(Server) Setting var " + varName);
@@ -459,7 +459,7 @@ public class UM2_Server : MonoBehaviour
                 return networkVariable;
             }
         }
-        Debug.LogError("(Server) Could not find server variable: " + name);
+        Debug.LogError("(Server) Could not find network variable: " + name);
         return null;
     }
 
