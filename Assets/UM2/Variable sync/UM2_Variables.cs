@@ -50,7 +50,7 @@ public class UM2_Variables : MonoBehaviourUM2
             UM2_Methods.networkMethodServer("giveAllVariables");
         }
         else{
-            variable.setValue(value);
+            variable.setValue(value, false);
         }
     }
 
@@ -151,7 +151,7 @@ public class NetworkVariable_Client
     }
 
     public void sendValue(){
-        UM2_Methods.networkMethodServer("setVarValue", name, value, type);
+        UM2_Methods.networkMethodServer("setVarValue", id, value);
     }
 
     public object getValue(){
@@ -171,8 +171,11 @@ public class NetworkVariable_Client
         return null;
     }
 
-    public void setValue(object newValue){
+    public void setValue(object newValue, bool sync = true){
         value = newValue;
-        sendValue();
+        
+        if(sync){
+            sendValue();
+        }
     }
 }
