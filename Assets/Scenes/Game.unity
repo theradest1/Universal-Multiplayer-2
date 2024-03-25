@@ -1088,6 +1088,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   networkVariableNames: []
   targetPreppedVariableIDs: 20
+  reserveIDDelayMS: 100
 --- !u!114 &1054571554
 MonoBehaviour:
   m_ObjectHideFlags: 0

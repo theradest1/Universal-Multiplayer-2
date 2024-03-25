@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 using System.Data.Common;
+using JetBrains.Annotations;
 
 
 public class UM2_Variables : MonoBehaviourUM2
@@ -16,6 +17,7 @@ public class UM2_Variables : MonoBehaviourUM2
     
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
+    [SerializeField] int reserveIDDelayMS = 100;
 
     public override void OnConnect(int clientID)
     {
@@ -24,7 +26,7 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
     async void reserveIDLoop(){
-        await Task.Delay(100);
+        await Task.Delay(reserveIDDelayMS);
 
         if(!UM2_Client.connectedToServer){
             return;
@@ -42,8 +44,8 @@ public class UM2_Variables : MonoBehaviourUM2
         reservedVariableIDs.Add(id);
     }
 
-    public void syncVar(string name, string value){
-        NetworkVariable_Client variable =  getNetworkVariable(name);
+    public void syncVar(string name, string value, int linkedID){
+        NetworkVariable_Client variable =  getNetworkVariable(name, linkedID);
         if(variable == null){
             Debug.LogWarning("Could not find variable (requesting from server): " + name);
             UM2_Methods.networkMethodServer("giveAllVariables");
@@ -54,15 +56,13 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
     public void syncNewVar(string name, int id, string value, Type type, int linkedID){
-        //check if it already exists (only if it isnt an object based variable)
-        if(linkedID == -1){
-            foreach(NetworkVariable_Client networkVariable in networkVariables)
-            {
-                if(networkVariable.name == name){
-                    Debug.Log("Variable " + name + " already exists, just setting value and ignoring creation");
-                    networkVariable.setValue(value);
-                    return;
-                }
+        //check if it already exists, only set value if it already does
+        foreach(NetworkVariable_Client networkVariable in networkVariables)
+        {
+            if(networkVariable.id == id){
+                Debug.Log("Variable with id " + id + " already exists, just setting value and ignoring creation");
+                networkVariable.setValue(value);
+                return;
             }
         }
 
@@ -91,18 +91,21 @@ public class UM2_Variables : MonoBehaviourUM2
 		return;
 	}
 
-    public IEnumerator createNetworkVariable(string name, object value, Type type){
-        Debug.Log("Waiting for a reserved variable ID...");
-
+    public IEnumerator createNetworkVariable(string name, object value, Type type, int linkedID = -1){
         //wait until there are reserved IDs for variable before creating
-        //its possible that this could create some issues if another variable is being created at the same time, but I don't think that will happen
         yield return new WaitUntil(() => reservedVariableIDs.Count > 0);
 
-        int id = reservedVariableIDs[0];
-        reservedVariableIDs.RemoveAt(0);
+        try{
+            int id = reservedVariableIDs[0];
+            reservedVariableIDs.RemoveAt(0);
 
-        NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id);
-        
+            NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id, linkedID);
+        }
+        catch(Exception e){
+            Debug.LogWarning("Variable failed to be created, trying again. Error message: " + e.Message);
+            StartCoroutine(createNetworkVariable(name, value, type, linkedID));
+        }
+
         yield return null;
     }
 
@@ -155,7 +158,7 @@ public class NetworkVariable_Client
     public int linkedID; //for object based variable only, it will stay -1 if it isn't an object based variable
 
     public NetworkVariable_Client(string name, object value, Type type, int id, int linkedID = -1, Action callbackOnChange = null){//, Action<string> callback = null){
-        Debug.Log("Created network variable: " + name);
+        Debug.Log("Created network variable. Info:\nName: " + name + "\nType: " + type + "\nID: " + id + "\nLinked ID: " + linkedID + "\n\n");
 
         this.name = name;
         this.id = id;
@@ -168,7 +171,6 @@ public class NetworkVariable_Client
         UM2_Variables.instance.networkVariableNames.Add(name);
         UM2_Variables.instance.networkVariables.Add(this);
         UM2_Methods.networkMethodServer("newVar", name, id, value, type, linkedID);
-        Debug.Log("yuh");
     }
 
     public void sendValue(){

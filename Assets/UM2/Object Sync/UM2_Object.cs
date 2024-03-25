@@ -86,8 +86,7 @@ public class UM2_Object : MonoBehaviourUM2
                     //check if it is an allowed variable type
                     if(UM2_Variables.instance.allowedVariableTypes.Contains(field.FieldType)){
                         //create the variable
-                        UM2_Variables.instance.createNetworkVariable(field.Name, field.GetValue(script), field.FieldType);
-                        Debug.Log(field.Name + " linked to " + gameObject.name);
+                        StartCoroutine(UM2_Variables.instance.createNetworkVariable(field.Name, field.GetValue(script), field.FieldType, objectID));
                     }
                     else{
                         Debug.LogError("Network variable " + field.Name + " of " + gameObject.name + " cannot be " + field.FieldType);

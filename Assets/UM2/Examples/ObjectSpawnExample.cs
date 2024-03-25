@@ -8,7 +8,8 @@ public class ObjectSpawnExample : MonoBehaviour
     public GameObject cubePrefab;
     public GameObject quickObjectPrefab;
     UM2_Object selfObject;
-    int variableName = 103;
+    int variableName = 0;
+    int cubeCount = 0;
     [ObjectNetworkVariable] int testVar1 = 103;
     [ObjectNetworkVariable] string testVar2 = "hola";
 
@@ -24,6 +25,8 @@ public class ObjectSpawnExample : MonoBehaviour
         if(Input.GetKeyDown("e")){
             Debug.Log("Spawning synced object");
             GameObject cube = Instantiate(cubePrefab, transform.position, transform.rotation);
+            cube.name += cubeCount;
+            cubeCount++;
         }
         if(Input.GetKeyDown("q")){
             Debug.Log("Spawning quick object"); 

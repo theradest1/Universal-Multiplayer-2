@@ -66,7 +66,7 @@ public class NetworkVariable_Server
     public void set(object newValue){
         value = newValue;
         //Debug.Log("(Server) Set " + name + " to " + value);
-        server.sendMessageToAll("syncVar~" + name + "~" + value, "TCP");
+        server.sendMessageToAll("syncVar~" + name + "~" + value + "~" + linkedID, "TCP");
     }
 }
 
