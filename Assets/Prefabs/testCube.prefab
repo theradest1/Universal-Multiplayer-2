@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6448214099961162952}
   - component: {fileID: 4151280356086231062}
   - component: {fileID: 8617445729963216109}
+  - component: {fileID: 2500006062373530936}
   m_Layer: 0
   m_Name: testCube
   m_TagString: Untagged
@@ -103,3 +104,15 @@ MonoBehaviour:
   optimizeTransoformSync: 1
   minTicksPerSecond: 0
   destroyWhenCreatorLeaves: 0
+--- !u!114 &2500006062373530936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4036667581075098692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e671de161bd51d4284b0f6038782568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

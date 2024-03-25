@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
-
-
 
 public class UM2_Object : MonoBehaviourUM2
 {
@@ -36,9 +34,21 @@ public class UM2_Object : MonoBehaviourUM2
 
     public bool destroyWhenCreatorLeaves = false;
 
+    public object getNetworkVariableValue(string name){
+        return UM2_Variables.getNetworkVariable(name, objectID).getValue();
+    }
+
+    public void setNetworkVariableValue(string name, object value){
+        UM2_Variables.getNetworkVariable(name, objectID).setValue(value);
+    }
+
+    public void addToNetworkVariableValue(string name, object valueToAdd){
+        UM2_Variables.getNetworkVariable(name, objectID).addToValue(valueToAdd);
+    }
+
     private void Start()
     {
-        sync = UM2_Sync.sync;
+        sync = UM2_Sync.instance;
 		variables = UM2_Variables.instance;
         initialize();
     }
@@ -49,6 +59,7 @@ public class UM2_Object : MonoBehaviourUM2
     }
 
     async void initialize(){
+        //wait until client has an ID
         while (UM2_Client.clientID == -1){
             await Task.Delay(50);
 
@@ -56,7 +67,37 @@ public class UM2_Object : MonoBehaviourUM2
                 return;
             }
         }
+
+        //start syncing
         sync.createSyncedObject(this);
+
+        //get a list of all scripts on this game object
+        List<object> scripts = new List<object>();
+        scripts.AddRange(gameObject.GetComponents<MonoBehaviour>());
+        scripts.AddRange(gameObject.GetComponents<MonoBehaviourUM2>());
+
+        foreach(object script in scripts){
+            FieldInfo[] fields = script.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            foreach (FieldInfo field in fields)
+            {
+                if (Attribute.IsDefined(field, typeof(ObjectNetworkVariableAttribute)))
+                {
+                    //check if it is an allowed variable type
+                    if(UM2_Variables.instance.allowedVariableTypes.Contains(field.FieldType)){
+                        //create the variable
+                        UM2_Variables.instance.createNetworkVariable(field.Name, field.GetValue(script), field.FieldType);
+                        Debug.Log(field.Name + " linked to " + gameObject.name);
+                    }
+                    else{
+                        Debug.LogError("Network variable " + field.Name + " of " + gameObject.name + " cannot be " + field.FieldType);
+                    }
+                }
+            }
+        }
+
+
+        //letting other processes know they can start
         initialized = true;
     }
 

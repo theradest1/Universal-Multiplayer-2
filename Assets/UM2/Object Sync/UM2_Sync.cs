@@ -5,7 +5,6 @@ using UnityEditor;
 using System.IO;
 using System;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 
 public class UM2_Sync : MonoBehaviourUM2
 {
@@ -16,15 +15,14 @@ public class UM2_Sync : MonoBehaviourUM2
     public string prefabFolderPath = "Assets/UM2/Object Sync/Resources";
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
     UM2_Client client;
-    public static UM2_Sync sync;
+    public static UM2_Sync instance;
     List<int> reservedIDs = new List<int>();
 
-    [Tooltip("Each synced object needs an ID - these IDs need to be gotten from the server so there isnt any overwriting of synced objects going on. Instead of waiting for the server to respond every time we create an object, this queues up new object IDs (this variable is how many will try to be queued)")]
     public int targetPreppedObjects = 10;
 
     private void Awake()
     {
-        sync = this;
+        instance = this;
 
         //loads all prefabs into a list
         UnityEngine.Object[] prefabFiles = Resources.LoadAll("", typeof(GameObject));

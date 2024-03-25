@@ -8,22 +8,15 @@ public class ObjectSpawnExample : MonoBehaviour
     public GameObject cubePrefab;
     public GameObject quickObjectPrefab;
     UM2_Object selfObject;
-    int variableName = 0;
+    int variableName = 103;
+    [ObjectNetworkVariable] int testVar1 = 103;
+    [ObjectNetworkVariable] string testVar2 = "hola";
 
     void Start()
     {
-        sync = UM2_Sync.sync;
+        sync = UM2_Sync.instance;
 
         selfObject = this.GetComponent<UM2_Object>();
-
-        //selfObject.createNewVariable<int>("health", 100);
-        //selfObject.createNewVariable<int>("timer", 0);
-
-        InvokeRepeating("timerUpdate", 1, .5f);
-    }
-
-    void timerUpdate(){
-        //selfObject.setVariableValue("timer", Time.time);
     }
 
     void Update()
@@ -34,10 +27,10 @@ public class ObjectSpawnExample : MonoBehaviour
         }
         if(Input.GetKeyDown("q")){
             Debug.Log("Spawning quick object"); 
-            UM2_Sync.sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
+            UM2_Sync.instance.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
         }
         if(Input.GetKeyDown("v")){
-            Debug.Log("Creating network variable...");
+            Debug.Log("Creating network variable");
             variableName++;
             UM2_Variables.createNetworkVariable<float>(variableName + "", Time.time);  
         }

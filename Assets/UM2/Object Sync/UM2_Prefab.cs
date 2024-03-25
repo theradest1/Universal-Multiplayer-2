@@ -18,6 +18,20 @@ public class UM2_Prefab : MonoBehaviourUM2
     float tickTime = -1;
     bool destroyWhenCreatorLeaves = false;
 
+
+    public object getNetworkVariableValue(string name){
+        return UM2_Variables.getNetworkVariable(name, objectID).getValue();
+    }
+
+    public void setNetworkVariableValue(string name, object value){
+        UM2_Variables.getNetworkVariable(name, objectID).setValue(value);
+    }
+
+    public void addToNetworkVariableValue(string name, object valueToAdd){
+        UM2_Variables.getNetworkVariable(name, objectID).addToValue(valueToAdd);
+    }
+
+
     public override void OnPlayerLeave(int clientID){
         if(clientID == creatorID && destroyWhenCreatorLeaves){
             Destroy(this.gameObject);

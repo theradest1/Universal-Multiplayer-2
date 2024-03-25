@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using System.Data.Common;
 
 
@@ -11,7 +10,7 @@ public class UM2_Variables : MonoBehaviourUM2
 {
     UM2_Client client;
 	public static UM2_Variables instance;
-    List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
+    public List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
     [HideInInspector] public List<NetworkVariable_Client> networkVariables = new List<NetworkVariable_Client>();
     public List<String> networkVariableNames = new List<String>();
     
@@ -39,7 +38,7 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
     public void reservedVariableID(int id){
-        Debug.Log("Reserved varible id " + id);
+        //Debug.Log("Reserved varible id " + id);
         reservedVariableIDs.Add(id);
     }
 
@@ -54,15 +53,20 @@ public class UM2_Variables : MonoBehaviourUM2
         }
     }
 
-    public void syncNewVar(string name, int id, string value, Type type){
-        //check if it already exists
-        if(networkVariableNames.Contains(name)){
-            Debug.Log("Variable " + name + " already exists, just setting value and ignoring creation");
-            getNetworkVariable(name).setValue(value);
-            return;
+    public void syncNewVar(string name, int id, string value, Type type, int linkedID){
+        //check if it already exists (only if it isnt an object based variable)
+        if(linkedID == -1){
+            foreach(NetworkVariable_Client networkVariable in networkVariables)
+            {
+                if(networkVariable.name == name){
+                    Debug.Log("Variable " + name + " already exists, just setting value and ignoring creation");
+                    networkVariable.setValue(value);
+                    return;
+                }
+            }
         }
 
-        NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id);
+        new NetworkVariable_Client(name, value, type, id, linkedID);
     }
     
     public static void createNetworkVariable<T>(string name, T initialValue){
@@ -91,6 +95,7 @@ public class UM2_Variables : MonoBehaviourUM2
         Debug.Log("Waiting for a reserved variable ID...");
 
         //wait until there are reserved IDs for variable before creating
+        //its possible that this could create some issues if another variable is being created at the same time, but I don't think that will happen
         yield return new WaitUntil(() => reservedVariableIDs.Count > 0);
 
         int id = reservedVariableIDs[0];
@@ -101,10 +106,11 @@ public class UM2_Variables : MonoBehaviourUM2
         yield return null;
     }
 
-    public NetworkVariable_Client getNetworkVariable(string name){ //I need to make this a dictionary in the future
-		foreach (NetworkVariable_Client networkVariable in networkVariables)
+    public static NetworkVariable_Client getNetworkVariable(string name, int linkedID = -1){ //I need to make this a dictionary in the future
+		foreach (NetworkVariable_Client networkVariable in UM2_Variables.instance.networkVariables)
         {
-            if(networkVariable.name == name){   
+            //if linkedID is -1, it isnt an object based network variable
+            if(networkVariable.linkedID == linkedID && networkVariable.name == name){   
                 return networkVariable;
             }
         }
@@ -113,8 +119,16 @@ public class UM2_Variables : MonoBehaviourUM2
         return null;
     }
 
-    public object getNetworkVariableValue(string name){
-        return getNetworkVariable(name).getValue();
+    public static object getNetworkVariableValue(string name, int linkedID = -1){
+        return getNetworkVariable(name, linkedID).getValue();
+    }
+
+    public static void setNetworkVariableValue(string name, object value, int linkedID = -1){
+        getNetworkVariable(name, linkedID).setValue(value);
+    }
+
+    public static void addToNetworkVariableValue(string name, object valueToAdd, int linkedID = -1){
+        getNetworkVariable(name, linkedID).addToValue(valueToAdd);
     }
 
 	private void Awake()
@@ -130,28 +144,39 @@ public class UM2_Variables : MonoBehaviourUM2
 
 public class NetworkVariable_Client
 {
+    //basics
     public string name;
     object value;
     Type type;
     public int id;
-    public bool serverVariable;
     UM2_Variables variables;
+    Action callback;
 
-    public NetworkVariable_Client(string name, object value, Type type, int id){//, Action<string> callback = null){
+    public int linkedID; //for object based variable only, it will stay -1 if it isn't an object based variable
+
+    public NetworkVariable_Client(string name, object value, Type type, int id, int linkedID = -1, Action callbackOnChange = null){//, Action<string> callback = null){
         Debug.Log("Created network variable: " + name);
 
         this.name = name;
+        this.id = id;
         this.value = value;
         this.type = type;
-        this.id = id;
+        this.linkedID = linkedID;
+
+        this.callback = callbackOnChange;
 
         UM2_Variables.instance.networkVariableNames.Add(name);
         UM2_Variables.instance.networkVariables.Add(this);
-        UM2_Methods.networkMethodServer("newVar", name, id, value, type);
+        UM2_Methods.networkMethodServer("newVar", name, id, value, type, linkedID);
+        Debug.Log("yuh");
     }
 
     public void sendValue(){
-        UM2_Methods.networkMethodServer("setVarValue", id, value);
+        UM2_Methods.networkMethodServer("setVarValue", id, value, linkedID);
+    }
+
+    public void addToValue(object valueToAdd){
+        UM2_Methods.networkMethodServer("addToVarValue", id, valueToAdd, linkedID);
     }
 
     public object getValue(){
@@ -173,9 +198,18 @@ public class NetworkVariable_Client
 
     public void setValue(object newValue, bool sync = true){
         value = newValue;
-        
+
+        if(callback != null){
+            callback.Invoke();
+        }
+
         if(sync){
             sendValue();
         }
     }
+}
+
+public class ObjectNetworkVariableAttribute : PropertyAttribute
+{
+    //nothing here, it is just a way to seprate normal and network variables
 }
