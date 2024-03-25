@@ -49,8 +49,8 @@ This allows you to have variables that Two kinds: global and object based
 - Getting Value:
   - networkObjectScript.getNetworkVariableValue(string name)
 - Setting Value:
-  - do not set it using the actual variable (it will not be synced)
   - networkObjectScript.setNetworkVariableValue(string name, object value)
+  - do not set it using the actual variable (it will not be synced)
 - Adding to Value:
   - this is used for variables that might be overwritten by different clients (like a score)
   - networkObjectScript.addToNetworkVariableValue(string name, object valueToAdd)

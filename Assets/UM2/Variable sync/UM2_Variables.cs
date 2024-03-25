@@ -75,7 +75,7 @@ public class UM2_Variables : MonoBehaviourUM2
         //make sure there arent name duplicates (remove this in the future)
         foreach(NetworkVariable_Client networkVariable in thisScript.networkVariables){
             if(networkVariable.name == name){
-                Debug.LogError("A server variable with name " + name + " already exists");
+                Debug.LogWarning("A server variable with name " + name + " already exists");
                 return;
             }
         }

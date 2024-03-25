@@ -75,7 +75,7 @@ public class MainMenu : MonoBehaviour
     public void Join()
     {
         saveSettings();
-        SceneManager.LoadScene("Game");
+        SceneManager.LoadScene("Example");
     }
 
     public void saveSettings()
