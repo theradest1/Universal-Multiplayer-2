@@ -15,13 +15,13 @@ public class MainMenu : MonoBehaviour
     public GameObject generateKeysButton;
     public TextMeshProUGUI keyDisplays;
 
+    //the keys have nothing to do with the actual server
+    //they only simplify IPs that the server is connnecting to
     string localKey;
     string publicKey;
 
-    public static bool hosting = false;
-
     //the characters allowed to be used in the join keys
-    public string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     public void copyKey(bool copyLocalKey){
         if(copyLocalKey){
@@ -69,7 +69,7 @@ public class MainMenu : MonoBehaviour
         }
 
         updateThings();
-        print("Local host join key: " + encodeJoinKey("127.0.0.1"));
+        Debug.Log("Local host join key: " + encodeJoinKey("127.0.0.1"));
     }
 
     public void Join()
@@ -107,9 +107,9 @@ public class MainMenu : MonoBehaviour
 
             saveSettings();
         }
-        catch
+        catch(Exception e)
         {
-            //this catch is just so errors dont happen when trying to get a int from an input
+            Debug.LogError(e.Message);
         }
     }
 

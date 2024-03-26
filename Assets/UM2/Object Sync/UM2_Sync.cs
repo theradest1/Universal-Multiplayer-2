@@ -102,19 +102,35 @@ public class UM2_Sync : MonoBehaviourUM2
     }
 
     public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
-        getSyncedObject(objectID).newTransform(position, rotation);
+        UM2_Prefab prefab = getSyncedObject(objectID, true);
+        if(prefab != null){
+            prefab.newTransform(position, rotation);
+        }
+        else{
+            UM2_Methods.networkMethodOthers("giveSyncedObject", UM2_Client.clientID, objectID);
+        }
     }
 
     public void updateObjectTPS(int objectID, float newTPS){
-        getSyncedObject(objectID).setTPS(newTPS);
+        UM2_Prefab prefab = getSyncedObject(objectID, true);
+        if(prefab != null){
+            prefab.setTPS(newTPS);
+        }
+        else{
+            UM2_Methods.networkMethodOthers("giveSyncedObject", UM2_Client.clientID, objectID);
+        }
     }
 
     public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond, Vector3 position, Quaternion rotation, int creatorID, bool destroyOnCreatorLeave){
         //Debug.Log("Made a new synced object: " + objectID);
-        
-        UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
-        syncedObjects.Add(newPrefab);
-        newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+        if(getSyncedObject(objectID, true) == null && getLocalSyncedObject(objectID, true) == null){
+            UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
+            syncedObjects.Add(newPrefab);
+            newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+        }
+        else{
+            //Debug.LogWarning("Synced object with ID " + objectID + " already exists, ignoring creation");
+        }
     }
 
     public void destroySyncedObject(UM2_Object objectToRemove){
@@ -158,8 +174,19 @@ public class UM2_Sync : MonoBehaviourUM2
     public void giveAllSyncedObjects(int requestingClientID){
         foreach(UM2_Object clientSideObject in clientSideObjects){
             int prefabID = prefabs.IndexOf(clientSideObject.prefab);
-            UM2_Methods.networkMethodOthers("newSyncedObject", clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
+            UM2_Methods.networkMethodDirect("newSyncedObject", requestingClientID, clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
         }
+    }
+
+    public void giveSyncedObject(int requestingClientID, int syncedObjectID){
+        //Debug.Log("Client with ID " + requestingClientID + " asked for synced object with ID " + syncedObjectID);
+        UM2_Object clientSideObject = getLocalSyncedObject(syncedObjectID, true);
+        if(clientSideObject != null){
+            int prefabID = prefabs.IndexOf(clientSideObject.prefab);
+            UM2_Methods.networkMethodDirect("newSyncedObject", requestingClientID, clientSideObject.objectID, prefabID, clientSideObject.ticksPerSecond, clientSideObject.transform.position, clientSideObject.transform.rotation, UM2_Client.clientID, clientSideObject.destroyWhenCreatorLeaves);
+            return;
+        }
+        //Debug.LogError("Another client asked for synced object with id " + syncedObjectID + ", but it doesnt exist here either ):");
     }
 
     public UM2_Object getLocalSyncedObject(int objectID, bool supressError = false){

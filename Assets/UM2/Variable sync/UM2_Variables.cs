@@ -60,7 +60,7 @@ public class UM2_Variables : MonoBehaviourUM2
         foreach(NetworkVariable_Client networkVariable in networkVariables)
         {
             if(networkVariable.id == id){
-                Debug.Log("Variable with id " + id + " already exists, just setting value and ignoring creation");
+                //Debug.Log("Variable with id " + id + " already exists, just setting value and ignoring creation");
                 networkVariable.setValue(value);
                 return;
             }
@@ -158,7 +158,7 @@ public class NetworkVariable_Client
     public int linkedID; //for object based variable only, it will stay -1 if it isn't an object based variable
 
     public NetworkVariable_Client(string name, object value, Type type, int id, int linkedID = -1, Action callbackOnChange = null){//, Action<string> callback = null){
-        Debug.Log("Created network variable. Info:\nName: " + name + "\nType: " + type + "\nID: " + id + "\nLinked ID: " + linkedID + "\n\n");
+        //Debug.Log("Created network variable. Info:\nName: " + name + "\nType: " + type + "\nID: " + id + "\nLinked ID: " + linkedID + "\n\n");
 
         this.name = name;
         this.id = id;
