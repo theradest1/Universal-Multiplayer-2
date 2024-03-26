@@ -182,17 +182,19 @@ public class NetworkVariable_Client
     }
 
     public object getValue(){
+        //convert it to a string so it is more consistant (will make it to be a string more in the future)
+        string stringValue = value + "";
         if (type == typeof(int))
         {
-            return (int)value;
+            return int.Parse(stringValue);
         }
         else if (type == typeof(float))
         {
-            return (float)value;
+            return float.Parse(stringValue);
         }
         else if (type == typeof(string))
         {
-            return (string)value;
+            return stringValue;
         }
         Debug.LogError("Unknown server variable type: " + type);
         return null;

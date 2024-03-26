@@ -1,23 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
-public class ObjectSpawnExample : MonoBehaviour
+public class ObjectSpawnExample : MonoBehaviourUM2
 {
-    UM2_Sync sync;
     public GameObject cubePrefab;
     public GameObject quickObjectPrefab;
-    UM2_Object selfObject;
-    int variableName = 0;
-    int cubeCount = 0;
-    [ObjectNetworkVariable] int testVar1 = 103;
-    [ObjectNetworkVariable] string testVar2 = "hola";
+    public TextMeshProUGUI timerText;
 
-    void Start()
+    public override void OnConnect(int clientID)
     {
-        sync = UM2_Sync.instance;
+        //create the network variable
+        UM2_Variables.createNetworkVariable<float>("Timer", 0f);
 
-        selfObject = this.GetComponent<UM2_Object>();
+        //start a loop that uses/updates the network variable
+        InvokeRepeating("updateTimerVar", .5f, .1f);
+    }
+
+    void updateTimerVar(){
+        //if you are the owner of the server
+        if(UM2_Client.hostingServer){
+            //set the timer network variable to the time
+            UM2_Variables.setNetworkVariableValue("Timer", Time.time);
+        }
+        //set the timer text to be the value of the timer network variable
+        timerText.text = UM2_Variables.getNetworkVariableValue("Timer") + "";
     }
 
     void Update()
@@ -25,17 +33,10 @@ public class ObjectSpawnExample : MonoBehaviour
         if(Input.GetKeyDown("e")){
             Debug.Log("Spawning synced object");
             GameObject cube = Instantiate(cubePrefab, transform.position, transform.rotation);
-            cube.name += cubeCount;
-            cubeCount++;
         }
         if(Input.GetKeyDown("q")){
             Debug.Log("Spawning quick object"); 
             UM2_Sync.instance.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
-        }
-        if(Input.GetKeyDown("v")){
-            Debug.Log("Creating network variable");
-            variableName++;
-            UM2_Variables.createNetworkVariable<float>(variableName + "", Time.time);  
         }
     }
 }
