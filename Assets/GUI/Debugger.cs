@@ -19,7 +19,7 @@ public class Debugger : MonoBehaviour
 
     private void Start() {
         client = UM2_Client.client;
-        server = UM2_Server.server;
+        server = UM2_Server.instance;
 
         debugger.addSpace("Client:");
         debugger.setDebug("UDP", "ms B/s↑ B/s↓");

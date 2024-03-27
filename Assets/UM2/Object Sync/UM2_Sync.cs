@@ -78,8 +78,8 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Methods.networkMethodOthers("newSyncedObject", startedObject.objectID, prefabID, startedObject.ticksPerSecond, startedObject.transform.position, startedObject.transform.rotation, UM2_Client.clientID, startedObject.destroyWhenCreatorLeaves);
     }
 
-    public void createQuickObject(GameObject prefab, Vector3 position, Quaternion rotation){
-        int prefabID = prefabs.IndexOf(prefab);
+    public static void createQuickObject(GameObject prefab, Vector3 position, Quaternion rotation){
+        int prefabID = UM2_Sync.instance.prefabs.IndexOf(prefab);
         if(prefabID == -1){
             Debug.LogError("Could not find " + prefab + " in the resources folder, go read the docs if you don't know what this means");
             return;

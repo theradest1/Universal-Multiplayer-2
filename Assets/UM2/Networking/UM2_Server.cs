@@ -46,7 +46,7 @@ public class NetworkVariable_Server
 		this.type = type;
         this.linkedID = linkedID;
 
-        server = UM2_Server.server;
+        server = UM2_Server.instance;
 
         server.sendMessageToAll("syncNewVar~" + name + "~" + id + "~" + value + "~" + type + "~" + linkedID, "TCP");
 	}
@@ -80,13 +80,15 @@ public class UM2_Server : MonoBehaviour
     int httpPort = 5002;
 
     UM2_Client client;
-    public static UM2_Server server;
+    public static UM2_Server instance;
     float currentTime;
 
 
     [Header("Settings:")]
     [Tooltip("How long (in seconds) it takes for a client to be timed out")]
     public float timeoutTime = 5; //seconds
+    //public bool forceVersion = false;
+    //public string version = "V0.0.0";
 
     [Header("Debug:")]
     public bool udpOnline;
@@ -129,7 +131,7 @@ public class UM2_Server : MonoBehaviour
 
     void Awake()
     {
-        server = this;
+        instance = this;
     }
 
     void Start()
@@ -145,10 +147,8 @@ public class UM2_Server : MonoBehaviour
             udpServer.Close();
         }
         udpOnline = false;
-        //Debug.Log("UDP Server has been stopped");
 
         //stop http
-        //Debug.Log("HTTP has been stopped");
         httpOnline = false;
         if (httpListener != null)
         {
@@ -156,7 +156,7 @@ public class UM2_Server : MonoBehaviour
             httpListener.Close();
         }
 
-        //close tcp
+        //stop tcp
         if(tcpServer != null){
             tcpServer.Stop();
         }

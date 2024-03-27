@@ -36,11 +36,7 @@ public class ObjectSpawnExample : MonoBehaviourUM2
         }
         if(Input.GetKeyDown("q")){
             Debug.Log("Spawning quick object"); 
-            UM2_Sync.instance.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
-        }
-        if(Input.GetKeyDown("z")){
-            Debug.Log("Spawning quick object... unsafe"); 
-            UM2_Sync.instance.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
+            UM2_Sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);
         }
     }
 }

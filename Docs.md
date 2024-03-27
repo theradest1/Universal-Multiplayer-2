@@ -6,6 +6,8 @@ This is a work in progress, but it should contain correct info (but not all info
 - All Universal Multiplayer scripts start with the prefix UM2_
 - UM2_Object based object is referring to the original version of a network object
 - UM2_Prefab based object is reffering to the clone of the original network object
+- don't use any special characters for anything - stick to letters and numbers
+  - HTTP (webgl builds) aren't able to transmit many special characters
 
 <br></br>
 ## Network Variables
@@ -97,27 +99,63 @@ Global methods are similar to Start, but are based on server events.
 - needs to be a "public virtual void"
 
 <br></br>
-## Network Object (UM2_Object):
+## Network Object:
 A way to sync the position and rotation of an object.
 
+### Good Uses:
+- Players
+- Projectiles (like grenades)
 
-- ### prefab
-  - what is created for the other clients
-  - put the prefab in assets -> UM2 -> resources
-- ### object ID 
-  - this is just debug, no touchy
-- ### Ticks per second:
-  - this is how fast the object is synced
-  - higher is faster, but more expensive
-  - lower is less exact, but less expensive
-  - try to do higher for players, and lower for objects
-- ### Sync transform:
-  - makes the transform (position and rotation) the same across all clients
-- ### optimize transform sync
-  - uses the minimum ticks per second if there is no changes in the transform
-  - I recommend using this on non player objects along with a higher normal ticks per second for smoothness along with performance
-- ### Min ticks per second:
-  - only used if optimize transform sync is enabled
-  - the ticks per second goes down to this if there is no change in transform
-  - its good to not have it zero if there isnt a rigidbody on it, otherwise just put it to zero
-## Quick Object:
+### How to use
+- attach the UM2_Object script onto the object you want to be synced
+- create a prefab 
+  - this is what will be created for the other players
+  - do not have a UM2_Object or UM2_Prefab script on it
+  - put it in `Assets -> UM2 -> Resources`
+  - reference it in the UM2_Object script
+- change the UM2_Object parameters in the inspector:
+  - prefab
+    - what is created for the other clients
+    - put the prefab in `assets -> UM2 -> resources`
+  - object ID 
+    - this is just debug, no touchy
+  - Ticks per second:
+    - this is how fast the object is synced
+    - higher is faster, but more expensive
+    - lower is less exact, but less expensive
+    - try to do higher for players, and lower for other objects
+  - Sync transform:
+    - makes the transform (position and rotation, no scale) the same across all clients
+  - optimize transform sync
+    - uses the minimum ticks per second if there is no changes in the transform
+    - I recommend using this on pretty much everything
+  - Min ticks per second:
+    - only is used if optimize transform sync is enabled
+    - the ticks per second goes down to this if there is no change in transform
+    - if there is a rigidbody, do not set this to 0
+
+<br></br>
+
+## Quick Objects:
+Quick objects are a network object that is synced once, then forgotten about. 
+
+### Good uses:
+- Bullet (if it is cosmetic)
+- Explosion
+- Any particle effect
+
+### How to use:
+- put the object you want to create in `Assets -> UM2 -> Resources`
+- create the quick object with `UM2_Sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);`
+
+<br></br>
+
+## Animation Sync:
+Syncronizes the animation parameters for a network object
+
+### Good uses:
+- pretty much any animation that is on a synced object
+
+## How to use:
+- 
+
