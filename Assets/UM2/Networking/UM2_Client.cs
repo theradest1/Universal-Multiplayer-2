@@ -325,7 +325,7 @@ public class UM2_Client : MonoBehaviourUM2
         }
         catch (Exception e)
         {
-            Debug.Log("UDP client exception: " + e);
+            Debug.LogError("UDP client exception: " + e);
             failedMessages += 1;
             UDPOnline = false;
         }
@@ -368,7 +368,7 @@ public class UM2_Client : MonoBehaviourUM2
         catch (Exception e)
         {
             if(e.GetType() != typeof(System.ObjectDisposedException)){
-                Debug.Log("Error sending tcp data: " + e);
+                Debug.LogError("Error sending tcp data: " + e);
                 failedMessages += 1;
             }
             else if(debugBasicMessages){

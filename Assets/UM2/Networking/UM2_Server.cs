@@ -32,16 +32,16 @@ public class Client{
 public class NetworkVariable_Server
 {
 	public string name;
-	public object value;
+	public string value;
     public int id;
     public int linkedID;
 	public Type type;
     UM2_Server server;
 
-	public NetworkVariable_Server(string name, int id, string value, Type type, int linkedID)
+	public NetworkVariable_Server(string name, int id, object value, Type type, int linkedID)
 	{
 		this.name = name;
-		this.value = value;
+		this.value = value + "";
         this.id = id;
 		this.type = type;
         this.linkedID = linkedID;
@@ -51,12 +51,12 @@ public class NetworkVariable_Server
         server.sendMessageToAll("syncNewVar~" + name + "~" + id + "~" + value + "~" + type + "~" + linkedID, "TCP");
 	}
 
-    public void add(string addValue){
+    public void add(object addValue){
         if(type == typeof(int)){
-            set((int)value + int.Parse(addValue));
+            set(int.Parse(value) + int.Parse(addValue + ""));
         }
         else if(type == typeof(float)){
-            set((float)value + float.Parse(addValue));
+            set(float.Parse(value) + float.Parse(addValue + ""));
         }
         else if(type == typeof(string)){
             set(value + addValue);
@@ -64,7 +64,7 @@ public class NetworkVariable_Server
     }
 
     public void set(object newValue){
-        value = newValue;
+        value = newValue + "";
         //Debug.Log("(Server) Set " + name + " to " + value);
         server.sendMessageToAll("syncVar~" + name + "~" + value + "~" + linkedID, "TCP");
     }

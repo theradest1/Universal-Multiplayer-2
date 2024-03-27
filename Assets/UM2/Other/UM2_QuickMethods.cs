@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class QuickMethods : MonoBehaviour
+public class UM2_QuickMethods : MonoBehaviour
 {
     //a bunch of small processing methods that I got annoyed with re-writing
 

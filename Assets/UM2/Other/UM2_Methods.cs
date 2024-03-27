@@ -85,7 +85,7 @@ public class UM2_Methods : MonoBehaviourUM2
                 for (int i = 0; i < methodPerameters.Length; i++)
                 {
                     Type parameterType = methodPerameters[i].ParameterType;
-                    object parsedValue = QuickMethods.ParseValue(perameters[i], parameterType);
+                    object parsedValue = UM2_QuickMethods.ParseValue(perameters[i], parameterType);
                     parsedParameters[i] = parsedValue;
                 }
 
@@ -101,7 +101,7 @@ public class UM2_Methods : MonoBehaviourUM2
         }
 
         //now thats a chunky debugging message tree
-        string perameterString = QuickMethods.ArrayToString(perameters);
+        string perameterString = UM2_QuickMethods.ArrayToString(perameters);
         if(succeededCalls == 0){
             if(failedCalls == 0){
                 Debug.LogError("Function was not found: Name: " + methodName + " Perameters: " + perameterString + "\n1. make sure the parent script is a MonoBehaviourUM2 script\n2. Make sure the name is correct\n3. The perameter count must be the exact same as how it was called\n4. The method being called must be pubic\nTurn on message debugging on client script for some debugging help (:");

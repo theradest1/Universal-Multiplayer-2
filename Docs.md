@@ -98,6 +98,9 @@ Global methods are similar to Start, but are based on server events.
 
 <br></br>
 ## Network Object (UM2_Object):
+A way to sync the position and rotation of an object.
+
+
 - ### prefab
   - what is created for the other clients
   - put the prefab in assets -> UM2 -> resources
@@ -117,3 +120,4 @@ Global methods are similar to Start, but are based on server events.
   - only used if optimize transform sync is enabled
   - the ticks per second goes down to this if there is no change in transform
   - its good to not have it zero if there isnt a rigidbody on it, otherwise just put it to zero
+## Quick Object:

@@ -9,15 +9,18 @@ using JetBrains.Annotations;
 
 public class UM2_Variables : MonoBehaviourUM2
 {
-    UM2_Client client;
 	public static UM2_Variables instance;
+    UM2_Client client;
+
+
     public List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
     [HideInInspector] public List<NetworkVariable_Client> networkVariables = new List<NetworkVariable_Client>();
-    public List<String> networkVariableNames = new List<String>();
     
+
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
     [SerializeField] int reserveIDDelayMS = 100;
+
 
     public override void OnConnect(int clientID)
     {
@@ -149,7 +152,7 @@ public class NetworkVariable_Client
 {
     //basics
     public string name;
-    object value;
+    string value;
     Type type;
     public int id;
     UM2_Variables variables;
@@ -162,13 +165,12 @@ public class NetworkVariable_Client
 
         this.name = name;
         this.id = id;
-        this.value = value;
+        this.value = value + "";
         this.type = type;
         this.linkedID = linkedID;
 
         this.callback = callbackOnChange;
 
-        UM2_Variables.instance.networkVariableNames.Add(name);
         UM2_Variables.instance.networkVariables.Add(this);
         UM2_Methods.networkMethodServer("newVar", name, id, value, type, linkedID);
     }
@@ -182,26 +184,24 @@ public class NetworkVariable_Client
     }
 
     public object getValue(){
-        //convert it to a string so it is more consistant (will make it to be a string more in the future)
-        string stringValue = value + "";
         if (type == typeof(int))
         {
-            return int.Parse(stringValue);
+            return int.Parse(value);
         }
         else if (type == typeof(float))
         {
-            return float.Parse(stringValue);
+            return float.Parse(value);
         }
         else if (type == typeof(string))
         {
-            return stringValue;
+            return value;
         }
         Debug.LogError("Unknown server variable type: " + type);
         return null;
     }
 
     public void setValue(object newValue, bool sync = true){
-        value = newValue;
+        value = newValue + "";
 
         if(callback != null){
             callback.Invoke();
