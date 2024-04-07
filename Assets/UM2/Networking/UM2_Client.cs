@@ -98,7 +98,7 @@ public class UM2_Client : MonoBehaviourUM2
 
     private void Start()
     {
-        server = UM2_Server.server;
+        server = UM2_Server.instance;
         connectedToServer = true;
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
