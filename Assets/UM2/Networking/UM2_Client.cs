@@ -342,7 +342,7 @@ public class UM2_Client : MonoBehaviourUM2
                 if (bytesRead > 0)  
                 {
                     string receivedData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                    MainThreadDispatcher.Enqueue(() => processMessage(receivedData, "TCP"));
+                    UM2_Client.Enqueue(() => processMessage(receivedData, "TCP"));
                 }
             }
             catch (Exception e)
@@ -497,4 +497,28 @@ public class UM2_Client : MonoBehaviourUM2
             //debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
         }
     }
+
+    //run TCP things on the main thread (while being executed on a different thread)
+    private static readonly Queue<Action> actions = new Queue<Action>();
+    private static readonly object queueLock = new object();
+
+    private void Update()
+    {
+        lock (queueLock)
+        {
+            while (actions.Count > 0)
+            {
+                actions.Dequeue().Invoke();
+            }
+        }
+    }
+
+    public static void Enqueue(Action action)
+    {
+        lock (queueLock)
+        {
+            actions.Enqueue(action);
+        }
+    }
+
 }

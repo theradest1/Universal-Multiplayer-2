@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1222,7 +1222,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51ed2d7f748e38c4eb231fb3d8f10ef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkVariableNames: []
   targetPreppedVariableIDs: 20
   reserveIDDelayMS: 100
 --- !u!114 &1054571554
@@ -1431,50 +1430,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4763873577496628945, guid: 31753812d37e7c54897cbc9aa19dd7ce, type: 3}
   m_PrefabInstance: {fileID: 1223835726}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1405071518
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1405071520}
-  - component: {fileID: 1405071519}
-  m_Layer: 0
-  m_Name: ThreadManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1405071519
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1405071518}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30bae690353c5e6419575791c5ca2d17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &1405071520
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1405071518}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1542006207
 GameObject:
   m_ObjectHideFlags: 0
@@ -1530,6 +1485,5 @@ SceneRoots:
   - {fileID: 812254017}
   - {fileID: 1054571551}
   - {fileID: 1542006209}
-  - {fileID: 1405071520}
   - {fileID: 180985654}
   - {fileID: 334502191}
