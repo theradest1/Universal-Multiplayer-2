@@ -85,7 +85,7 @@ public class UM2_Sync : MonoBehaviourUM2
             return;
         }
         else{
-            UM2_Methods.networkMethodOthers("newQuickObject", prefabID, position, rotation);
+            UM2_Methods.networkMethodGlobal("newQuickObject", prefabID, position, rotation);
         }
     }
 
