@@ -19,7 +19,7 @@ public class UM2_Variables : MonoBehaviourUM2
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
     [SerializeField] int reserveIDDelayMS = 100;
-    
+
 
     [Header("Debug:")]
     public List<String> variableNames = new List<String>();
@@ -221,7 +221,6 @@ public class NetworkVariable_Client
         for(int i = 0; i < UM2_Variables.instance.variableIDs.Count; i++){
             if(UM2_Variables.instance.variableIDs[i] == id){
                 UM2_Variables.instance.variableValues[i] = value;
-                Debug.Log("Set debug");
             }
         }
     }
