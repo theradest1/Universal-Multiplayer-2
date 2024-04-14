@@ -31,6 +31,10 @@ public class UM2_Prefab : MonoBehaviourUM2
         UM2_Variables.getNetworkVariable(name, objectID).addToValue(valueToAdd);
     }
 
+    public NetworkVariable_Client getNetworkVariable(string name){
+        return UM2_Variables.getNetworkVariable(name, objectID);
+    }
+
 
     public override void OnPlayerLeave(int clientID){
         if(clientID == creatorID && destroyWhenCreatorLeaves){

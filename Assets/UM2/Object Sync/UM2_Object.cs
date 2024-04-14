@@ -38,6 +38,10 @@ public class UM2_Object : MonoBehaviourUM2
         return UM2_Variables.getNetworkVariable(name, objectID).getValue();
     }
 
+    public NetworkVariable_Client getNetworkVariable(string name){
+        return UM2_Variables.getNetworkVariable(name, objectID);
+    }
+
     public void setNetworkVariableValue(string name, object value){
         UM2_Variables.getNetworkVariable(name, objectID).setValue(value);
     }
