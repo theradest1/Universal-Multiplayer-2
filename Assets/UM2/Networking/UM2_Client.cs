@@ -166,6 +166,10 @@ public class UM2_Client : MonoBehaviourUM2
                 while(clientID == -1){
                     await Task.Delay(100);
                     Debug.Log("Wating for ID to send message: " + message + ". Current ID: " + clientID);
+                    if(!connectedToServer){
+                        Debug.LogWarning("Didn't send message " + message);
+                        return;
+                    }
                 }
             }
         }
