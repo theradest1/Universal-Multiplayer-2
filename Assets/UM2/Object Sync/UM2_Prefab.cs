@@ -21,18 +21,23 @@ public class UM2_Prefab : MonoBehaviourUM2
 
 
     public object getNetworkVariableValue(string name){
-        return UM2_Variables.getNetworkVariable(name, objectID).getValue();
+        return this.getNetworkVariable(name).getValue();
     }
 
     public void setNetworkVariableValue(string name, object value){
-        UM2_Variables.getNetworkVariable(name, objectID).setValue(value);
+        this.getNetworkVariable(name).setValue(value);
     }
 
     public void addToNetworkVariableValue(string name, object valueToAdd){
-        UM2_Variables.getNetworkVariable(name, objectID).addToValue(valueToAdd);
+        this.getNetworkVariable(name).addToValue(valueToAdd);
     }
 
     public NetworkVariable_Client getNetworkVariable(string name){
+        if(objectID == -1){
+            Debug.LogWarning("Cannot get network variable since object doesn't have a variable yet\njust wait for a bit before getting it (or ignore)");
+            return null;
+        }
+
         return UM2_Variables.getNetworkVariable(name, objectID);
     }
 
