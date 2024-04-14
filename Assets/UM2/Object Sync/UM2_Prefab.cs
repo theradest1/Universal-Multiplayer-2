@@ -7,7 +7,8 @@ using System;
 
 public class UM2_Prefab : MonoBehaviourUM2
 {
-    [HideInInspector] public int objectID;
+    [Header("Debug:")]
+    public int objectID;
     [HideInInspector] public int creatorID = -1;
 
     Vector3 pastPos;

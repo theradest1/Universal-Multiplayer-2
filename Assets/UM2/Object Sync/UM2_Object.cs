@@ -71,16 +71,21 @@ public class UM2_Object : MonoBehaviourUM2
                 return;
             }
         }
-
         //start syncing
         sync.createSyncedObject(this);
 
-        //get a list of all scripts on this game object
-        List<object> scripts = new List<object>();
-        scripts.AddRange(gameObject.GetComponents<MonoBehaviour>());
-        scripts.AddRange(gameObject.GetComponents<MonoBehaviourUM2>());
+        //wait until this object has an ID
+        while (objectID == -1){
+            await Task.Delay(50);
 
-        foreach(object script in scripts){
+            if(!UM2_Client.connectedToServer){
+                return;
+            }
+        }
+        //get a list of all scripts on this game object
+        MonoBehaviour[] scripts = gameObject.GetComponents<MonoBehaviour>();
+
+        foreach(MonoBehaviour script in scripts){
             FieldInfo[] fields = script.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             foreach (FieldInfo field in fields)

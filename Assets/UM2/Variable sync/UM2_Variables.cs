@@ -10,7 +10,6 @@ using JetBrains.Annotations;
 public class UM2_Variables : MonoBehaviourUM2
 {
 	public static UM2_Variables instance;
-    UM2_Client client;
 
 
     public List<Type> allowedVariableTypes = new List<Type>{typeof(String), typeof(int), typeof(float)};
@@ -20,7 +19,13 @@ public class UM2_Variables : MonoBehaviourUM2
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
     [SerializeField] int reserveIDDelayMS = 100;
+    
 
+    [Header("Debug:")]
+    public List<String> variableNames = new List<String>();
+    public List<String> variableValues = new List<String>();
+    public List<int> variableIDs = new List<int>();
+    public List<int> variableLinkedIDs = new List<int>();
 
     public override void OnConnect(int clientID)
     {
@@ -121,7 +126,7 @@ public class UM2_Variables : MonoBehaviourUM2
             }
         }
         
-        Debug.LogError("Could not find server variable: " + name);
+        Debug.LogError("Could not find server variable: " + name + " with linked ID " + linkedID);
         return null;
     }
 
@@ -141,11 +146,6 @@ public class UM2_Variables : MonoBehaviourUM2
 	{
 		instance = this;
 	}
-
-    void Start()
-    {
-        client = gameObject.GetComponent<UM2_Client>();
-    }
 }
 
 public class NetworkVariable_Client
@@ -173,6 +173,12 @@ public class NetworkVariable_Client
 
         UM2_Variables.instance.networkVariables.Add(this);
         UM2_Methods.networkMethodServer("newVar", name, id, value, type, linkedID);
+
+        //debug stuffs
+        UM2_Variables.instance.variableNames.Add(name);
+        UM2_Variables.instance.variableValues.Add(value + "");
+        UM2_Variables.instance.variableIDs.Add(id);
+        UM2_Variables.instance.variableLinkedIDs.Add(linkedID);
     }
 
     public void sendValue(){
@@ -210,10 +216,20 @@ public class NetworkVariable_Client
         if(sync){
             sendValue();
         }
+        
+        //debug
+        for(int i = 0; i < UM2_Variables.instance.variableIDs.Count; i++){
+            if(UM2_Variables.instance.variableIDs[i] == id){
+                UM2_Variables.instance.variableValues[i] = value;
+                Debug.Log("Set debug");
+            }
+        }
     }
 }
 
 public class ObjectNetworkVariableAttribute : PropertyAttribute
 {
     //nothing here, it is just a way to seprate normal and network variables
+    //used like:
+    // [ObjectNetworkVariable] int variableName
 }
