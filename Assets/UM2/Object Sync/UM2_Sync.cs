@@ -91,7 +91,7 @@ public class UM2_Sync : MonoBehaviourUM2
 
     public void updateObject(int objectID, Vector3 position, Quaternion rotation){
         string message = "others~updateObjectTransform~" + objectID + "~" + position + "~" + rotation;
-        UM2_Client.client.sendMessage(message, false, false);
+        UM2_Client.instance.sendMessage(message, false, false);
     }
 
     public void updateTPS(int objectID, float newTPS){

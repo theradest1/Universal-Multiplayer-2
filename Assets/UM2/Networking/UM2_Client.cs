@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
+using Unity.VisualScripting;
 
 public class UM2_Client : MonoBehaviourUM2
 {
@@ -21,7 +22,7 @@ public class UM2_Client : MonoBehaviourUM2
     public static int clientID = -1;
     
 
-    public static UM2_Client client;
+    public static UM2_Client instance;
     UM2_Server server;
 
     List<String> messageQueue = new List<string>();
@@ -91,7 +92,7 @@ public class UM2_Client : MonoBehaviourUM2
 
     private void Awake()
     {
-        client = this;
+        instance = this;
 
         messageQueue = new List<string>();
     }

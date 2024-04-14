@@ -118,21 +118,21 @@ public class UM2_Methods : MonoBehaviourUM2
     public static void networkMethodServer(string methodName, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
         message = "server~" + message;
-        UM2_Client.client.sendMessage(message, true, false);
+        UM2_Client.instance.sendMessage(message, true, false);
     }
     public static void networkMethodOthers(string methodName, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
         message = "others~" + message;
-        UM2_Client.client.sendMessage(message, true, false);
+        UM2_Client.instance.sendMessage(message, true, false);
     }
     public static void networkMethodGlobal(string methodName, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
         message = "all~" + message;
-        UM2_Client.client.sendMessage(message, true, false);
+        UM2_Client.instance.sendMessage(message, true, false);
     }
     public static void networkMethodDirect(string methodName, int recipientID, params object[] parameters){
         string message = methodName + "~" + String.Join("~", parameters);
         message = "direct~" + recipientID + "~" + message;
-        UM2_Client.client.sendMessage(message, true, false);
+        UM2_Client.instance.sendMessage(message, true, false);
     }
 }

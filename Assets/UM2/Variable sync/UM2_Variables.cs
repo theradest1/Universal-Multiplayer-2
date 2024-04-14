@@ -125,8 +125,8 @@ public class UM2_Variables : MonoBehaviourUM2
                 return networkVariable;
             }
         }
-        
-        Debug.LogError("Could not find server variable: " + name + " with linked ID " + linkedID);
+
+        //Debug.LogError("Could not find server variable: " + name + " with linked ID " + linkedID);
         return null;
     }
 
@@ -140,6 +140,27 @@ public class UM2_Variables : MonoBehaviourUM2
 
     public static void addToNetworkVariableValue(string name, object valueToAdd, int linkedID = -1){
         getNetworkVariable(name, linkedID).addToValue(valueToAdd);
+    }
+
+    public static async void addVarCallbackTo(string name, Action<object> method, int linkedID = -1){
+        if(getNetworkVariable(name, linkedID) == null){
+            int totalTime = 0;
+            while (getNetworkVariable(name, linkedID) == null){
+                await Task.Delay(50);
+
+                if(!UM2_Client.connectedToServer){
+                    return;
+                }
+
+                totalTime += 50;
+                if(totalTime >= 5000){ //5 seconds
+                    Debug.LogError("Variable " + name + " with linked ID " + linkedID + " was never created, but had a callback added");
+                    return;
+                }
+            }
+        }
+        
+        getNetworkVariable(name, linkedID).addCallback(method);
     }
 
 	private void Awake()
@@ -156,11 +177,12 @@ public class NetworkVariable_Client
     Type type;
     public int id;
     UM2_Variables variables;
-    Action callback;
+
+    List<Action<object>> callbacks = new List<Action<object>>();
 
     public int linkedID; //for object based variable only, it will stay -1 if it isn't an object based variable
 
-    public NetworkVariable_Client(string name, object value, Type type, int id, int linkedID = -1, Action callbackOnChange = null){//, Action<string> callback = null){
+    public NetworkVariable_Client(string name, object value, Type type, int id, int linkedID = -1){//, Action<string> callback = null){
         //Debug.Log("Created network variable. Info:\nName: " + name + "\nType: " + type + "\nID: " + id + "\nLinked ID: " + linkedID + "\n\n");
 
         this.name = name;
@@ -168,8 +190,6 @@ public class NetworkVariable_Client
         this.value = value + "";
         this.type = type;
         this.linkedID = linkedID;
-
-        this.callback = callbackOnChange;
 
         UM2_Variables.instance.networkVariables.Add(this);
         UM2_Methods.networkMethodServer("newVar", name, id, value, type, linkedID);
@@ -206,12 +226,20 @@ public class NetworkVariable_Client
         return null;
     }
 
+    public void addCallback(Action<object> method){
+        callbacks.Add(method);
+    }
+
+    void invokeCallbacks(){
+        foreach(Action<object> callback in callbacks){
+            callback(value);
+        }
+    }
+
     public void setValue(object newValue, bool sync = true){
         value = newValue + "";
 
-        if(callback != null){
-            callback.Invoke();
-        }
+        invokeCallbacks();
 
         if(sync){
             sendValue();

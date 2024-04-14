@@ -18,7 +18,7 @@ public class Debugger : MonoBehaviour
     }
 
     private void Start() {
-        client = UM2_Client.client;
+        client = UM2_Client.instance;
         server = UM2_Server.instance;
 
         debugger.addSpace("Client:");

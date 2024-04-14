@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class UM2_Object : MonoBehaviourUM2
 {
@@ -35,15 +36,29 @@ public class UM2_Object : MonoBehaviourUM2
     public bool destroyWhenCreatorLeaves = false;
 
     public object getNetworkVariableValue(string name){
-        return this.getNetworkVariable(name).getValue();
+        return getNetworkVariable(name).getValue();
     }
 
     public void setNetworkVariableValue(string name, object value){
-        this.getNetworkVariable(name).setValue(value);
+        getNetworkVariable(name).setValue(value);
     }
 
     public void addToNetworkVariableValue(string name, object valueToAdd){
-        this.getNetworkVariable(name).addToValue(valueToAdd);
+        getNetworkVariable(name).addToValue(valueToAdd);
+    }
+
+    public async void addVarCallback(string name, Action<object> method){
+        if(objectID == -1){
+            while (objectID == -1){
+                await Task.Delay(50);
+                
+                if(!UM2_Client.connectedToServer){
+                    return;
+                }
+            }
+        }
+        
+        UM2_Variables.addVarCallbackTo(name, method, objectID);
     }
 
     public NetworkVariable_Client getNetworkVariable(string name){

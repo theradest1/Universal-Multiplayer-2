@@ -9,7 +9,7 @@ public class UM2_Events : MonoBehaviourUM2
 
     void Start()
     {
-        client = UM2_Client.client;
+        client = UM2_Client.instance;
     }
 
     public void clientJoined(int newClientID){

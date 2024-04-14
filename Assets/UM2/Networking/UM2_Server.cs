@@ -136,7 +136,7 @@ public class UM2_Server : MonoBehaviour
 
     void Start()
     {
-        client = UM2_Client.client;
+        client = UM2_Client.instance;
     }
 
 	private void OnDestroy()

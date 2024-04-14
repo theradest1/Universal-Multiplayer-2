@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using UnityEngine;
 using System;
 
@@ -19,17 +20,28 @@ public class UM2_Prefab : MonoBehaviourUM2
     float tickTime = -1;
     bool destroyWhenCreatorLeaves = false;
 
-
     public object getNetworkVariableValue(string name){
-        return this.getNetworkVariable(name).getValue();
+        return getNetworkVariable(name).getValue();
+    }
+    public async void addVarCallback(string name, Action<object> method){
+        if(objectID == -1){
+            while (objectID == -1){
+                await Task.Delay(50);
+                if(!UM2_Client.connectedToServer){
+                    return;
+                }
+            }
+        }
+        
+        UM2_Variables.addVarCallbackTo(name, method, objectID);
     }
 
     public void setNetworkVariableValue(string name, object value){
-        this.getNetworkVariable(name).setValue(value);
+        getNetworkVariable(name).setValue(value);
     }
 
     public void addToNetworkVariableValue(string name, object valueToAdd){
-        this.getNetworkVariable(name).addToValue(valueToAdd);
+        getNetworkVariable(name).addToValue(valueToAdd);
     }
 
     public NetworkVariable_Client getNetworkVariable(string name){
@@ -61,9 +73,9 @@ public class UM2_Prefab : MonoBehaviourUM2
     }
 
     public void setTPS(float newTPS){
-        //if(!UM2_Client.client.tcpRecorded && !UM2_Client.client.udpRecorded){
+        //if(!UM2_Client.instance.tcpRecorded && !UM2_Client.instance.udpRecorded){
         //    //if http is the only thing, it makes the tps the same as the http update rate
-        //    newTPS = UM2_Client.client.httpUpdateTPS;
+        //    newTPS = UM2_Client.instance.httpUpdateTPS;
         //}
         tickTime = 1/newTPS;
     }
