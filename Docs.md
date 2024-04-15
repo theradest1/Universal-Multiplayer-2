@@ -2,12 +2,38 @@
 This is a work in progress, but it should contain correct info (but not all info)
 
 <br></br>
-## **Basics:**
+## **Setup**
+- import UM2:
+  - download latest unity package from releases
+  - right click in explorer in unity
+  - import package -> custom package
+  - find and select UM2_Vx.x.x
+  - import all
+- setup UM2 manager:
+  - create an empty object in your game scene
+  - add the following scripts to it:
+    - UM2_Client
+    - UM2_Server
+    - UM2_Sync
+    - UM2_Variables
+    - UM2_Methods
+    - UM2_Events
+  - default settings are good, but feel free to change them
+- Examples:
+  - this repository is essentially a big example, but if you want a more accurate-to-life example of how to use UM2, check out my other repository "UM2-Example"
+    - it is a multiplayer game that I made using UM2, and is what I use to figure out problems and improvements
+- Questions:
+  - There isnt a fixed place to submit questions currently
+  - If you found a bug or think something could be improved (including docs), please submit an issue request in github
+
+<br></br>
+## **Basic info:**
 - All Universal Multiplayer scripts start with the prefix UM2_
 - UM2_Object based object is referring to the original version of a network object
 - UM2_Prefab based object is reffering to the clone of the original network object
 - don't use any special characters for anything - stick to letters and numbers
   - HTTP (webgl builds) aren't able to transmit many special characters
+- callbacks are great and should be used when possible, especially since multiplayer is often not consistant
 
 <br></br>
 ## Network Variables
@@ -37,6 +63,9 @@ This allows you to have variables that Two kinds: global and object based
 - Check if variable exists:
   - UM2_Variable.getNetworkVariable(string name)
   - returns null if a global variable with that name doesn't exist
+- Setting a callback function:
+  - triggers when the variable's value is set
+  - UM2_Variables.addVarCallback(string variableName, Action<object> methodToCall)
 
 ### Object based Variables:
 - Uses:
