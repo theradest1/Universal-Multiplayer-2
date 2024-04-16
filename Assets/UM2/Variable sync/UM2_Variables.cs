@@ -110,7 +110,9 @@ public class UM2_Variables : MonoBehaviourUM2
             NetworkVariable_Client newVariable = new NetworkVariable_Client(name, value, type, id, linkedID);
         }
         catch(Exception e){
-            Debug.LogWarning("Variable failed to be created, trying again. Error message: " + e.Message);
+            if(UM2_Client.instance.debugBasicMessages){
+                Debug.LogWarning("Variable failed to be created, trying again. Error message: " + e.Message);
+            }
             StartCoroutine(createNetworkVariable(name, value, type, linkedID));
         }
 
