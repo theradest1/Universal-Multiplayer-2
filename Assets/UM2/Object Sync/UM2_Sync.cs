@@ -121,12 +121,25 @@ public class UM2_Sync : MonoBehaviourUM2
     public void newSyncedObject(int objectID, int prefabID, float ticksPerSecond, Vector3 position, Quaternion rotation, int creatorID, bool destroyOnCreatorLeave){
         //Debug.Log("Made a new synced object: " + objectID);
         if(getSyncedObject(objectID, true) == null && getLocalSyncedObject(objectID, true) == null){
-            UM2_Prefab newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation).AddComponent<UM2_Prefab>(); 
-            syncedObjects.Add(newPrefab);
-            newPrefab.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
+            //spawn prefab
+            GameObject newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation);
+
+            //get prefab script
+            UM2_Prefab newPrefabScript = newPrefab.GetComponent<UM2_Prefab>(); 
+
+            //if there isnt one, add one
+            if(newPrefabScript == null){
+                newPrefab.AddComponent<UM2_Prefab>();
+            }
+
+            //add info
+            syncedObjects.Add(newPrefabScript);
+            newPrefabScript.initialize(objectID, ticksPerSecond, position, rotation, creatorID, destroyOnCreatorLeave);
         }
         else{
-            //Debug.LogWarning("Synced object with ID " + objectID + " already exists, ignoring creation");
+            if(UM2_Client.instance.debugBasicMessages){
+                Debug.LogWarning("Synced object with ID " + objectID + " already exists, ignoring creation");
+            } 
         }
     }
 

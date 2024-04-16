@@ -14,7 +14,7 @@ public class UM2_Object : MonoBehaviourUM2
 
     public GameObject prefab;
     
-    public int objectID = -1;
+    [HideInInspector] public int objectID = -1;
 
     float pastTicksPerSecond = -1;
     [Range(1,64)]
