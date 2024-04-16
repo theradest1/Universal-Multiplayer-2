@@ -142,7 +142,7 @@ public class UM2_Variables : MonoBehaviourUM2
         getNetworkVariable(name, linkedID).addToValue(valueToAdd);
     }
 
-    public static async void addVarCallbackTo(string name, Action<object> method, int linkedID = -1){
+    public static async void addVarCallback(string name, Action<object> method, int linkedID = -1){
         if(getNetworkVariable(name, linkedID) == null){
             int totalTime = 0;
             while (getNetworkVariable(name, linkedID) == null){

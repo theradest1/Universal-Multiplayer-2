@@ -33,7 +33,7 @@ public class UM2_Prefab : MonoBehaviourUM2
             }
         }
         
-        UM2_Variables.addVarCallbackTo(name, method, objectID);
+        UM2_Variables.addVarCallback(name, method, objectID);
     }
 
     public void setNetworkVariableValue(string name, object value){

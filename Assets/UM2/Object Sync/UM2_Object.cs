@@ -58,7 +58,7 @@ public class UM2_Object : MonoBehaviourUM2
             }
         }
         
-        UM2_Variables.addVarCallbackTo(name, method, objectID);
+        UM2_Variables.addVarCallback(name, method, objectID);
     }
 
     public NetworkVariable_Client getNetworkVariable(string name){
