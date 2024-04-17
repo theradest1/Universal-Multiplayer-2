@@ -18,7 +18,6 @@ public class UM2_Prefab : MonoBehaviourUM2
     Vector3 targetPos;
     Quaternion targetRot;
     float tickTime = -1;
-    bool destroyWhenCreatorLeaves = false;
 
     public object getNetworkVariableValue(string name){
         return getNetworkVariable(name).getValue();
@@ -55,7 +54,7 @@ public class UM2_Prefab : MonoBehaviourUM2
 
 
     public override void OnPlayerLeave(int clientID){
-        if(clientID == creatorID && destroyWhenCreatorLeaves){
+        if(clientID == creatorID){
             Destroy(this.gameObject);
         }
     }
@@ -80,20 +79,19 @@ public class UM2_Prefab : MonoBehaviourUM2
         tickTime = 1/newTPS;
     }
 
-    public void initialize(int setObjectID, float TPS, Vector3 _position, Quaternion _rotation, int _creatorID, bool _destroyWhenCreatorLeaves){
-        objectID = setObjectID;
-        creatorID = _creatorID;
-        destroyWhenCreatorLeaves = _destroyWhenCreatorLeaves;
+    public void initialize(int objectID, float TPS, Vector3 position, Quaternion rotation, int creatorID){
+        this.objectID = objectID;
+        this.creatorID = creatorID;
 
         setTPS(TPS);
 
-        pastPos = _position;
-        targetPos = _position;
-        transform.position = _position;
+        pastPos = position;
+        targetPos = position;
+        transform.position = position;
 
-        pastRot = _rotation;
-        targetRot = _rotation;
-        transform.rotation = _rotation;
+        pastRot = rotation;
+        targetRot = rotation;
+        transform.rotation = rotation;
     }
 
     private void Update()

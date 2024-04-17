@@ -4,9 +4,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
-using JetBrains.Annotations;
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using UnityEngine.Networking;
+
 
 public class MainMenu : MonoBehaviour
 {
@@ -64,8 +66,8 @@ public class MainMenu : MonoBehaviour
             hostServerToggle.gameObject.SetActive(false);
         }
         else{
-            UM2_Server.GetLocalIPAddress();
             UM2_Server.GetPublicIPAddress();
+            UM2_Server.FindLocalIP();
         }
 
         updateThings();
@@ -75,7 +77,9 @@ public class MainMenu : MonoBehaviour
     public void Join()
     {
         saveSettings();
-        SceneManager.LoadScene("Example");
+        if(UM2_Server.publicIpAddress != null){
+            SceneManager.LoadScene("Example");
+        }
     }
 
     public void saveSettings()

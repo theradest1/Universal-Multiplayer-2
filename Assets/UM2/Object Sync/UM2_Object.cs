@@ -18,22 +18,20 @@ public class UM2_Object : MonoBehaviourUM2
 
     float pastTicksPerSecond = -1;
     [Range(1,64)]
-    public float ticksPerSecond;
+    public float ticksPerSecond = 20;
     UM2_Sync sync;
 	UM2_Variables variables;
 
     public bool syncTransform = true;
     public bool optimizeTransoformSync = true;
     [Range(0, 16)]
-    public float minTicksPerSecond;
+    public float minTicksPerSecond = 0;
     float pastSyncTime = 0;
     bool pastSyncTransform = false;
     bool initialized = false;
 
     Vector3 pastSyncedPos;
     Quaternion pastSyncedRot;
-
-    public bool destroyWhenCreatorLeaves = false;
 
     public object getNetworkVariableValue(string name){
         return getNetworkVariable(name).getValue();

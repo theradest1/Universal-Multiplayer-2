@@ -18,7 +18,6 @@ public class UM2_Variables : MonoBehaviourUM2
 
     List<int> reservedVariableIDs = new List<int>();
     public int targetPreppedVariableIDs = 10;
-    [SerializeField] int reserveIDDelayMS = 100;
 
 
     [Header("Debug:")]
@@ -34,7 +33,7 @@ public class UM2_Variables : MonoBehaviourUM2
     }
 
     async void reserveIDLoop(){
-        await Task.Delay(reserveIDDelayMS);
+        await Task.Delay(100);
 
         if(!UM2_Client.connectedToServer){
             return;

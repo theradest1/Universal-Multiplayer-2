@@ -30,7 +30,7 @@ public class UM2_Client : MonoBehaviourUM2
 
     [Header("Settings:")]
     [Tooltip("How often http clears the message queue (higher means less latency, but also more messages)")]
-    public float httpUpdateTPS;
+    public float httpUpdateTPS = 10;
 
 
     [Header("Console debug settings:")]
@@ -104,7 +104,9 @@ public class UM2_Client : MonoBehaviourUM2
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
             Debug.LogError("Not all info has been set for client. Look at the startup info in the docs for help: \nServer IP: " + serverIP + "\nServer UDP Port: " + serverUdpPort + "\nServer TCP Port: " + serverTcpPort + "\nServer HTTP Port: " + serverHttpPort);
-            //SceneManager.LoadScene("Menu");
+            #if UNITY_EDITOR
+                SceneManager.LoadScene("Menu");
+            #endif
             return;
         }
 

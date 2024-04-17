@@ -306,7 +306,6 @@ MonoBehaviour:
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 2
-  destroyWhenCreatorLeaves: 1
 --- !u!114 &180985660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1134,7 +1133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c0b7dedcee9bb4499acca6aae50ed95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeoutTime: 10
+  timeoutTime: 5
   udpOnline: 0
   tcpOnline: 0
   httpOnline: 0
@@ -1165,11 +1164,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   httpUpdateTPS: 10
+  debugUDPMessages: 0
+  debugTCPMessages: 0
+  debugHTTPMessages: 0
+  debugBasicMessages: 0
   udpRecorded: 0
-  tcpRecorded: 0
   udpPing: 0
   sentBytesUDP: 0
   gotBytesUDP: 0
+  tcpRecorded: 0
   tcpPing: 0
   sentBytesTCP: 0
   gotBytesTCP: 0
@@ -1177,10 +1180,6 @@ MonoBehaviour:
   sentBytesHTTP: 0
   gotBytesHTTP: 0
   failedMessages: 0
-  debugUDPMessages: 0
-  debugTCPMessages: 0
-  debugHTTPMessages: 0
-  debugBasicMessages: 0
 --- !u!4 &1054571551
 Transform:
   m_ObjectHideFlags: 0
@@ -1208,7 +1207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc7e5ba156414bb4393dfb79ff2c7431, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetPreppedObjects: 3
+  targetPreppedObjects: 10
 --- !u!114 &1054571553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1221,8 +1220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51ed2d7f748e38c4eb231fb3d8f10ef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetPreppedVariableIDs: 20
-  reserveIDDelayMS: 100
+  targetPreppedVariableIDs: 10
   variableNames: []
   variableValues: []
   variableIDs: 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class Client{
     public IPEndPoint udpEndpoint;
@@ -71,8 +72,10 @@ public class NetworkVariable_Server{
 
 public class UM2_Server : MonoBehaviour
 {
-    public static string localIpAddress;
-    public static string publicIpAddress;
+    #region Variables
+    public static string publicIPURL = "http://checkip.dyndns.org";
+    public static string localIpAddress = null;
+    public static string publicIpAddress = null;
 
     int udpPort = 5000;
     int tcpPort = 5001;
@@ -128,6 +131,9 @@ public class UM2_Server : MonoBehaviour
     List<Client> clients = new List<Client>();
 	List<NetworkVariable_Server> networkVariables = new List<NetworkVariable_Server>();
 
+    #endregion
+
+    #region Events
     void Awake()
     {
         instance = this;
@@ -167,16 +173,19 @@ public class UM2_Server : MonoBehaviour
         currentTime = Time.time; 
     }
 
-    public void StartServer()
-    {
-        InvokeRepeating("checkTimeoutTimers", 1f, 1f);
-
-        if (localIpAddress == null || publicIpAddress == null)
-        {
-            Debug.LogWarning("(Server) Ip addresses have not been found yet (restart if continued)");
-            Invoke("StartServer", 1f);
+    public void StartServer(){
+        FindLocalIP();
+        if(localIpAddress == null){
+            Debug.LogError("(Server) No network adapters with an IPv4 address in the system! (when finding local ip)");
             return;
         }
+        if (publicIpAddress == null)
+        {
+            Debug.LogError("Public IP has not been set, read docs on startup for help");
+            return;
+        }
+
+        InvokeRepeating("checkTimeoutTimers", 1f, 1f);
 
         if (!UM2_Client.webGLBuild)
         {
@@ -188,6 +197,9 @@ public class UM2_Server : MonoBehaviour
         client.StartClient();
     }
 
+    #endregion
+
+    #region idk
     void checkTimeoutTimers(){
         List<Client> clientsToDisconnect = new List<Client>();
         foreach(Client client in clients){
@@ -201,7 +213,9 @@ public class UM2_Server : MonoBehaviour
             clients.Remove(client);
         }
     }
+    #endregion
 
+    #region HTTP
     void initHTTP()
     {
         // Create HttpListener
@@ -291,7 +305,9 @@ public class UM2_Server : MonoBehaviour
             }
         });
     }
+    #endregion
 
+    #region Message processing
     string processSplitMessages(string messages, string protocol){
         string[] splitMessages = messages.Split("|");
         string endString = "";
@@ -459,6 +475,9 @@ public class UM2_Server : MonoBehaviour
         return responseMessage;
     }
 
+    #endregion
+
+    #region Helpfull things
     public NetworkVariable_Server getNetworkVariable(int id, int linkedID){
         foreach(NetworkVariable_Server networkVariable in networkVariables){
             if(networkVariable.id == id && networkVariable.linkedID == linkedID){
@@ -478,7 +497,9 @@ public class UM2_Server : MonoBehaviour
         Debug.LogError("(Server) Couldnt find client with ID " + clientID);
         return null;
     }
+    #endregion
 
+    #region Message sending
     public void sendMessageToAll(string message, string protocol, int excludedID = -1){
         foreach(Client client in clients){
             if(client.clientID != excludedID){
@@ -507,7 +528,9 @@ public class UM2_Server : MonoBehaviour
             sendHTTPMessage(message, client.clientID);
         }
     }
+    #endregion
 
+    #region UDP
     void initUDP()
     {
         try
@@ -528,6 +551,49 @@ public class UM2_Server : MonoBehaviour
         }
     }
 
+    private void udpReciever(IAsyncResult result)
+    {
+        udpServer.BeginReceive(udpReciever, null);
+        
+        IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
+        byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
+        string receivedData = Encoding.UTF8.GetString(receivedBytes);
+
+        string responseMessage = processSplitMessages(receivedData, "UDP");
+
+        if (responseMessage != null && responseMessage != "|")
+        {
+            if(responseMessage.Contains("recordedProtocol~UDP")){
+                Client clientData = getClient(int.Parse(receivedData.Split("~")[0]));
+                clientData.udpEndpoint = clientEndPoint;
+            }
+            SendUDPMessage(responseMessage, clientEndPoint);
+        }
+    }
+
+    private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
+    {
+        message += "|";
+        try
+        {
+            //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
+            byte[] data = Encoding.UTF8.GetBytes(message);
+            if(debugUDPMessages){
+                Debug.Log("(Server) Sent UDP: " + message);
+            }
+            sentBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
+            udpServer.Send(data, data.Length, clientEndPoint);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("(Server) Error sending response: " + e);
+            failedMessages += 1;
+        }
+    }
+
+    #endregion
+
+    #region TCP
     void initTCP()
     {
         tcpReciever();
@@ -615,66 +681,23 @@ public class UM2_Server : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    private void udpReciever(IAsyncResult result)
-    {
-        udpServer.BeginReceive(udpReciever, null);
-        
-        IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
-        byte[] receivedBytes = udpServer.EndReceive(result, ref clientEndPoint);
-        string receivedData = Encoding.UTF8.GetString(receivedBytes);
-
-        string responseMessage = processSplitMessages(receivedData, "UDP");
-
-        if (responseMessage != null && responseMessage != "|")
-        {
-            if(responseMessage.Contains("recordedProtocol~UDP")){
-                Client clientData = getClient(int.Parse(receivedData.Split("~")[0]));
-                clientData.udpEndpoint = clientEndPoint;
-            }
-            SendUDPMessage(responseMessage, clientEndPoint);
-        }
-
-    }
-
-    private void SendUDPMessage(string message, IPEndPoint clientEndPoint)
-    {
-        message += "|";
-        try
-        {
-            //sendBytesUDP += Encoding.UTF8.GetByteCount(message);
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            if(debugUDPMessages){
-                Debug.Log("(Server) Sent UDP: " + message);
-            }
-            sentBytesUDP += System.Text.Encoding.UTF8.GetByteCount(message);
-            udpServer.Send(data, data.Length, clientEndPoint);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("(Server) Error sending response: " + e);
-            failedMessages += 1;
-        }
-    }
-
-    public static void GetLocalIPAddress()
-    {
-        var host = Dns.GetHostEntry(Dns.GetHostName());
-        foreach (var ip in host.AddressList)
+    public static void FindLocalIP(){
+        //Get local IP
+        foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
         {
             if (ip.AddressFamily == AddressFamily.InterNetwork)
             {
                 UM2_Server.localIpAddress = ip.ToString();
-                return;
             }
         }
-        Debug.LogError("(Server) No network adapters with an IPv4 address in the system! (when finding local ip)");
     }
 
     public static async void GetPublicIPAddress()
     {
         //this is kind of disgusting but there isnt a different way
-        UnityWebRequest request = UnityWebRequest.Get("http://checkip.dyndns.org");
+        UnityWebRequest request = UnityWebRequest.Get(publicIPURL);
 
         // send
         var operation = request.SendWebRequest();
@@ -685,7 +708,7 @@ public class UM2_Server : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("(Server) Error getting public IP: " + request.error);
+            Debug.LogError("Error getting public IP. Possible fix is to change UM2_Server.publicIPURL\nError message: " + request.error);
         }
         else
         {
