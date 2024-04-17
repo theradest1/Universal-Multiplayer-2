@@ -67,7 +67,7 @@ public class MainMenu : MonoBehaviour
         }
         else{
             UM2_Server.GetPublicIPAddress();
-            UM2_Server.FindLocalIP();
+            UM2_Server.GetLocalIPAddress();
         }
 
         updateThings();

@@ -174,7 +174,7 @@ public class UM2_Server : MonoBehaviour
     }
 
     public void StartServer(){
-        FindLocalIP();
+        GetLocalIPAddress();
         if(localIpAddress == null){
             Debug.LogError("(Server) No network adapters with an IPv4 address in the system! (when finding local ip)");
             return;
@@ -683,7 +683,7 @@ public class UM2_Server : MonoBehaviour
     }
     #endregion
 
-    public static void FindLocalIP(){
+    public static void GetLocalIPAddress(){
         //Get local IP
         foreach (var ip in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
         {
