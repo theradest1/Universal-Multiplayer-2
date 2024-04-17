@@ -8,13 +8,9 @@ using System.Threading.Tasks;
 
 public class UM2_Sync : MonoBehaviourUM2
 {
-    List<GameObject> prefabs = new List<GameObject>();
+    List<GameObject> prefabs = new List<GameObject>();  
     List<UM2_Object> clientSideObjects = new List<UM2_Object>();
-
-    [Tooltip("Put any prefabs or other stuff that will be used by UM2 in this folder (default is Assets/UM2/Object Sync/Resources)")]
-    public string prefabFolderPath = "Assets/UM2/Object Sync/Resources";
     List<UM2_Prefab> syncedObjects = new List<UM2_Prefab>();
-    UM2_Client client;
     public static UM2_Sync instance;
     List<int> reservedIDs = new List<int>();
 
@@ -50,8 +46,6 @@ public class UM2_Sync : MonoBehaviourUM2
 
     private void Start()
     {
-        client = gameObject.GetComponent<UM2_Client>();
-        
         StartCoroutine(checkIfAllObjectsExist());
 
         reserveIDLoop();
@@ -125,11 +119,11 @@ public class UM2_Sync : MonoBehaviourUM2
             GameObject newPrefab = GameObject.Instantiate(prefabs[prefabID].gameObject, position, rotation);
 
             //get prefab script
-            UM2_Prefab newPrefabScript = newPrefab.GetComponent<UM2_Prefab>(); 
+            UM2_Prefab newPrefabScript = newPrefab.GetComponent<UM2_Prefab>();
 
             //if there isnt one, add one
             if(newPrefabScript == null){
-                newPrefab.AddComponent<UM2_Prefab>();
+                newPrefabScript = newPrefab.AddComponent<UM2_Prefab>();
             }
 
             //add info
