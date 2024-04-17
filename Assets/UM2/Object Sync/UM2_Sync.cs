@@ -66,7 +66,6 @@ public class UM2_Sync : MonoBehaviourUM2
         }
 
         startedObject.objectID = reservedIDs[0];
-        //Debug.Log("used reserved ID " + startedObject.objectID);
         reservedIDs.RemoveAt(0);
         
         UM2_Methods.networkMethodOthers("newSyncedObject", startedObject.objectID, prefabID, startedObject.ticksPerSecond, startedObject.transform.position, startedObject.transform.rotation, UM2_Client.clientID, startedObject.destroyWhenCreatorLeaves);

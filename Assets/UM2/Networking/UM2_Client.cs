@@ -13,17 +13,16 @@ using Unity.VisualScripting;
 
 public class UM2_Client : MonoBehaviourUM2
 {
+    #region Variables
     public static string serverIP = null;
     public static int serverUdpPort = 5000;
     public static int serverTcpPort = 5001;
     public static int serverHttpPort = 5002;
     public static bool hostingServer = false;
-    public static bool webGLBuild;
+    public static bool webGLBuild = false;
     public static int clientID = -1;
     
-
     public static UM2_Client instance;
-    UM2_Server server;
 
     List<String> messageQueue = new List<string>();
     //string messageQueue = "";
@@ -34,31 +33,40 @@ public class UM2_Client : MonoBehaviourUM2
     public float httpUpdateTPS;
 
 
+    [Header("Console debug settings:")]
+    public bool debugUDPMessages = false;
+    public bool debugTCPMessages = false;
+    public bool debugHTTPMessages = false;
+    public bool debugBasicMessages = false;
+
+
     [Header("Debug variables:")]
-    public bool udpRecorded = false; 
+    //udp
     IPEndPoint serverEndpoint;
+    public bool udpRecorded = false; 
     UdpClient udpClient;
     bool connectedToUDP = false;
     bool UDPOnline = false;
-
-    TcpClient tcpClient;
-    NetworkStream tcpStream;
-    bool connectedToTCP = false; //this is if the server can be pinged
-    bool TCPOnline = false; //this is if the reciever is on
-    public bool tcpRecorded = false; //this is if the server has said that it recorded the client's TCP stream
-    Thread tcpRecieveThread;
-
-    bool connectedToHTTP = false;
-
 
     float udpPingStartTime;
     public float udpPing;
     public int sentBytesUDP;
     public int gotBytesUDP;
+
+    //tcp
+    Thread tcpRecieveThread;
+    public bool tcpRecorded = false; //this is if the server has said that it recorded the client's TCP stream
+    bool TCPOnline = false; //this is if the reciever is on
+    TcpClient tcpClient;
+    NetworkStream tcpStream;
+    bool connectedToTCP = false; //this is if the server can be pinged
     float tcpPingStartTime;
     public float tcpPing;
     public int sentBytesTCP;
     public int gotBytesTCP;
+
+    //http
+    bool connectedToHTTP = false;
     float httpPingStartTime;
     public float httpPing;
     public int sentBytesHTTP;
@@ -68,15 +76,9 @@ public class UM2_Client : MonoBehaviourUM2
 
 
     public static bool connectedToServer = true;
+    #endregion
 
-
-    [Header("Console debug settings:")]
-    public bool debugUDPMessages = false;
-    public bool debugTCPMessages = false;
-    public bool debugHTTPMessages = false;
-    public bool debugBasicMessages = false;
-
-
+    #region Events
     private void OnDestroy()
     {
         connectedToServer = false;
@@ -93,19 +95,16 @@ public class UM2_Client : MonoBehaviourUM2
     private void Awake()
     {
         instance = this;
-
-        messageQueue = new List<string>();
     }
 
     private void Start()
     {
-        server = UM2_Server.instance;
         connectedToServer = true;
         //get info from menu
         if (serverIP == null || serverUdpPort == 0 || serverUdpPort == 0 || serverTcpPort == 0)
         {
-            //Debug.LogWarning("Server info not set, pushing back to menu");
-            SceneManager.LoadScene("Menu");
+            Debug.LogError("Not all info has been set for client. Look at the startup info in the docs for help: \nServer IP: " + serverIP + "\nServer UDP Port: " + serverUdpPort + "\nServer TCP Port: " + serverTcpPort + "\nServer HTTP Port: " + serverHttpPort);
+            //SceneManager.LoadScene("Menu");
             return;
         }
 
@@ -115,18 +114,27 @@ public class UM2_Client : MonoBehaviourUM2
         }
         else
         {
-            server.StartServer();
+            UM2_Server.instance.StartServer();
         }
         InvokeRepeating("clearHTTPQueue", 1f, 1f/httpUpdateTPS);
     }
 
-    public void clearHTTPQueue(){
-        sendMessage("server~getQueue", "HTTP");
-    }
+    public void StartClient()
+    {
+        if (!webGLBuild)
+        {
+            initTCP();
+            initUDP();
+        }
+        initHTTP();
 
-    public void join(){
+        InvokeRepeating("Ping", 0, 1f);
+
         sendMessage("server~join", true, true);
     }
+    #endregion
+
+    #region Basic message sending
 
     public void sendMessage(string message, bool reliableProtocol = true, bool sendWithoutID = false){ //this just finds what protocol you want to use and has some protections
         
@@ -223,19 +231,11 @@ public class UM2_Client : MonoBehaviourUM2
 
         //Debug.Log("Sent message: " + message);
     }
+    #endregion
 
-    public void StartClient()
-    {
-        if (!webGLBuild)
-        {
-            initTCP();
-            initUDP();
-        }
-        initHTTP();
-
-        InvokeRepeating("Ping", 0, 1f);
-
-        join();
+    #region idk
+    public void clearHTTPQueue(){
+        sendMessage("server~getQueue", "HTTP");
     }
 
     void Ping()
@@ -262,6 +262,9 @@ public class UM2_Client : MonoBehaviourUM2
         httpPingStartTime = Time.time;
         sendMessage("server~ping", "HTTP", true);
     }
+    #endregion
+
+    #region protocol initializers
 
     void initUDP()
     {
@@ -311,7 +314,9 @@ public class UM2_Client : MonoBehaviourUM2
         }
         connectedToHTTP = true;
     }
+    #endregion
 
+    #region recievers
     async void udpReciever()
     {
         try
@@ -362,7 +367,9 @@ public class UM2_Client : MonoBehaviourUM2
             }
         }
     }
+    #endregion
 
+    #region specific message sending
     public void sendTCPMessage(string message)
     {   
         try
@@ -421,6 +428,9 @@ public class UM2_Client : MonoBehaviourUM2
         }
     }
 
+    #endregion
+
+    #region message processing
     void processMessage(string message, string protocol)
     {
         string initialMessage = message;
@@ -502,7 +512,9 @@ public class UM2_Client : MonoBehaviourUM2
             //debugger.setDebug("HTTP Ping", (int)(httpPing * 1000) + "ms");
         }
     }
+    #endregion
 
+    #region weird thread stuffs
     //run TCP things on the main thread (while being executed on a different thread)
     private static readonly Queue<Action> actions = new Queue<Action>();
     private static readonly object queueLock = new object();
@@ -525,5 +537,5 @@ public class UM2_Client : MonoBehaviourUM2
             actions.Enqueue(action);
         }
     }
-
+    #endregion
 }

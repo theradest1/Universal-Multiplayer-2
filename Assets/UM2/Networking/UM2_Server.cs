@@ -29,8 +29,7 @@ public class Client{
     }
 }
 
-public class NetworkVariable_Server
-{
+public class NetworkVariable_Server{
 	public string name;
 	public string value;
     public int id;
