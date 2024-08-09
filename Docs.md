@@ -2,41 +2,96 @@
 This is a work in progress, but it should contain correct info (but not all info)
 
 <br></br>
-## **Setup**
+## **Install:**
 - import UM2:
   - download latest unity package from releases
   - right click in explorer in unity
   - import package -> custom package
   - find and select UM2_Vx.x.x
   - import all
-- setup UM2 manager:
-  - create an empty object in your game scene
-  - add the following scripts to it:
-    - UM2_Client
-    - UM2_Server
-    - UM2_Sync
-    - UM2_Variables
-    - UM2_Methods
-    - UM2_Events
-  - default settings are good, but feel free to change them
 - HTTP fix: do this if you want P2P (just do this if you aren't sure):
     - go to edit -> Project settings -> Player -> Other settings -> configuration -> allow downloads over HTTP
     - change "Not Allowed" to "Always allowed"
+- Look at the Quick Start section for next steps
 - Examples:
   - this repository is essentially a big example, but if you want a more accurate-to-life example of how to use UM2, check out my other repository "UM2-Example"
     - it is a multiplayer game that I made using UM2, and is what I use to figure out problems and improvements
+- Thank you for reading the docs (:
 - Questions:
-  - There isnt a fixed place to submit questions currently
+  - There isnt a fixed place to submit questions currently so just use github issues until I figure things out
   - If you found a bug or think something could be improved (including docs), please submit an issue request in github
 
 <br></br>
-## **Basic info:**
+## **Quick Start:**
+This will be how to make a first person multiplayer thing as simply as possible  
+- read and follow ALL of the install information
+  - read it again slowly
+  - ask questions if anything doesn't make sense
+  - I would recommend looking at "Basic info for docs"
+
+#### **Making the manager**:
+Create an empty object in your game scene and name it "UM2 Manager". You can name it other things, but that is what I call it and how I will reference it in the docs.
+
+Add the following scripts to the UM2 Manager. Ignore all of the settings on the scripts for now, but feel free to change them later:
+  - UM2_Client
+  - UM2_Server
+  - UM2_Sync
+  - UM2_Variables
+  - UM2_Methods
+  - UM2_Events
+
+#### **Making the player**:
+Create a first person controller just like you would in a single player game. I would recommend brackey's video on this if you don't know how: https://www.youtube.com/watch?v=_QajrabyTJc
+
+Duplicate your player and remove everything that isn't visual. Things like movement scripts and the camera should be deleted off of the duplicated player. The only components that should be left on it is the transform, mesh filter, mesh renderer, and maybe a collider if you want.
+
+Make this into a prefab by dragging it into the project folder panel. Put it in the folder called "Resources" in the "UM2" folder. You can then delete the duplicated player in the scene.
+
+You should now have a working player with a controller in the scene, and a visual copy of that player as a prefab in the folder at Assets -> UM2 -> Resources. The prefab is what the other players/clients will see in place of your local player.
+
+Add the UM2_Object script into your working player game object, and put the visual prefab in the prefab variable in the inspector. Look at the "Network Objects" part of the docs if you want to know more about the other variables.
+
+#### **Connecting**:
+Create a new scene that will be used for connecting to multiplayer. Ill let you figure out how to do the menu stuff, but you will need to set a few variables before connecting (loading the scene automatically makes you connect)
+- serverIP (string)
+- hostingServer (bool) (automatically false)
+- webGLBuild (bool) (automatically false)
+
+You can set these by doing `UM2_Client.{Variable} = {Value};`. For example if I wanted to set the server IP, I would do `UM2_Client.serverIP = "127.0.0.1";`
+
+Currently the multiplayer that this uses is called P2P, or peer to peer. This means that one of the peers/players/clients will need to also be the server while all of the other peers/players/clients will connect to that server.
+
+The main reason I made it like this is because having a dedicated server requires you to use money and I don't have money D: (and it is infinitly scalable). In the future there will be one, but for now it is just P2P.
+
+If the client is going to be the server, these functions will need to be called:
+- `UM2_Server.GetPublicIPAddress();` 
+- `UM2_Server.GetLocalIPAddress();`
+
+The `UM2_Client.hostingServer` variable will also need to be set to `true`
+
+I will reference the client that is hosting the server as server-client. The clients that are connecting to the server-client will be just called client.
+
+For the clients, they will need the IP of the server-client. This can be given to the client by the server-client, and it can be gotten by the server-client by calling the get IP functions, then accessing the IPs with `UM2_Server.publicIpAddress` and `UM2_Server.localIpAddress`. Use the public IP if the server-client and client are on different networks, and use the local IP if they are on the same network. Set server's ip on the client with `UM2_Client.serverIP = {server IP};`
+
+If they are not on the same network, the server-client will also need to port forward. Look at the basic info for more info on that. 
+
+<br></br>
+## **Basic info for docs:**
 - All Universal Multiplayer scripts start with the prefix UM2_
 - UM2_Object based object is referring to the original version of a network object
 - UM2_Prefab based object is reffering to the clone of the original network object
+- Webgl builds cannot be a server and can only use HTTP
 - don't use any special characters for anything - stick to letters and numbers
-  - HTTP (webgl builds) aren't able to transmit many special characters
+  - This is because HTTP isn't able to transmit many special characters
 - callbacks are great and should be used when possible, especially since multiplayer is often not consistant
+- if you want to port forward to connect through WAN, forward with this (find a youtube video on how to port-forward):
+  - udp on 5000
+  - tcp on 5001
+  - http on 5002 (both udp and tcp)
+- these can be changed by doing `UM2_Server.{udp/tcp/http}Port = {port};` on the server and `UM2_Client.server{Udp/Tcp/Http}Port = {port};` on the client during the same time as setting the server ip.
+  - I don't recommend doing this unless you know what you are doing
+- for testing your game, you can build and run one instance and run in the inspector for a second. Make one host a server and the other use the IP `127.0.0.1` (local host)
+- if a client is connecting to its own server use the ip `127.0.0.1` (local host)
 
 <br></br>
 ## Network Variables

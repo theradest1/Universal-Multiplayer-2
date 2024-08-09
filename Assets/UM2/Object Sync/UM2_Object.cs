@@ -20,7 +20,6 @@ public class UM2_Object : MonoBehaviourUM2
     [Range(1,64)]
     public float ticksPerSecond = 20;
     UM2_Sync sync;
-	UM2_Variables variables;
 
     public bool syncTransform = true;
     public bool optimizeTransoformSync = true;
@@ -71,7 +70,6 @@ public class UM2_Object : MonoBehaviourUM2
     private void Start()
     {
         sync = UM2_Sync.instance;
-		variables = UM2_Variables.instance;
         initialize();
     }
 
