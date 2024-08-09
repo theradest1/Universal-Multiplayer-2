@@ -19,7 +19,7 @@ This is a work in progress, but it should contain correct info (but not all info
     - UM2_Methods
     - UM2_Events
   - default settings are good, but feel free to change them
-- HTTP fix: do this if your server isnt secured (HTTP instead of HTTPS) (just do this if you aren't sure):
+- HTTP fix: do this if you want P2P (just do this if you aren't sure):
     - go to edit -> Project settings -> Player -> Other settings -> configuration -> allow downloads over HTTP
     - change "Not Allowed" to "Always allowed"
 - Examples:
