@@ -19,6 +19,9 @@ This is a work in progress, but it should contain correct info (but not all info
     - UM2_Methods
     - UM2_Events
   - default settings are good, but feel free to change them
+- HTTP fix: do this if your server isnt secured (HTTP instead of HTTPS) (just do this if you aren't sure):
+    - go to edit -> Project settings -> Player -> Other settings -> configuration -> allow downloads over HTTP
+    - change "Not Allowed" to "Always allowed"
 - Examples:
   - this repository is essentially a big example, but if you want a more accurate-to-life example of how to use UM2, check out my other repository "UM2-Example"
     - it is a multiplayer game that I made using UM2, and is what I use to figure out problems and improvements
