@@ -75,6 +75,8 @@ For the clients, they will need the IP of the server-client. This can be given t
 
 If they are not on the same network, the server-client will also need to port forward. Look at the basic info for more info on that. 
 
+It should be done, and you will see the other player after joining with the correct ip. I say this in the basic info too, but if one of the clients are full screen, the other client doesnt send network messages. This sometimes makes it so the other client doesnt immedietly spawn in, so just make the windows not full screen
+
 <br></br>
 ## **Basic info for docs:**
 - All Universal Multiplayer scripts start with the prefix UM2_
@@ -91,6 +93,7 @@ If they are not on the same network, the server-client will also need to port fo
 - these can be changed by doing `UM2_Server.{udp/tcp/http}Port = {port};` on the server and `UM2_Client.server{Udp/Tcp/Http}Port = {port};` on the client during the same time as setting the server ip.
   - I don't recommend doing this unless you know what you are doing
 - for testing your game, you can build and run one instance and run in the inspector for a second. Make one host a server and the other use the IP `127.0.0.1` (local host)
+  - if one of the clients are full screen, the other client doesnt send network messages (make both windowed)
 - if a client is connecting to its own server use the ip `127.0.0.1` (local host)
 
 <br></br>
