@@ -10,7 +10,7 @@ public class UM2_Prefab : MonoBehaviourUM2
 {
     [Header("Debug:")]
     [HideInInspector] public int objectID;
-    [HideInInspector] public int creatorID = -1;
+    [HideInInspector] public int clientID = -1;
 
     Vector3 pastPos;
     Quaternion pastRot;
@@ -53,8 +53,8 @@ public class UM2_Prefab : MonoBehaviourUM2
     }
 
 
-    public override void OnPlayerLeave(int clientID){
-        if(clientID == creatorID){
+    public override void OnPlayerLeave(int _clientID){
+        if(_clientID == clientID){
             Destroy(this.gameObject);
         }
     }
@@ -79,9 +79,9 @@ public class UM2_Prefab : MonoBehaviourUM2
         tickTime = 1/newTPS;
     }
 
-    public void initialize(int objectID, float TPS, Vector3 position, Quaternion rotation, int creatorID){
+    public void initialize(int objectID, float TPS, Vector3 position, Quaternion rotation, int clientID){
         this.objectID = objectID;
-        this.creatorID = creatorID;
+        this.clientID = clientID;
 
         setTPS(TPS);
 

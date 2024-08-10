@@ -40,9 +40,9 @@ public class UM2_Client : MonoBehaviourUM2
     public bool debugBasicMessages = false;
 
 
-    [Header("Debug variables:")]
     //udp
     IPEndPoint serverEndpoint;
+    [Header("Debug variables:")]
     public bool udpRecorded = false; 
     UdpClient udpClient;
     bool connectedToUDP = false;

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -132,6 +131,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 180985654}
+  - component: {fileID: 180985661}
   - component: {fileID: 180985660}
   - component: {fileID: 180985656}
   - component: {fileID: 180985659}
@@ -321,6 +321,24 @@ MonoBehaviour:
   cubePrefab: {fileID: 4036667581075098692, guid: 72fdd2e4e49b384428bd70386c342bdf, type: 3}
   quickObjectPrefab: {fileID: 8463915166535900988, guid: 36bb989d309260d4ca15a4262544b01e, type: 3}
   timerText: {fileID: 691730070}
+--- !u!114 &180985661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180985650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef0639f8c3d55743864bea0cbb89215, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  otherPlayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  cam: {fileID: 963194228}
+  power: 400
+  rb: {fileID: 180985657}
 --- !u!1 &586985160
 GameObject:
   m_ObjectHideFlags: 0
