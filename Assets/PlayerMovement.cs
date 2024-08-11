@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    Vector2 horizontalInput;
+    Vector2 movementInput;
 
     //movement settings
 	public float acceleration = 11f;
@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     //references
     public Rigidbody playerRB;
     public Transform playerCam;
+    public Animator animator;
 
 
     //vars
@@ -62,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        horizontalInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        movementInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
         RaycastHit hit;
 		isGrounded = Physics.Raycast(transform.position + Vector3.up * groundCheckHeight, -Vector3.up, out hit, groundCheckDistance, groundMask);
@@ -72,13 +73,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (isGrounded)
         {
-            playerRB.AddForce((transform.right * horizontalInput.x + transform.forward * horizontalInput.y) * acceleration);
+            playerRB.AddForce((transform.right * movementInput.x + transform.forward * movementInput.y) * acceleration);
         }
         else
         {
-            playerRB.AddForce((transform.right * horizontalInput.x + transform.forward * horizontalInput.y) * inAirAcceleration);
+            playerRB.AddForce((transform.right * movementInput.x + transform.forward * movementInput.y) * inAirAcceleration);
         }
 
+        //ignore how bad the animation looks, it's just for an animation syncing example
+        animator.SetFloat("x", movementInput.x);
+        animator.SetFloat("y", movementInput.y);
 
         //jumping
 		if(isGrounded && jumping)

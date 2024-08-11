@@ -10,6 +10,8 @@ public class UM2_Prefab : MonoBehaviourUM2
 {
     [Header("Debug:")]
     [HideInInspector] public int objectID;
+
+    //the ID of the creator of this object
     [HideInInspector] public int clientID = -1;
 
     Vector3 pastPos;
