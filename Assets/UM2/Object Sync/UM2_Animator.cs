@@ -16,7 +16,7 @@ public class UM2_Animator : MonoBehaviour
     }
 
     private void Start() {
-        InvokeRepeating("syncAnimationParams", .5, updateRate);
+        InvokeRepeating("syncAnimationParams", .5f, updateRate);
     }
 
     private void Update() {

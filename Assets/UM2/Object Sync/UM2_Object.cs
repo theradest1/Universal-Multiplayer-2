@@ -120,16 +120,25 @@ public class UM2_Object : MonoBehaviourUM2
             }
         }
 
-
         //letting other processes know they can start
         initialized = true;
     }
 
     private void Update()
     {
-        if(initialized){ // if object is being synced
-            if(pastSyncTransform != syncTransform){ //if it has been changed
+        //this peice of code turns on the updateTransform loop
+        //if syncTransform is set to false, the updateTransform loop stops
+        //but if it is set back to true, this peice of code starts it back up again
+        //it also turns it on at the start
+
+        // if object is created on the network
+        if(initialized){
+
+            //if the syncTransform toggle was changed
+            if(pastSyncTransform != syncTransform){
                 pastSyncTransform = syncTransform;
+
+                //if it was set to true, turn the loop back on
                 if(syncTransform){
                     updateTransform();
                 }
@@ -139,18 +148,17 @@ public class UM2_Object : MonoBehaviourUM2
 
     public async void updateTransform(bool forced = false){
         if(this != null && syncTransform){
+            
+            //if the tps is changed, sync it to other clients
             if(pastTicksPerSecond != ticksPerSecond){
                 pastTicksPerSecond = ticksPerSecond;
                 sync.updateTPS(objectID, ticksPerSecond);
             }
             
-            bool transformChanged = pastSyncedPos != transform.position || pastSyncedRot != transform.rotation;
-            
-            bool isMinUpdateRate = false;
-            if(minTicksPerSecond > 0){
-                float minTPSTime = 1/minTicksPerSecond;
-                isMinUpdateRate = minTicksPerSecond <= Time.time - pastSyncTime;
-            }
+            //if the object has moved
+            bool transformChanged = (pastSyncedPos != transform.position) || (pastSyncedRot != transform.rotation);
+
+            bool isMinUpdateRate = (minTicksPerSecond > 0) && (1/minTicksPerSecond <= Time.time - pastSyncTime);
             
             if(transformChanged || !optimizeTransoformSync || forced || isMinUpdateRate){
                 sync.updateObject(objectID, transform.position, transform.rotation);
