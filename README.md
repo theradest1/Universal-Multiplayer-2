@@ -10,6 +10,7 @@
                                                                      | |             __/ |                    
                                                                      |_|            |___/                     
 ```
+Read the docs, currently found in the same place as this readme: https://github.com/theradest1/Universal-Multiplayer-2/blob/V0.2.0/Docs.md
 
 I forget to update this readme a lot, so check the docs/commits/releases for more up to date info
 
