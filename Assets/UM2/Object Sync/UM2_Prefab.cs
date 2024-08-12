@@ -21,6 +21,12 @@ public class UM2_Prefab : MonoBehaviourUM2
     Quaternion targetRot;
     float tickTime = -1;
 
+    Animator animator;
+
+    private void Awake() {
+        animator = GetComponent<Animator>();
+    }
+
     public object getNetworkVariableValue(string name){
         return getNetworkVariable(name).getValue();
     }
@@ -52,6 +58,29 @@ public class UM2_Prefab : MonoBehaviourUM2
         }
 
         return UM2_Variables.getNetworkVariable(name, objectID);
+    }
+
+    public void newAnimationParameters(string parametersString){
+        List<string> parametersStringList = parametersString.Split('_').ToList();
+        List<AnimatorControllerParameter> parameters = animator.parameters.ToList();
+        
+        for(int parameterIndex = 0; parameterIndex < parameters.Count; parameterIndex++){
+            switch (parameters[parameterIndex].type)
+            {
+                case AnimatorControllerParameterType.Float:
+                    animator.SetFloat(parameters[parameterIndex].name, float.Parse(parametersStringList[parameterIndex]));
+                    break;
+
+                case AnimatorControllerParameterType.Int:
+                    animator.SetInteger(parameters[parameterIndex].name, int.Parse(parametersStringList[parameterIndex]));
+                    break;
+
+                case AnimatorControllerParameterType.Bool:
+                    animator.SetBool(parameters[parameterIndex].name, bool.Parse(parametersStringList[parameterIndex]));
+                    break;
+            }
+
+        }
     }
 
 

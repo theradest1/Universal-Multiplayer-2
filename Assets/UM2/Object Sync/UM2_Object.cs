@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class UM2_Object : MonoBehaviourUM2
 {
@@ -27,7 +26,7 @@ public class UM2_Object : MonoBehaviourUM2
     public float minTicksPerSecond = 0;
     float pastSyncTime = 0;
     bool pastSyncTransform = false;
-    bool initialized = false;
+    [HideInInspector] public bool initialized = false;
 
     Vector3 pastSyncedPos;
     Quaternion pastSyncedRot;

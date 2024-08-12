@@ -87,6 +87,11 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Client.instance.sendMessage(message, false, false);
     }
 
+    public void updateObject(int objectID, string parameters){
+        string message = "others~updateObjectAnimation~" + objectID + "~" + parameters;
+        UM2_Client.instance.sendMessage(message, false, false);
+    }
+
     public void updateTPS(int objectID, float newTPS){
         UM2_Methods.networkMethodOthers("updateObjectTPS", objectID, newTPS);
     }
@@ -95,6 +100,16 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Prefab prefab = getSyncedObject(objectID, true);
         if(prefab != null){
             prefab.newTransform(position, rotation);
+        }
+        else{
+            UM2_Methods.networkMethodOthers("giveSyncedObject", UM2_Client.clientID, objectID);
+        }
+    }
+
+    public void updateObjectAnimation(int objectID, string parameters){
+        UM2_Prefab prefab = getSyncedObject(objectID, true);
+        if(prefab != null){
+            prefab.newAnimationParameters(parameters);
         }
         else{
             UM2_Methods.networkMethodOthers("giveSyncedObject", UM2_Client.clientID, objectID);

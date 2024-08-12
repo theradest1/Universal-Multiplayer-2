@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-using System.Data.Common;
-using JetBrains.Annotations;
 
 
 public class UM2_Variables : MonoBehaviourUM2

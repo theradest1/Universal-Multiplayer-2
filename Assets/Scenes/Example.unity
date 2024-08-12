@@ -310,6 +310,7 @@ MonoBehaviour:
   syncTransform: 1
   optimizeTransoformSync: 1
   minTicksPerSecond: 0
+  initialized: 0
 --- !u!114 &180985660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,12 +372,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180985650}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf5fe4888977704408e0562d3d36b2d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateRate: 5
+  ticksPerSecond: 5
+  syncAnimation: 1
+  optimizeAnimationSync: 1
+  minTicksPerSecond: 0
 --- !u!1 &586985160
 GameObject:
   m_ObjectHideFlags: 0
@@ -2421,7 +2425,7 @@ SkinnedMeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4841922664101397179}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 3
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
