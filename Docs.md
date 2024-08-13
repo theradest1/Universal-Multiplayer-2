@@ -2,32 +2,57 @@
 This is a work in progress, but it should contain correct info (but not all info)
 
 <br></br>
+## **Index:**
+- [Install](#install)
+- [Quick Start](#quick-start)
+- [Basic Info For Reading Docs](#basic-info-for-docs)
+- [Tips and Tricks](#tips-and-tricks)
+- [Network Variables](#network-variables)
+- [Network Methods](#network-methods)
+- [Global Methods](#global-methods)
+- [Network Objects](#network-objects)
+- [Quick Objects](#quick-objects)
+- [Animation Sync](#animation-sync)
+
+<br></br>
 ## **Install:**
-- import UM2:
-  - download latest unity package from releases
-  - right click in explorer in unity
-  - import package -> custom package
-  - find and select UM2_Vx.x.x
-  - click import all
-- HTTP fix, do this if you want P2P (just do this if you aren't sure):
-    - go to edit -> Project settings -> Player -> Other settings -> configuration -> allow downloads over HTTP
-    - change "Not Allowed" to "Always allowed"
-- Look at the Quick Start section for next steps
-- Examples:
-  - this repository is essentially a big example, but if you want a more accurate-to-life example of how to use UM2, check out my other repository "UM2-Example"
-    - it is a multiplayer game that I made using UM2, and is what I use to figure out problems and improvements
-- Thank you for reading the docs (:
-- Questions:
-  - There isnt a fixed place to submit questions currently so just use github issues until I figure things out
-  - If you found a bug or think something could be improved (including docs), please submit an issue request in github
+import UM2:
+- download latest unity package from releases
+- right click in explorer in unity
+- import package -> custom package
+- find and select UM2_Vx.x.x
+- click import all
+
+HTTP fix, do this if you want P2P (just do this if you aren't sure):
+  - go to edit -> Project settings -> Player -> Other settings -> configuration -> allow downloads over HTTP
+  - change "Not Allowed" to "Always allowed"
+
+Look at these before starting your own project:
+- [Basic Info For Reading Docs](#basic-info-for-docs) section for random peices of info that is good to know
+- [Tips and Tricks](#tips-and-tricks) to see how to see how I recommend you use UM2
+- [Quick Start](#quick-start) section for a quick tutorial on how to get players moving around and some explainations
+
+Examples:
+- this repository is essentially a big example, but if you want a more accurate-to-life example of how to use UM2, check out my other repository "UM2-Example"
+  - it is a multiplayer game that I made using UM2, and is what I use to figure out problems and improvements
+
+Thank you for reading the docs (:
+
+Questions:
+- There isnt a fixed place to submit questions currently so just use github issues until I figure things out
+- If you found a bug or think something could be improved (including docs), please submit an issue request in github
 
 <br></br>
 ## **Quick Start:**
 This will be how to make a very simple first person multiplayer thing
-- read and follow ALL of the install information
-  - read it again slowly
-  - ask questions if anything doesn't make sense
-  - I would recommend looking at "Basic info for docs" for good miscilaneous peice of information that could help in the future
+
+read and follow ALL of the install information
+
+read it again slowly
+
+ask questions if anything doesn't make sense
+
+I would recommend looking at "Basic info for docs" for good miscilaneous peice of information that could help in the future
 
 If you don't want to go through this, or want an example, the actual unity project in this repo (not the package) uses everything that UM2 has to offer set up already. I would still recommend going through this because it could help explain how some things work.
 
@@ -87,107 +112,138 @@ It should be done, and you will see the other player after joining with the corr
 - Webgl builds cannot be a server and can only use HTTP
 - don't use any special characters for anything - stick to letters and numbers
   - This is because HTTP isn't able to transmit many special characters
-- callbacks are great and should be used when possible, especially since multiplayer is often not consistant
 - if you want to port forward to connect through WAN, forward with this (find a youtube video on how to port-forward):
   - udp on 5000
   - tcp on 5001
   - http on 5002 (both udp and tcp)
-- these can be changed by doing `UM2_Server.{udp/tcp/http}Port = {port};` on the server and `UM2_Client.server{Udp/Tcp/Http}Port = {port};` on the client during the same time as setting the server ip.
-  - I don't recommend doing this unless you know what you are doing
-- for testing your game, you can build and run one instance and run in the inspector for a second. Make one host a server and the other use the IP `127.0.0.1` (local host)
-  - if one of the clients are full screen, the other client doesnt send network messages (make both windowed)
+  - these can be changed by doing `UM2_Server.{udp/tcp/http}Port = {port};` on the server and `UM2_Client.server{Udp/Tcp/Http}Port = {port};` on the client during the same time as setting the server ip.
+    - I don't recommend doing this unless you know what you are doing
 - if a client is connecting to its own server use the ip `127.0.0.1` (local host)
-- you generally don't need any reference to UM2 scripts, just use the name of the script
+
 
 <br></br>
-## Network Variables
+## **Tips and tricks:**
+- callbacks are great and should be used when possible, especially since multiplayer is often not consistant with timing
+- for testing your game, you can build and run one instance and run in the inspector for another. Make one host a server and the other use the IP `127.0.0.1` (local host)
+  - make sure to switch back and forth a lot since some methods only run when the window is focused (I have no control over this)
+- you generally don't need any reference to UM2 scripts, just use the name/type of the script
+- If there is something that is centralized (like a boss in a game), have the client that is running the server control it. You can do this by checking `UM2_Client.hostingServer`
+
+<br></br>
+## **Network Variables**
 This allows you to have variables that Two kinds: global and object based
 
-### Info for Both:
-- can only be an int, float, or string
+- can only be an int, float, or string (no lists yet)
 - both are synced across the network automatically
 
 ### Global network variables:
 A network variable that can be accessed anywhere by any script, without any references to anything. Don't use this for things like player health, as it isnt linked to anything (use object based network variables)
 
+Each global variable must have a different name
+
 Uses:
 - Timer
 - Team scores
 - Player count
-Each global variable must have a different name
+
 Creating:
-- UM2_Variables.createNetworkVariable<type>(string variableName, object initialValue);
-- Example 1: UM2_Variables.createNetworkVariable<string>("roomName", "The Room")
-- Example 2: UM2_Variables.createNetworkVariable<float>("timer", 60f)
+- `UM2_Variables.createNetworkVariable<type>(string variableName, object initialValue);`
+- Example 1: `UM2_Variables.createNetworkVariable<string>("roomName", "The Room")`
+- Example 2: `UM2_Variables.createNetworkVariable<float>("timer", 60f)`
+
 Getting Value:
-- UM2_Variables.getNetworkVariableValue(string name)
+- `UM2_Variables.getNetworkVariableValue(string name)`
+- Example: `UM2_Variables.getNetworkVariableValue("timer")`
+
 Setting Value:
-- UM2_Variables.setNetworkVariableValue(string name, object value)
+- `UM2_Variables.setNetworkVariableValue(string name, object value)`
+- Example: `UM2_Variables.setNetworkVariableValue("timer", 120f)`
+
 Adding to Value:
 - this is used for variables that might be overwritten by different clients (like score)
-- UM2_Variables.addToNetworkVariableValue(string name, object valueToAdd)
+- `UM2_Variables.addToNetworkVariableValue(string name, object valueToAdd)`
+- Example: `UM2_Variables.addToNetworkVariableValue("timer", 2f)`
+
 Check if variable exists:
-- UM2_Variable.getNetworkVariable(string name)
+- `UM2_Variable.getNetworkVariable(string name)`
+- Example: `bool exists = UM2_Variable.getNetworkVariable("timer") != null`
 - returns null if a global variable with that name doesn't exist
+
 Setting a callback function:
 - triggers when the variable's value is set or changed
-- UM2_Variables.addVarCallback(string variableName, Action<object> methodToCall)
-- Example: 
-  - UM2_Variables.addVarCallback("roomName", Action<object> updateGUI)
+- `UM2_Variables.addVarCallback(string variableName, Action<object> methodToCall)`
+- Example: `UM2_Variables.addVarCallback("roomName", Action<object> updateGUI)`
 
 ### Object based network variables:
+
 A network variable that is related to an object. You will need a reference to a game object's UM2_Object script. I recommend doing this with `UM2_Object networkObjectScript = player.GetComponent<UM2_Object>();` (player being the game object)
 
 Uses:
 - health
 - usernames
-Getting, setting, and adding to the value of an object based network variable is the same on a UM2_Object and UM2_Prefab based object (creating variables can currently only be done on the UM2_Object)
+
 Creating:
 - must be created in a script that is on an object with UM2_Object script 
 - Use the flag [ObjectNetworkVariable] in front of the variable you want to be synced
 - example: `[ObjectNetworkVariable] int health;`
-- Unity complains when the varible isn't used, so I recommend just doing `variable += 0;` in Start().
+- Unity complains when the varible isn't used, so I recommend just doing `variable += 0;` in a function that is never called.
+
 Getting Value:
 - networkObjectScript.getNetworkVariableValue(string name)
+
 Setting Value:
 - networkObjectScript.setNetworkVariableValue(string name, object value)
 - do not set it using the actual variable (it will not be synced)
+
 Adding to Value:
 - this is used for variables that might be overwritten by different clients (like a score)
 - networkObjectScript.addToNetworkVariableValue(string name, object valueToAdd)
+
 Check if variable exists:
 - networkObjectScript.getNetworkVariable(string name)
 - returns null if a global variable with that name doesn't exist
 
 <br></br>
-## Network Methods:
+## **Network Methods:**
 A way for one client to call another client's method
 
 ### How to call a network method:
-UM2_Methods.networkMethod*Recipients*(*MethodName*, *recipientIDIfDirect*, parameters[])
-#### recipients types:
+UM2_Methods.networkMethod\*Recipients\*(string methodName, int recipientIDIfDirect, object parameter1, object parameter2...)
+
+
+#### recipient types:
 - Others - sends to all other clients
 - All - sends to all clients (including the sender)
 - Direct - sends to a specific client ID
 - Server - if you want to send a message to the server, you shouldn't use this unless modifying the server
+- Example 1: `UM2_Methods.networkMethodAll(startNewGame, difficulty, timeLimit, totalEnemies)`
+- Example 2: `UM2_Methods.networkMethodDirect(chatMessage, clientID, message)`
+  - The recipient ID is only there if it is a direct message
 
-Example 1: UM2_Methods.networkMethodAll(startNewGame, difficulty, timeLimit, totalEnemies)
-Example 2: UM2_Methods.networkMethodDirect(chatMessage, clientID, message)
 
-The main recipients you will (and should) be using is others and all.
+The main recipients you will (and should) be using is `Others` and `All`.
 
-### How to set up a network method:
+### How to create a network method:
 #### subscribe to call list
 There are two ways:
-- change MonoBehaviour to MonoBehaviourUM2 at the top of the script (recommended)
-- subscribe directly with "UM2_Methods.addToServerMethods(this);"
+- change `MonoBehaviour` to `MonoBehaviourUM2` at the top of the script (recommended)
+- subscribe directly with `UM2_Methods.addToServerMethods(this);`
 
 #### create the method
+It just needs to be a public void that has the same parameters as is called. Here is a reminder that the script that this method is in has to be a `MonoBehaviourUM2` or subscribed directly.
 
+Duplicate functions across scripts will also be called. For example you could put this next example in several scripts, and all will be called (assuming all scripts are a `MonoBehaviourUM2` or subscribed directly)
+
+Example (if the method call is the 2nd example shown above):
+```
+public void chatMessage(int senderID, string message){
+  //do stuff
+}
+```
 
 <br></br>
-## Global Methods:
-Global methods are similar to Start, Awake, and Update, but are based on server events. 
+## **Global Methods**:
+Global methods are similar to `Start`, `Awake`, and `Update`, but are based on server events. 
 
 ### All global methods so far:
 - #### OnConnect(int clientID):
@@ -202,12 +258,18 @@ Global methods are similar to Start, Awake, and Update, but are based on server 
 
 ### How to use global methods:
 - change MonoBehaviour to MonoBehaviourUM2
-- has to be one of the global methods
 - needs to be a `public override void` method
-- Example: `public override void OnConnect(int clientID){ do stuff }`
+- needs to have the same parameters as shown above
+
+Example: 
+```
+public override void OnConnect(int clientID){
+ //do stuff 
+}
+```
 
 <br></br>
-## Network Object:
+## **Network Objects:**
 A way to sync the position and rotation of an object.
 
 ### Good Uses:
@@ -243,8 +305,7 @@ A way to sync the position and rotation of an object.
     - if there is a rigidbody, do not set this to 0
 
 <br></br>
-
-## Quick Objects:
+## **Quick Objects:**
 Quick objects are a network object that is synced once, then forgotten about. 
 
 ### Good uses:
@@ -257,13 +318,14 @@ Quick objects are a network object that is synced once, then forgotten about.
 - create the quick object with `UM2_Sync.createQuickObject(quickObjectPrefab, transform.position, transform.rotation);`
 
 <br></br>
-
-## Animation Sync:
+## **Animation Sync:**
 Syncronizes the animation parameters for a network object
 
 ### Good uses:
 - pretty much any animation that is on a synced object
 
 ## How to use:
-- 
+- Put a UM2_Animator script on a game object with the UM2_Object script
+- The Animator component needs to be on the same game object as the UM2_Animator script.
+- The prefab only needs to have the Animator component on the base game object
 
