@@ -10,7 +10,7 @@
                                                                      | |             __/ |                    
                                                                      |_|            |___/                     
 ```
-Read the docs, currently found in the same place as this readme: https://github.com/theradest1/Universal-Multiplayer-2/blob/V0.2.0/Docs.md
+Read the docs please, currently found in the same place as this readme: https://github.com/theradest1/Universal-Multiplayer-2/blob/main/Docs.md
 
 I forget to update this readme a lot, so check the docs/commits/releases for more up to date info
 
@@ -30,20 +30,18 @@ What this can do right now:
   - global are kind of like player prefs
   - object based are linked to each object
 - global methods (on connect, on player leave...)
-- docs that I actually use and test
+- docs that I actually use and constantly improve
 - auto client timeouts
-- inspector variables for pretty much everything
-  - can be used for essentially every multiplayer game type
-- clients arent directly linked to gameobjects (like a player character)
+- most settings are in the inspector for easy changes
+  - can be used for essentially every multiplayer genre
 - network variable callbacks that get triggered on change
 - really easy package based updates
-  
+- animation syncing
+- quick network objects (for particle systems, bullets...)
 
 What this will be able to do in the future:
 - Dedicated server (might even be written in c++ in the future)
 - Websockets: while http is great, its neither fast nor 2 way
-- animation syncing
-- quick network objects (for particle systems, bullets...)
 - LOD-like transform update optimizations
 - programming beginner's test info (for docs and simplification)
 
