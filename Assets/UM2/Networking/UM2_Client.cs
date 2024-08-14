@@ -171,7 +171,7 @@ public class UM2_Client : MonoBehaviourUM2
             return;
         }
 
-        //sign message if ID is available
+        //sign message
         if(!sendWithoutID){
             if(clientID == -1){
                 while(clientID == -1){
@@ -185,16 +185,14 @@ public class UM2_Client : MonoBehaviourUM2
             }
         }
 
-        //prepping dividers
+        //still sign message if sendWithoutID=true for formatting reasons. Will just send with ID -1 if ID is not set yet 
         message = clientID + "~" + message;
 
-        //UDP cant do queued messages because they are only for consistant protocols
+        //UDP cant do queued messages because they are only for consistant protocols (there just isnt any application)
         //HTTP cant because it can only do one message at a time (for now)
-        if(protocol != "UDP" && protocol != "HTTP"){
-            if(protocol == "TCP"){
-                message += "|" + String.Join("|", messageQueue);
-                messageQueue = new List<string>();
-            }
+        if(protocol == "TCP"){
+            message += "|" + String.Join("|", messageQueue);
+            messageQueue = new List<string>();
         }
 
         if(protocol != "HTTP"){ //http cant do the symbol "|", but it doesnt need it since there is no chance of smashing messages
