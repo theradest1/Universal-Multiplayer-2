@@ -31,8 +31,12 @@ public class UM2_Object : MonoBehaviourUM2
     Vector3 pastSyncedPos;
     Quaternion pastSyncedRot;
 
-    public object getNetworkVariableValue(string name){
-        return getNetworkVariable(name).getValue();
+    public T getNetworkVariableValue<T>(string name){
+        NetworkVariable_Client networkVariable = getNetworkVariable(name);
+        if(typeof(T) != networkVariable.type){
+            Debug.LogWarning("Network variable \"" + name + "\" is " + networkVariable.type + ", but you requested " + typeof(T));
+        }
+        return (T)networkVariable.getValue();
     }
 
     public void setNetworkVariableValue(string name, object value){

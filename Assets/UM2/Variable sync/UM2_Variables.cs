@@ -135,7 +135,7 @@ public class UM2_Variables : MonoBehaviourUM2
     public static T getNetworkVariableValue<T>(string name, int linkedID = -1){
         NetworkVariable_Client networkVariable = getNetworkVariable(name, linkedID);
         if(typeof(T) != networkVariable.type){
-            Debug.LogWarning("Network variable is " + networkVariable.type + ", but you requested " + typeof(T));
+            Debug.LogWarning("Network variable \"" + name + "\" is " + networkVariable.type + ", but you requested " + typeof(T));
         }
         return (T)networkVariable.getValue();
     }

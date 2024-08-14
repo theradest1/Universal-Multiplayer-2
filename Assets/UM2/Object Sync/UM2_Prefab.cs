@@ -27,9 +27,14 @@ public class UM2_Prefab : MonoBehaviourUM2
         animator = GetComponent<Animator>();
     }
 
-    public object getNetworkVariableValue(string name){
-        return getNetworkVariable(name).getValue();
+    public T getNetworkVariableValue<T>(string name){
+        NetworkVariable_Client networkVariable = getNetworkVariable(name);
+        if(typeof(T) != networkVariable.type){
+            Debug.LogWarning("Network variable \"" + name + "\" is " + networkVariable.type + ", but you requested " + typeof(T));
+        }
+        return (T)networkVariable.getValue();
     }
+
     public async void addVarCallback(string name, Action<object> method){
         if(objectID == -1){
             while (objectID == -1){

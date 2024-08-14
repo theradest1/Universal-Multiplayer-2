@@ -152,8 +152,9 @@ Creating:
 - Example 2: `UM2_Variables.createNetworkVariable<float>("timer", 60f)`
 
 Getting Value:
-- `UM2_Variables.getNetworkVariableValue(string name)`
-- Example: `UM2_Variables.getNetworkVariableValue("timer")`
+- `UM2_Variables.getNetworkVariableValue<type>(string name)`
+- the `<type>` does a type cast for you so you don't have to do it manualy. Just use the type the network variable is.
+- Example: `UM2_Variables.getNetworkVariableValue<float>("timer")`
 
 Setting Value:
 - `UM2_Variables.setNetworkVariableValue(string name, object value)`
@@ -170,11 +171,32 @@ Check if variable exists:
 - returns null if a global variable with that name doesn't exist
 
 Setting a callback function:
-- triggers when the variable's value is set or changed
 - `UM2_Variables.addVarCallback(string variableName, Action<object> methodToCall)`
-- Example: `UM2_Variables.addVarCallback("roomName", Action<object> updateGUI)`
+- triggers when the variable's value is set or changed
+- the `Action<object>` needs to be a public void function that has `object newValue` as it's parameter (newValue would be the new value of the variable)
+- as many callback functions can be added as you want
+
+Example: 
+```
+void OnConnect(int clientID){
+  //create the timer variable as a float
+  UM2_Variables.createNetworkVariable<float>("timer", 60f);
+
+  //add the updateGUI function to the callback functions
+  UM2_Variables.addVarCallback("roomName", updateGUI);
+}
+
+//a public void with a single object parameter
+public void updateGUI(object newValue){
+  //do something with the timer value
+  timerElement.text = newValue + ""; 
+
+  // + "" to change the value into a string
+}
+```
 
 ### Object based network variables:
+Everything that you can do in this section with the UM2_Object script can be done with the UM2_Prefab script. For example, getting, setting, and adding to a variable is done in the exact same way with the UM2_Prefab as the UM2_Object.
 
 A network variable that is related to an object. You will need a reference to a game object's UM2_Object script. I recommend doing this with `UM2_Object networkObjectScript = player.GetComponent<UM2_Object>();` (player being the game object)
 
@@ -202,6 +224,33 @@ Adding to Value:
 Check if variable exists:
 - networkObjectScript.getNetworkVariable(string name)
 - returns null if a global variable with that name doesn't exist
+
+Setting a callback function:
+- `networkObjectScript.addVarCallback(string variableName, Action<object> methodToCall)`
+- triggers when the variable's value is set or changed
+- the `Action<object>` needs to be a public void function that has `object newValue` as it's parameter (newValue would be the new value of the variable)
+- as many callback functions can be added as you want
+
+Example: 
+```
+public UM2_Object networkObjectScript;
+
+void OnConnect(int clientID){
+  //create the timer variable as a float
+  networkObjectScript.createNetworkVariable<float>("timer", 60f);
+
+  //add the updateGUI function to the callback functions
+  networkObjectScript.addVarCallback("roomName", updateGUI);
+}
+
+//a public void with a single object parameter
+public void updateGUI(object newValue){
+  //do something with the timer value
+  timerElement.text = newValue + ""; 
+
+  // + "" to change the value into a string
+}
+```
 
 <br></br>
 ## **Network Methods:**
