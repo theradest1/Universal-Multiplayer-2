@@ -9,6 +9,11 @@ public class TestCubeScript : MonoBehaviour
 
     UM2_Object objectScript;
 
+    void neverCalledFunction(){
+        cubeVariable1 += 0;
+        cubeVariable2 += "";
+    }
+
     void Start()
     {
         objectScript = this.GetComponent<UM2_Object>();

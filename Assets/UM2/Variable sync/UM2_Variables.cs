@@ -24,6 +24,10 @@ public class UM2_Variables : MonoBehaviourUM2
     public List<int> variableIDs = new List<int>();
     public List<int> variableLinkedIDs = new List<int>();
 
+    private void Awake() {
+		instance = this;
+    }
+
     public override void OnConnect(int clientID)
     {
         UM2_Methods.networkMethodServer("giveAllVariables", UM2_Client.clientID);
@@ -56,7 +60,7 @@ public class UM2_Variables : MonoBehaviourUM2
             UM2_Methods.networkMethodServer("giveAllVariables");
         }
         else{
-            variable.setValue(value, false);
+            variable.setValue(value, false, true);
         }
     }
 
@@ -66,7 +70,7 @@ public class UM2_Variables : MonoBehaviourUM2
         {
             if(networkVariable.id == id){
                 //Debug.Log("Variable with id " + id + " already exists, just setting value and ignoring creation");
-                networkVariable.setValue(value);
+                networkVariable.setValue(value, true, true); 
                 return;
             }
         }
@@ -124,13 +128,16 @@ public class UM2_Variables : MonoBehaviourUM2
                 return networkVariable;
             }
         }
-
         //Debug.LogError("Could not find server variable: " + name + " with linked ID " + linkedID);
         return null;
     }
 
-    public static object getNetworkVariableValue(string name, int linkedID = -1){
-        return getNetworkVariable(name, linkedID).getValue();
+    public static T getNetworkVariableValue<T>(string name, int linkedID = -1){
+        NetworkVariable_Client networkVariable = getNetworkVariable(name, linkedID);
+        if(typeof(T) != networkVariable.type){
+            Debug.LogWarning("Network variable is " + networkVariable.type + ", but you requested " + typeof(T));
+        }
+        return (T)networkVariable.getValue();
     }
 
     public static void setNetworkVariableValue(string name, object value, int linkedID = -1){
@@ -161,11 +168,6 @@ public class UM2_Variables : MonoBehaviourUM2
         
         getNetworkVariable(name, linkedID).addCallback(method);
     }
-
-	private void Awake()
-	{
-		instance = this;
-	}
 }
 
 public class NetworkVariable_Client
@@ -173,7 +175,7 @@ public class NetworkVariable_Client
     //basics
     public string name;
     string value;
-    Type type;
+    public Type type;
     public int id;
     UM2_Variables variables;
 
@@ -205,6 +207,10 @@ public class NetworkVariable_Client
     }
 
     public void addToValue(object valueToAdd){
+        if(valueToAdd.GetType() != type){
+            Debug.LogWarning("Network variable is " + type + ", but you added " + valueToAdd.GetType());
+        }
+
         UM2_Methods.networkMethodServer("addToVarValue", id, valueToAdd, linkedID);
     }
 
@@ -235,7 +241,11 @@ public class NetworkVariable_Client
         }
     }
 
-    public void setValue(object newValue, bool sync = true){
+    public void setValue(object newValue, bool sync = true, bool silent = false){
+        if(newValue.GetType() != type && !silent){
+            Debug.LogWarning("Network variable is " + type + ", but you set it's value to " + newValue.GetType());
+        }
+
         value = newValue + "";
 
         invokeCallbacks();

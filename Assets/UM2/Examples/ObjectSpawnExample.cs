@@ -13,19 +13,23 @@ public class ObjectSpawnExample : MonoBehaviourUM2
     {
         //create the network variable
         UM2_Variables.createNetworkVariable<float>("Timer", 0f);
+        UM2_Variables.addVarCallback("Timer", updateTimerGUI);
 
-        //start a loop that uses/updates the network variable
-        InvokeRepeating("updateTimerVar", .5f, .1f);
+        //if you are the owner of the server
+        if(UM2_Client.hostingServer){
+            //start a loop that updates the network variable
+            InvokeRepeating("updateTimerVar", .5f, .1f);
+        }
     }
 
     void updateTimerVar(){
-        //if you are the owner of the server
-        if(UM2_Client.hostingServer){
-            //set the timer network variable to the time
-            UM2_Variables.setNetworkVariableValue("Timer", Time.time);
-        }
+        //set the timer network variable to the time
+        UM2_Variables.setNetworkVariableValue("Timer", (float)Time.time);
+    }
+
+    public void updateTimerGUI(object newTimerValue){
         //set the timer text to be the value of the timer network variable
-        timerText.text = UM2_Variables.getNetworkVariableValue("Timer") + "";
+        timerText.text = newTimerValue + "";
     }
 
     void Update()
