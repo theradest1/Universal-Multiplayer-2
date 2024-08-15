@@ -8,8 +8,6 @@ using System.Threading;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
-using Unity.VisualScripting;
 
 public class UM2_Client : MonoBehaviourUM2
 {
