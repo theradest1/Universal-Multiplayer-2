@@ -95,15 +95,20 @@ public class UM2_Prefab : MonoBehaviourUM2
         }
     }
 
-    public void newTransform(Vector3 position, Quaternion rotation){
+    public void newTransform(Vector3 position, Quaternion rotation, bool ease){
         //dynamic TPS (not currently using)
         //tickTime = Time.time - pastTime;
+
         pastTime = Time.time;
-
-        pastPos = transform.position;
-        pastRot = transform.rotation;
-
-        targetPos = position;//new Vector3(-position.x, position.y, position.z);
+        if(ease){
+            pastPos = transform.position;
+            pastRot = transform.rotation;
+        }
+        else{
+            pastPos = position;
+            pastRot = rotation;
+        }
+        targetPos = position;
         targetRot = rotation;
     }
 

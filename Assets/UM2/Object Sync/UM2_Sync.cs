@@ -82,8 +82,8 @@ public class UM2_Sync : MonoBehaviourUM2
         }
     }
 
-    public void updateObject(int objectID, Vector3 position, Quaternion rotation){
-        string message = "others~updateObjectTransform~" + objectID + "~" + position + "~" + rotation;
+    public void sendUpdateObjectTransform(int objectID, Vector3 position, Quaternion rotation, bool ease){
+        string message = "others~updateObjectTransform~" + objectID + "~" + position + "~" + rotation + "~" + ease;
         UM2_Client.instance.sendMessage(message, false, false);
     }
 
@@ -96,10 +96,10 @@ public class UM2_Sync : MonoBehaviourUM2
         UM2_Methods.networkMethodOthers("updateObjectTPS", objectID, newTPS);
     }
 
-    public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation){
+    public void updateObjectTransform(int objectID, Vector3 position, Quaternion rotation, bool ease){
         UM2_Prefab prefab = getSyncedObject(objectID, true);
         if(prefab != null){
-            prefab.newTransform(position, rotation);
+            prefab.newTransform(position, rotation, ease);
         }
         else{
             UM2_Methods.networkMethodOthers("giveSyncedObject", UM2_Client.clientID, objectID);

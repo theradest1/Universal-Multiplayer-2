@@ -31,6 +31,8 @@ public class UM2_Object : MonoBehaviourUM2
     Vector3 pastSyncedPos;
     Quaternion pastSyncedRot;
 
+    bool skipNextTransformEase = false;
+
     public T getNetworkVariableValue<T>(string name){
         NetworkVariable_Client networkVariable = getNetworkVariable(name);
         if(typeof(T) != networkVariable.type){
@@ -149,6 +151,10 @@ public class UM2_Object : MonoBehaviourUM2
         }
     }
 
+    public void teleportObject(){
+        skipNextTransformEase = true;
+    }
+
     public async void updateTransform(bool forced = false){
         if(this != null && syncTransform){
             
@@ -164,7 +170,7 @@ public class UM2_Object : MonoBehaviourUM2
             bool isMinUpdateRate = (minTicksPerSecond > 0) && (1/minTicksPerSecond <= Time.time - pastSyncTime);
             
             if(transformChanged || !optimizeTransoformSync || forced || isMinUpdateRate){
-                sync.updateObject(objectID, transform.position, transform.rotation);
+                sync.sendUpdateObjectTransform(objectID, transform.position, transform.rotation, !skipNextTransformEase);
                 pastSyncedPos = transform.position;
                 pastSyncedRot = transform.rotation;
                 pastSyncTime = Time.time;

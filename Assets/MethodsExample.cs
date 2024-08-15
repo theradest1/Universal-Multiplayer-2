@@ -5,9 +5,15 @@ using UnityEngine;
 public class MethodsExample : MonoBehaviourUM2
 {
     public LayerMask otherPlayerMask;
+    public LayerMask groundMask;
     public Transform cam;
     public float power;
     public Rigidbody rb;
+    UM2_Object objectScript;
+
+    private void Awake() {
+        objectScript = GetComponent<UM2_Object>();
+    }
 
     private void Update() {
         //if you press the left mouse button
@@ -22,6 +28,18 @@ public class MethodsExample : MonoBehaviourUM2
                 int hitPlayerID = hit.collider.gameObject.GetComponent<UM2_Prefab>().clientID;
 
                 UM2_Methods.networkMethodDirect("jump", hitPlayerID, power);
+            }
+        }
+
+        //if you press the left mouse button
+        if(Input.GetMouseButtonDown(1)){
+
+            //set position to where you are looking
+            RaycastHit hit;
+            if(Physics.Raycast(cam.position, cam.forward, out hit, Mathf.Infinity, groundMask)){
+                rb.position = hit.point + Vector3.up;
+
+                objectScript.teleportObject();
             }
         }
     }

@@ -50,8 +50,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        //player movement
-        //playerRB.MovePosition(playerRB.position +  * moveSpeed * playerRB.transform.forward * Time.deltaTime + Input.GetAxis("Horizontal") * moveSpeed * playerRB.transform.right * Time.deltaTime);
+        movementInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
         //player rotation
         playerRB.MoveRotation(playerRB.rotation * Quaternion.Euler(0, Input.GetAxis("Mouse X") * camRotateSpeed, 0));
@@ -59,12 +58,14 @@ public class PlayerMovement : MonoBehaviour
         //cam rotation
         camX = Math.Clamp(camX - Input.GetAxis("Mouse Y") * camRotateSpeed, -maxCamAngle, maxCamAngle);
         playerCam.transform.rotation = Quaternion.Euler(camX, playerCam.transform.rotation.eulerAngles.y, playerCam.transform.rotation.eulerAngles.z);
+
+        //ignore how choppy the animation looks, it's just for an animation syncing example
+        animator.SetFloat("x", movementInput.x);
+        animator.SetFloat("y", movementInput.y);
     }
 
     void FixedUpdate()
     {
-        movementInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
         RaycastHit hit;
 		isGrounded = Physics.Raycast(transform.position + Vector3.up * groundCheckHeight, -Vector3.up, out hit, groundCheckDistance, groundMask);
         isGrounded = isGrounded && playerRB.velocity.y < 1f;
@@ -79,10 +80,6 @@ public class PlayerMovement : MonoBehaviour
         {
             playerRB.AddForce((transform.right * movementInput.x + transform.forward * movementInput.y) * inAirAcceleration);
         }
-
-        //ignore how bad the animation looks, it's just for an animation syncing example
-        animator.SetFloat("x", movementInput.x);
-        animator.SetFloat("y", movementInput.y);
 
         //jumping
 		if(isGrounded && jumping)

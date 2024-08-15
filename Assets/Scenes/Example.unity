@@ -341,9 +341,13 @@ MonoBehaviour:
   otherPlayerMask:
     serializedVersion: 2
     m_Bits: 64
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
   cam: {fileID: 963194228}
   power: 400
   rb: {fileID: 180985657}
+  objectScript: {fileID: 180985659}
 --- !u!95 &180985662
 Animator:
   serializedVersion: 5

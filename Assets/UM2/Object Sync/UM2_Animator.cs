@@ -10,7 +10,7 @@ public class UM2_Animator : MonoBehaviour
     Animator animator;
     List<string> pastSyncedParameterValues = new List<string>();
 
-    float pastTicksPerSecond = -1;
+    //float pastTicksPerSecond = -1;
     [Range(1,64)]
     public float ticksPerSecond = 20;
     UM2_Sync sync;
