@@ -353,6 +353,24 @@ A way to sync the position and rotation of an object.
     - the ticks per second goes down to this if there is no change in transform
     - if there is a rigidbody, do not set this to 0
 
+### Other info:
+If you want the object to teleport, such as having a player respawn, you must use the function `objectScript.teleportObject()` right before or after changing the position or rotation of the object. If not used, the other clients will see the player ease to the teleported position.
+
+It doesn't actually set the position, but just stops the network prefabs from easing between this and the next transform update.
+
+Example:
+```
+public UM2_Object objectScript;
+
+public void respawn(){
+  //reset position
+  transform.position = Vector3.zero;
+
+  //use function
+  objectScript.teleportObject();
+}
+```
+
 <br></br>
 ## **Quick Objects:**
 Quick objects are a network object that is synced once, then forgotten about. 
