@@ -72,7 +72,7 @@ public class NetworkVariable_Server{
 public class UM2_Server : MonoBehaviour
 {
     #region Variables
-    public static string publicIPURL = "http://checkip.dyndns.org";
+    public static string publicIPURL = "https://api.ipify.org?format=text"; //this is a url that returns your public ip address. Ask chatgpt or something to get a new one if this is not working
     public static string localIpAddress = null;
     public static string publicIpAddress = null;
 
@@ -713,10 +713,6 @@ public class UM2_Server : MonoBehaviour
         {
             // get data
             string response = request.downloadHandler.text;
-
-            //cut off unwanted things
-            response = response.Substring(response.IndexOf(":") + 2);
-            response = response.Substring(0, response.IndexOf("<"));
 
             UM2_Server.publicIpAddress = response;
         }
