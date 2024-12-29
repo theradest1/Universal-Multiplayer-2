@@ -1,17 +1,15 @@
 using UnityEngine;
 using System;
+using TMPro;
 
 public class MicInput : MonoBehaviour
 {
     //settings
-    //public int maxBPS = 999999999;
     public float secondsPerPacket = 2;
+    public int micBufferSeconds; //needs to be comfortably bigger than the size of sent clips
 
-
-    [Range(-0.1f, 1f)]
-    public float compressionQuality = 0.7f;
-
-    public int micBufferSeconds; //needs to be comfortably bigger than the size of sent clips 
+    [Range(4000, 50000)]
+    public int targetSampleRate;
 
     //references
     AudioSource audioSource;
@@ -21,6 +19,14 @@ public class MicInput : MonoBehaviour
     int pastMicPos = 0;
     int sampleRate;
     float[] audioData;
+
+    //debug
+    public TextMeshProUGUI bytesPerSecondText;
+    public TextMeshProUGUI samplesPerSecondText;
+    int bytesPerSec = 0;
+    int samplesPerSec = 0;
+    float avgBytesPerSec = 0;
+    float avgSamplesPerSec = 0;
 
     void Start()
     {
@@ -32,7 +38,8 @@ public class MicInput : MonoBehaviour
 
             //get the max frequency (and use it)
             Microphone.GetDeviceCaps(null, out int minFreq, out int maxFreq);
-            sampleRate = maxFreq;
+            sampleRate = targetSampleRate; //Math.Clamp(targetSampleRate, minFreq, maxFreq);
+            Debug.Log("Sample Rate: " + sampleRate);
 
             // Start recording from the microphone
             // null is for the default microphone
@@ -43,11 +50,26 @@ public class MicInput : MonoBehaviour
 
             //send the clip after it is recorded, and every record time after that
             InvokeRepeating("SendClip", secondsPerPacket, secondsPerPacket);
+            InvokeRepeating("UpdateText", 1, 1);
         }
         else
         {
             Debug.LogError("No microphone detected!");
         }
+    }
+
+    void UpdateText(){
+        //average
+        avgBytesPerSec = (bytesPerSec + avgBytesPerSec) / 2;
+        avgSamplesPerSec = (samplesPerSec + avgSamplesPerSec) / 2;
+
+        //show
+        bytesPerSecondText.text = "Bytes Per Sec: " + (int)avgBytesPerSec;
+        samplesPerSecondText.text = "Samples Per Sec: " + (int)avgSamplesPerSec;
+
+        //clear
+        bytesPerSec = 0;
+        samplesPerSec = 0;
     }
 
     void SendClip(){
@@ -56,11 +78,13 @@ public class MicInput : MonoBehaviour
 
         //get the samples
         audioData = GetWrappedSamples(micInputLoop, pastMicPos, currentMicPos);
+        samplesPerSec += audioData.Length;
 
         //record where it stopped
         pastMicPos = currentMicPos;
 
         byte[] audioBytes = EncodeFloatArray(audioData);
+        bytesPerSec += audioBytes.Length;
 
         //"send" the clip
         RecieveClip(audioBytes);
