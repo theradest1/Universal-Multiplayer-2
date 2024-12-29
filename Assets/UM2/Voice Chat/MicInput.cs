@@ -1,10 +1,16 @@
 using UnityEngine;
+using System;
 
 public class MicInput : MonoBehaviour
 {
     //settings
-    public int sampleRate = 44100;
+    //public int maxBPS = 999999999;
     public float secondsPerPacket = 2;
+
+
+    [Range(-0.1f, 1f)]
+    public float compressionQuality = 0.7f;
+
     public int micBufferSeconds; //needs to be comfortably bigger than the size of sent clips 
 
     //references
@@ -13,6 +19,7 @@ public class MicInput : MonoBehaviour
 
     //other
     int pastMicPos = 0;
+    int sampleRate;
     float[] audioData;
 
     void Start()
@@ -22,6 +29,10 @@ public class MicInput : MonoBehaviour
         {
             //create audio source for playback
             audioSource = gameObject.AddComponent<AudioSource>();
+
+            //get the max frequency (and use it)
+            Microphone.GetDeviceCaps(null, out int minFreq, out int maxFreq);
+            sampleRate = maxFreq;
 
             // Start recording from the microphone
             // null is for the default microphone
@@ -49,11 +60,15 @@ public class MicInput : MonoBehaviour
         //record where it stopped
         pastMicPos = currentMicPos;
 
+        byte[] audioBytes = EncodeFloatArray(audioData);
+
         //"send" the clip
-        RecieveClip(audioData);
+        RecieveClip(audioBytes);
     }
 
-    void RecieveClip(float[] clipData){
+    void RecieveClip(byte[] clipBytes){
+        float[] clipData = DecodeByteArray(clipBytes);
+
         //create new temp clip the right size
         AudioClip newClip = AudioClip.Create("RecordedClip", clipData.Length, 1, sampleRate, false);
         
@@ -102,4 +117,19 @@ public class MicInput : MonoBehaviour
 
         return resultData;
     }
+
+    public static byte[] EncodeFloatArray(float[] floatArray)
+    {
+        byte[] byteArray = new byte[floatArray.Length * sizeof(float)];
+        Buffer.BlockCopy(floatArray, 0, byteArray, 0, byteArray.Length);
+        return byteArray;
+    }
+
+    public static float[] DecodeByteArray(byte[] byteArray)
+    {
+        float[] floatArray = new float[byteArray.Length / sizeof(float)];
+        Buffer.BlockCopy(byteArray, 0, floatArray, 0, byteArray.Length);
+        return floatArray;
+    }
+
 }
